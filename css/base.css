@@ -1,0 +1,30 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.header-img {
+    background-color: #243E36;
+    color: white;
+    border-radius: 100%;
+    padding: 2px;
+}
+
+.hp-body {
+    background-color: #F1F7ED;
+    border-bottom: 1px solid black;
+}
+
+.pressable {
+    cursor: pointer;
+    position: relative;
+
+    transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+}
+
+.pressable:active {
+    transform: scale(0.92);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    filter: brightness(0.95);
+}

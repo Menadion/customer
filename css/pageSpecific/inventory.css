@@ -1,0 +1,2300 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Chivo:ital,wght@0,100..900;1,100..900&family=Concert+One&family=DynaPuff:wght@400..700&family=Finger+Paint&family=Goldman:wght@400;700&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=League+Spartan:wght@100..900&family=Permanent+Marker&family=Quantico:ital,wght@0,400;0,700;1,400;1,700&family=Russo+One&family=Shippori+Antique&family=Squada+One&family=TASA+Explorer:wght@400..800&display=swap');
+
+.header{
+	width: 100%;
+	height: 7%;
+	background: #FFFFFF;
+	position: absolute;
+	z-index: 0;
+}
+
+.home, .inventory{
+	position: absolute;
+	top: 3%;
+	left: 5%;
+	z-index: 0;
+}
+
+.title, .title2{ 
+	position: absolute; 
+	font-family: "TASA Explorer", sans-serif;
+ 	color: #243E36; 
+ 	font-size: 25px; 
+ 	left: 8%; 
+ 	top: 24%; 
+ 	text-transform: uppercase; 
+ 	font-weight: 500; 
+}
+
+.NavBar{
+	width: 3.5%;
+	height: 100%;
+	position: absolute;
+	background: #243E36;
+	text-align: center;
+	z-index: 1;
+	transition: 0.3s;
+}
+
+.NavBar:hover{
+	width: 5.5%;
+}
+
+.Admintitleplace{
+	right: 1%;
+	top: 15%;
+	position: absolute;
+	width: 20%;
+	height: 65%;
+	border-radius: 50px;
+	border: 2px solid #CBCBCB;
+	background: whitesmoke;
+}
+.Adminicon{
+	width: auto;
+	height: 98%;
+	position: absolute;
+	top: 2%;
+	left: 0%;
+	transition: 0.5s;
+	background: transparent;
+	border-radius: 0px 7px 0px 15px;
+}
+.AdminTitleName {
+	font-family: "TASA Explorer";
+	color: black;
+	font-size: 20px;
+	text-align: center;
+	text-transform: uppercase;
+	padding-top: 2%;
+	transition: 0.5s ease-in-out;
+	padding-left: 8%;
+	display: smooth;
+	opacity: 100%;
+}
+
+.Bold {
+    font-weight: 700;
+}
+
+.Normal {
+    font-weight: 400;
+}
+.subtitle1 ,.subtitle3{
+	font-family: "TASA Explorer";
+	color: whitesmoke;
+	font-size: 16px;
+	width: 100%;
+	height: 4%;
+	background: #49615A;
+	position: absolute;
+	top: 7%;
+	left: 1%;
+	right: 0%;
+	bottom: 0%;
+	padding-left: 3.5%;
+	padding-top: 1%;
+	text-transform: uppercase;
+	z-index: 0;
+	transition: 0.6s;
+	cursor: pointer;
+}
+
+.subtitle2{
+	font-family: "TASA Explorer";
+	color: whitesmoke;
+	font-size: 16px;
+	width: 100%;
+	height: 4%;
+	background: transparent;
+	position: absolute;
+	top: 7%;
+	left: 9%;
+	right: 0%;
+	bottom: 0%;
+	padding-top: 1%;
+	text-transform: uppercase;
+	z-index: 1;
+	transition: font-weight 0.4s ease, opacity 0.4s ease;
+	display: none;
+	cursor: pointer;
+}
+
+.subtitle4, .subtitle5, .subtitle7, .subtitle10{
+	font-family: "TASA Explorer";
+	color: whitesmoke;
+	font-size: 16px;
+	width: 100%;
+	height: 4%;
+	background: transparent;
+	position: absolute;
+	top: 7%;
+	left: 14%;
+	right: 0%;
+	bottom: 0%;
+	padding-top: 1%;
+	text-transform: uppercase;
+	z-index: 1;
+	transition: font-weight 0.4s ease, opacity 0.4s ease;
+	display: none;
+	cursor: pointer;
+}
+
+.subtitle6 ,.subtitle9{
+	font-family: "TASA Explorer";
+	color: whitesmoke;
+	font-size: 16px;
+	width: 100%;
+	height: 4%;
+	background: transparent;
+	position: absolute;
+	top: 7%;
+	left: 27.5%;
+	right: 0%;
+	bottom: 0%;
+	padding-top: 1%;
+	text-transform: uppercase;
+	z-index: 1;
+	transition: font-weight 0.4s ease, opacity 0.4s ease;
+	display: none;
+	cursor: pointer;
+}
+
+.subtitle8{
+	font-family: "TASA Explorer";
+	color: whitesmoke;
+	font-size: 16px;
+	width: 100%;
+	height: 4%;
+	background: transparent;
+	position: absolute;
+	top: 7%;
+	left: 22%;
+	right: 0%;
+	bottom: 0%;
+	padding-top: 1%;
+	text-transform: uppercase;
+	z-index: 1;
+	transition: font-weight 0.4s ease, opacity 0.4s ease;
+	display: none;
+	cursor: pointer;
+}
+
+.profPic{
+	position: absolute;
+	left: 15%;
+	top: 4%;
+	width: 65%;
+	height: auto;
+	border-radius: 100%;
+	background: transparent;
+	content-visibility: 100%;
+	border: .5px solid black;
+	cursor: pointer;
+	transition: 0.5s;
+	z-index: 2;
+}
+
+.profPic:hover{
+	padding: 6%;
+	background: whitesmoke;
+	cursor: pointer;
+}
+
+.fname{
+	position: relative;
+	font-family: "TASA Explorer", sans-serif;
+	color: #FFFFFF;
+	font-size: 14.5px;
+	text-align: center;
+	padding-top: 90%;
+}
+
+.inventory_container{
+    width: 100%;
+    padding: 16px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: absolute;
+    top: 15%;
+}
+
+/* Icon wrapper effect */
+.inventory_icon{
+    width: 46px;
+    height: 46px;
+    padding: 10px;
+    border-radius: 14px;
+    transition: 0.3s ease;
+}
+
+/* White pill on hover */
+.inventory_container:hover .inventory_icon{
+    background: white;
+    box-shadow: 0 0 12px rgba(0,0,0,0.1);
+}
+
+/* Label */
+.Inventory_label{
+    margin-top: 8px;
+    font-size: 12px;
+    font-family: "TASA Explorer", sans-serif;
+    color: transparent;
+    transition: 0.3s ease;
+    cursor: none;
+}
+
+/* Dark text when active */
+.inventory_container:hover .Inventory_label{
+    color: whitesmoke;
+    cursor: pointer;
+}
+
+/* Click animation */
+.inventory_container:active .inventory_icon{
+    transform: scale(0.9);
+}
+
+.logout_container{
+    width: 100%;
+    padding: 16px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: absolute;
+    bottom: 0%;
+}
+
+/* Icon wrapper effect */
+.logout_icon{
+    width: 40px;
+    height: 40px;
+    padding: 10px;
+    border-radius: 14px;
+    transition: 0.3s ease;
+}
+
+/* White pill on hover */
+.logout_container:hover .logout_icon{
+    background: white;
+    box-shadow: 0 0 12px rgba(0,0,0,0.1);
+}
+
+/* Label */
+.Logout_label{
+    margin-top: 8px;
+    font-size: 12px;
+    font-family: "TASA Explorer", sans-serif;
+    color: transparent;
+    transition: 0.3s ease;
+    cursor: none;
+}
+
+/* Dark text when active */
+.logout_container:hover .Logout_label{
+    color: whitesmoke;
+    cursor: pointer;
+}
+
+/* Click animation */
+.logout_container:active .logout_icon{
+    transform: scale(0.9);
+}
+
+.LogOutPane{
+	width: 35%;
+	height: 50%;
+	background: rgba(255, 255, 255, 0.4);
+	border-radius: 20px 20px;
+	backdrop-filter: blur(100px);
+	box-shadow: 0px 0px 20px 0.5px whitesmoke;
+	content-visibility: 100%;	position: absolute;
+	left: 34%;
+	top: 23%;
+	z-index: 11;
+	text-align: center;
+	align-items: center;
+	align-content: center;
+	display: none;
+}
+
+.lougoutQNA{
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 30px;
+	text-align: center;
+	padding: 5%;
+	text-transform: uppercase;
+	font-weight: 400;
+	padding-bottom: 20%;
+	color: #243E36;
+}
+
+.LOlogout_icon{
+	width: 10%;
+	height: auto;
+}
+
+.LOYesbTn, .LONobTn{
+	padding: 2%;
+	width: 15%;
+	height: 10%;
+	font-size: 28px;
+	background: #243E36;
+	color: whitesmoke;
+	font-family: "TASA Explorer", sans-serif;
+	font-weight: 500;
+	transition: ease-in-out 0.3s;
+	border-radius: 10px 10px;
+	position: absolute;
+	cursor: pointer;
+}
+
+.LOYesbTn{
+	bottom: 15%;
+	left: 15%;
+}
+
+.LONobTn{
+	bottom: 15%;
+	right: 15%;
+}
+
+.LOYesbTn:hover, .LONobTn:hover{
+	background: #01A572;
+	transform: scale(1.1);
+}
+.blackbg{
+	width: 100%;
+	height: 100%;
+	background: black;
+	position: fixed;
+	top: 0%;
+	opacity: 45%;
+	z-index: 10;
+	display: none;
+}
+
+/******************************************************************************************************************/
+.FrstContainerPage1{
+	border-radius: 15px 15px;
+	width: 28%;
+	height: 72%;
+	position: absolute;
+	left: 6%;
+	top: 18%;
+	background: #FFFFFF;
+	border: solid 1px #626262;
+	align-items: center;
+	align-content: center;
+	text-align: center;
+	transition: 0.5s;
+}
+
+.profPic2{
+	position: absolute;
+	left: 23%;
+	top: 5%;
+	border-radius: 100%;
+	background: transparent;
+	content-visibility: 100%;
+	border: .5px solid black;
+	width: 55%;
+	height: auto;
+}
+
+.pic{
+	display: block;
+	width: 100%;
+	height: auto;
+	image-rendering: smooth;
+	object-fit: cover;
+	z-index: 0;
+}
+
+.status_loaded{
+	background: #00BE33;
+	opacity: 1;
+}
+
+.Full_Name{
+	position: relative;
+	padding-top: 18%;
+	align-self: center;
+	color: black;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 25px;
+}
+
+.Full_Name::before{
+	content: "Miguel Santos";
+}
+
+.Position{
+	position: relative;
+	left: 31%;
+	top: 0%;
+	padding: 1.5%;
+	width: 35%;
+	border-radius: 20px 20px;
+	background: #496152;
+	align-self: center;
+	color: #FFFFFF;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 14px;
+	text-transform: uppercase;
+}
+
+.Position::before{
+	content: "STORE OWNER";
+}
+
+.ContactInfo{
+	position: absolute;
+	left: 10%;
+	bottom: 25%;
+	color: black;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 20px;
+	text-transform: uppercase;
+	font-weight: 500;
+}
+
+.line{
+	position: absolute;
+	left: 7%;
+	bottom: 23%;
+	width: 85%;
+	height: .3%;
+	background: black;
+	opacity: 30%;
+}
+
+.Phone_icon{
+	width: 7%;
+	height: auto;
+	position: absolute;
+	bottom: 15%;
+	left: 13%;
+}
+
+.Phone_Num{
+	position: absolute;
+	bottom: 15.5%;
+	left: 25%;
+	color: black;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 17px;
+	text-transform: uppercase;
+	font-weight: 300;
+}
+
+.Phone_Num::before{
+	content: "0917 824 5610";
+}
+
+.Email_icon{
+	width: 7%;
+	height: auto;
+	position: absolute;
+	bottom: 7%;
+	left: 13%;
+}
+
+.Email_Add{
+	position: absolute;
+	bottom: 8%;
+	left: 25%;
+	color: black;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 16px;
+	font-weight: 300;
+}
+
+.Email_Add::before{
+	content: "Miguel.Santos@newcenturytire.com";
+}
+/***********************************************************************************************************************/
+.ScndContainerPage1{
+	border-radius: 15px 15px;
+	width: 61%;
+	height: 72%;
+	position: absolute;
+	left: 35.5%;
+	top: 18%;
+	background: #FFFFFF;
+	border: solid 1px #626262;
+	transition: 0.5s;
+}
+
+.PersonalInfo{
+	position: absolute;
+	left: 5%;
+	top: 3%;
+	color: black;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 19px;
+	text-transform: uppercase;
+	font-weight: 500;
+}
+
+.line2{
+	height: 1.5px;
+	width: 50%;
+	padding-left: 20%;
+	padding-right: 20%;
+	background: black;
+	position: absolute;
+	top: 8.5%;
+	left: 4.5%;
+	opacity: 30%;
+}
+
+.line3{
+	height: 37%;
+	width: 1.7px;
+	background: black;
+	position: absolute;
+	top: 11.5%;
+	left: 29.5%;
+	opacity: 30%;
+}
+
+.infoTbl{
+	position: absolute;
+	text-align: justify;
+	color: black;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 18px;
+	width: 70%;
+	height: 42%;
+	left: 14.5%;
+	top: 10%;
+	padding: 0%;
+	text-align: justify;
+}
+
+.EmploymentInfo{
+	position: absolute;
+	left: 5%;
+	top: 53%;
+	color: black;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 19px;
+	text-transform: uppercase;
+	font-weight: 500;
+}
+
+.line4{
+	height: 1.5px;
+	width: 50%;
+	padding-left: 20%;
+	padding-right: 20%;
+	background: black;
+	position: relative;
+	top: 58%;
+	left: 4.5%;
+	opacity: 30%;
+}
+.line5{
+	height: 37%;
+	width: 1.7px;
+	background: black;
+	position: absolute;
+	top: 60.5%;
+	left: 29.5%;
+	opacity: 30%;
+}
+
+.EmploymentTbl{
+	position: absolute;
+	text-align: justify;
+	color: black;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 18px;
+	width: 80%;
+	height: 42%;
+	left: 14.5%;
+	top: 59%;
+	padding: 0%;
+	text-align: justify;
+}
+
+.View_ProfBtn{
+	position: absolute;
+	bottom: 2%;
+	right: 3%;
+	background: #243E36;
+	color: #FFFFFF;
+	border-radius: 20px 20px;
+	width: auto;
+	padding: .5%;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 18px;
+	cursor: pointer;
+	border: solid 3px #243E36;
+	transition: .4s;
+	font-weight: 500;
+}
+
+.View_ProfBtn:hover{
+	background: transparent;
+	color: #243E36;
+	transform: scale(1.05) translateY(1px);
+}
+
+.View_ProfBtn:active{
+	background: transparent;
+	opacity: 60%;
+	color: #243E36;
+	transform: scale(0.9);
+}
+/***********************************************************************************************************************/
+.ThirdContainer{
+	border-radius: 15px 15px;
+	width: 75%;
+	height: 70%;
+	position: absolute;
+	left: 15%;
+	top: 18%;
+	background: #FFFFFF;
+	border: solid 1px #626262;
+	z-index: 3;
+	display: none;
+}
+
+.EPDpage1, .EPDpage2{
+	display: none;
+}
+
+
+.EditTitle, .UpdateProdInfoTitle, .AddStockBatchTitle, .StockBatchInfoTitle{
+	position: absolute;
+	left: 3%;
+	top: 3%;
+	color: black;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 21px;
+	text-transform: uppercase;
+	font-weight: 700;
+}
+
+.line6{
+	height: 1.5px;
+	width: 55%;
+	padding-left: 20%;
+	padding-right: 20%;
+	background: black;
+	position: absolute;
+	top: 9%;
+	left: 2.5%;
+	opacity: 30%;
+}
+
+.User_icon{
+	width: 3%;
+	height: auto;
+	position: absolute;
+	top: 13%;
+	left: 3%;
+}
+
+.EditPersonalTitle, .EditEmployeeTitle{
+	position: absolute;
+	left: 7%;
+	top: 14%;
+	color: black;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 22px;
+	text-transform: uppercase;
+	font-weight: 400;
+}
+
+.line7{
+	height: 50%;
+	width: 1.5px;
+	background: black;
+	position: absolute;
+	top: 27%;
+	right: 35%;
+	opacity: 30%;
+}
+
+.EmergencyContactTitle, .FNameEPD, .MIEPD, .LNameEPD, .SuffixEPD, .GenderEPD, .BirthdateEPD, .AgeEPD, .ConNumberEPD, .EmailEPD, .EContactEPD, .FullNameEPD{
+	color: black;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 19px;
+	transition: 0.5s ease-in-out;
+	text-transform: uppercase;
+	padding-top: 1.5%;
+}
+
+.FNameInputEPD, .MIInputEPD, .LNameInputEPD, .SUFFIXInputEPD, .GenderInputEPD, .BirthdateInputEPD, .AgeInputEPD, .ConNumberInputEPD, .EmailInputEPD, .EContactInputEPD, .FullNameInputEPD{
+	outline: none;
+	transition: 0.3s ease-in-out;
+	font-family: "TASA Explorer", sans-serif;
+	cursor: pointer;
+	color: black;
+	font-size: 18px;
+	box-sizing: border-box;
+  	border: 0.5px solid #B6B6B6;
+  	background: transparent;
+  	transition: 0.5s;
+  	height: auto;
+}
+
+.FNameInputEPD:hover, .MIInputEPD:hover, .LNameInputEPD:hover, .SUFFIXInputEPD:hover, .GenderInputEPD:hover, .BirthdateInputEPD:hover, .AgeInputEPD:hover, .ConNumberInputEPD:hover, .EmailInputEPD:hover, .EContactInputEPD:hover, .FullNameInputEPD:hover{
+	box-sizing: border-box;
+  	border: 1.5px solid black;
+  	border-radius: 10px 10px 10px 10px;
+
+}
+
+.FNameEPD{
+	position: absolute;
+	top: 22%;
+	left: 3.9%;
+}
+
+.FNameInputEPD{
+	width: 15%;
+  	padding: 12px 20px;
+  	position: absolute;
+  	top: 30%;
+	left: 3.9%;
+}
+
+.MIEPD{
+	position: absolute;
+	top: 22%;
+	left: 25.5%;
+}
+
+.MIInputEPD{
+	width: 5%;
+  	padding: 12px 20px;
+  	position: absolute;
+  	top: 30%;
+	left: 24%;
+}
+
+.LNameEPD{
+	position: absolute;
+	top: 22%;
+	left: 33.5%;
+}
+
+.LNameInputEPD{
+	width: 15%;
+  	padding: 12px 20px;
+  	position: absolute;
+  	top: 30%;
+	left: 33.5%;
+}
+
+.SuffixEPD{
+	position: absolute;
+	top: 22%;
+	left: 54%;
+}
+
+.SUFFIXInputEPD{
+	width: 7%;
+  	padding: 12px 20px;
+  	position: absolute;
+  	top: 30%;
+	left: 53.2%;
+}
+
+.GenderEPD{
+	position: absolute;
+	top: 42%;
+	left: 3.9%;
+}
+
+.GenderInputEPD{
+	width: 15%;
+  	padding: 12px 20px;
+  	position: absolute;
+  	top: 50%;
+	left: 3.9%;
+}
+
+.BirthdateEPD{
+	position: absolute;
+	top: 42%;
+	left: 23.9%;
+}
+
+.BirthdateInputEPD{
+	width: 23%;
+  	padding: 12px 20px;
+  	position: absolute;
+  	top: 50%;
+	left: 23.9%;
+}
+
+.AgeEPD{
+	position: absolute;
+	top: 42%;
+	left: 50.2%;
+}
+
+.AgeInputEPD{
+	width: 10.5%;
+  	padding: 12px 20px;
+  	position: absolute;
+  	top: 50%;
+	left: 50%;
+}
+
+.ConNumberEPD{
+	position: absolute;
+	top: 65%;
+	left: 3.9%;
+}
+
+.ConNumberInputEPD{
+	width: 15%;
+  	padding: 12px 20px;
+  	position: absolute;
+  	top: 74%;
+	left: 3.9%;
+}
+
+.EmailEPD{
+	position: absolute;
+	top: 65%;
+	left: 24%;
+}
+
+.EmailInputEPD{
+	width: 36.8%;
+  	padding: 12px 20px;
+  	position: absolute;
+  	top: 74%;
+	left: 23.9%;
+}
+
+.EmergencyContactTitle{
+	position: absolute;
+	top: 22%;
+	right: 12%;
+}
+
+.line8{
+	height: 1.5px;
+	width: 20%;
+	background: black;
+	position: absolute;
+	top: 30%;
+	right: 10.5%;
+	opacity: 30%;
+}
+
+.EContactEPD{
+	position: absolute;
+	top: 36%;
+	right: 7.8%;
+}
+
+.EContactInputEPD{
+	width: 18%;
+  	padding: 12px 20px;
+  	position: absolute;
+  	top: 45%;
+	right: 13.9%;
+}
+
+.FullNameEPD{
+	position: absolute;
+	top: 58%;
+	right: 23%;
+}
+
+.FullNameInputEPD{
+	width: 25%;
+  	padding: 12px 20px;
+  	position: absolute;
+  	top: 66.5%;
+	right: 6.7%;
+}
+
+.pagecontainer{
+	width: 7%;
+	height: 6%;
+	position: absolute;
+	bottom: 3%;
+	background: #EFEFEF;
+	z-index: 3;
+	border-radius: 20px 20px;
+	justify-content: center;
+	align-items: center;
+	display: flex;
+	gap: 10%;
+	left: 47.5%;
+}
+
+.pagee {
+ 	width: 12px;
+ 	height: 12px;
+ 	border-radius: 50%;
+ 	background-color: #D9D9D9;
+ 	transition: 0.3s;
+}
+
+.pagee.aactive {
+ 	background-color: #243E36;
+}
+
+.Next_ProfBtn{
+	position: absolute;
+	bottom: 2%;
+	text-align: center;
+	right: 3%;
+	background: #243E36;
+	color: #FFFFFF;
+	border-radius: 20px 20px;
+	width: 7%;
+	padding: .5%;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 18px;
+	cursor: pointer;
+	border: solid 3px #243E36;
+	transition: .4s;
+	font-weight: 500;
+	display: none;
+}
+
+.Next_ProfBtn:hover{
+	background: transparent;
+	color: #243E36;
+	transform: scale(1.05) translateY(1px);
+}
+
+.Next_ProfBtn:active{
+	background: transparent;
+	opacity: 60%;
+	color: #243E36;
+	transform: scale(0.9);
+}
+
+.back_btn, .back_btn2 {
+	position: absolute;
+	text-align: center;
+	bottom: 2%;
+	left: 9%;
+	background: #243E36;
+	color: #FFFFFF;
+	border-radius: 20px 20px;
+	width: 7%;
+	padding: .5%;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 18px;
+	cursor: pointer;
+	border: solid 3px #243E36;
+	transition: .4s;
+	font-weight: 500;
+	display: none;
+}
+
+.UpdatebtnStockBatchInfo:hover, .RemovebtnStockBatchInfo:hover, .AddStockbtnskuid1:hover ,.StockBatchBackbtnskuid1:hover, .back_btn:hover, .back_btn2:hover, .Updatebtnskuid1:hover, .Updatebtnskuid2:hover, .Backbtnskuid1:hover, .Backbtnskuid2:hover, .UpdatebtnBattskuid1:hover, .BackbtnBattskuid1:hover{
+	background: transparent;
+	color: #243E36;
+	transform: scale(1.05) translateY(1px);
+}
+
+.Updatebtnskuid1:active, .RemovebtnStockBatchInfo:hover .AddStockbtnskuid1:active, .StockBatchBackbtnskuid1:active, .back_btn:active, .back_btn2:active, .Updatebtnskuid1:active, .Updatebtnskuid2:active, .Backbtnskuid1:active, .Backbtnskuid2:active, .UpdatebtnBattskuid1:active, .BackbtnBattskuid1:active{
+	background: transparent;
+	opacity: 60%;
+	color: #243E36;
+	transform: scale(0.9);
+}
+
+.HireDateEPD, .SchedDayEPD, .EmployeeCert{
+	color: black;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 19px;
+	transition: 0.5s ease-in-out;
+	text-transform: uppercase;
+	padding-top: 1.5%;
+}
+
+.HireDateEPD{
+	position: absolute;
+	top: 22%;
+	left: 8%;
+}
+
+.HireDateInputEPD{
+	outline: none;
+	transition: 0.3s ease-in-out;
+	font-family: "TASA Explorer", sans-serif;
+	cursor: pointer;
+	color: black;
+	font-size: 20px;
+	box-sizing: border-box;
+  	border: 0.5px solid #B6B6B6;
+  	background: transparent;
+  	transition: 0.5s;
+  	height: 10%;
+  	width: 20%;
+  	position: absolute;
+  	top: 32%;
+  	left: 8%;
+  	padding-left: 1%;
+}
+
+.HireDateInputEPD:hover , .WorkingHoursInputEPDtimeStart:hover , .WorkingHoursInputEPDMeridiemStart:hover , .WorkingHoursInputEPDtimeEnd:hover , .WorkingHoursInputEPDMeridiemEnd:hover{
+	box-sizing: border-box;
+  	border: 1.5px solid black;
+  	border-radius: 10px 10px 10px 10px;
+}
+
+.line9{
+	height: 25%;
+	width: 1.5px;
+	background: black;
+	position: absolute;
+	top: 27%;
+	left: 30%;
+	opacity: 30%;
+}
+
+.SchedDayEPD{
+	position: absolute;
+	top: 22%;
+	left: 33%;
+}
+
+.WorkingHoursEPD{
+	color: black;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 16px;
+	transition: 0.5s ease-in-out;
+	text-transform: uppercase;
+	padding-top: 1.5%;
+	left: 33%;
+	top: 30.5%;
+	position: absolute;
+}
+
+.WorkingHoursInputEPDtimeStart, .WorkingHoursInputEPDtimeEnd{
+	outline: none;
+	transition: 0.3s ease-in-out;
+	font-family: "TASA Explorer", sans-serif;
+	cursor: pointer;
+	color: black;
+	font-size: 16px;
+	box-sizing: border-box;
+  	border: 0.5px solid #B6B6B6;
+  	background: transparent;
+  	transition: 0.5s;
+  	height: 7%;
+  	width: 6.5%;
+  	position: absolute;
+  	padding-left: 1%;
+}
+
+.WorkingHoursInputEPDMeridiemStart, .WorkingHoursInputEPDMeridiemEnd{
+	outline: none;
+	transition: 0.3s ease-in-out;
+	font-family: "TASA Explorer", sans-serif;
+	cursor: pointer;
+	color: black;
+	font-size: 14px;
+	box-sizing: border-box;
+  	border: 0.5px solid #B6B6B6;
+  	background: transparent;
+  	transition: 0.5s;
+  	height: 7%;
+  	width: 3.5%;
+  	position: absolute;
+  	padding-left: .7%;
+}
+.WorkingHoursInputEPDtimeStart{
+	top: 38.5%;
+  	left: 33%;
+}
+
+.WorkingHoursInputEPDMeridiemStart{
+	top: 38.5%;
+  	left: 40%;
+}
+
+.WorkingHoursInputEPDtimeEnd{
+	top: 38.5%;
+  	left: 45%;
+}
+
+.WorkingHoursInputEPDMeridiemEnd{
+	top: 38.5%;
+  	left: 52%;
+}
+
+
+.Workingdays{
+	color: black;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 16px;
+	transition: 0.5s ease-in-out;
+	text-transform: uppercase;
+	padding-top: 1.5%;
+	right: 30%;
+	top: 30.5%;
+	position: absolute;
+}
+
+.days {
+ 	display: flex;
+ 	gap: 14px;
+ 	position: absolute;
+ 	right: 8.5%;
+ 	top: 39%;
+}
+
+.day {
+ 	cursor: pointer;
+}
+
+.day input {
+ 	display: none;
+}
+
+.day span {
+	font-family: "TASA Explorer", sans-serif;
+	width: 40px;
+	height: 32px;
+	border-radius: 13px;
+	background: #243E36; 
+	color: white;
+	display: flex;
+ 	align-items: center;
+ 	justify-content: center;
+	font-size: 18px;
+ 	transition: 0.2s ease;
+}
+
+.day input:not(:checked) + span {
+ 	background: #c4c4c4;
+ 	color: black;
+}
+
+.day span:hover {
+ 	opacity: 0.85;
+}
+
+.line10{
+	height: 1.5px;
+	width: 55%;
+	padding-left: 20%;
+	padding-right: 20%;
+	background: black;
+	position: absolute;
+	top: 55%;
+	left: 2.5%;
+	opacity: 30%;
+}
+
+.EmployeeCert{
+	position: absolute;
+	top: 53%;
+	left: 3%;
+}
+
+.EmployeeCertValue{
+	width: 100%;
+ 	max-width: 1080px;
+ 	height: 140px;
+ 	border: 2px solid #d9d9d9;
+ 	border-radius: 4px;
+ 	padding: 18px 20px;
+ 	box-sizing: border-box;
+ 	font-family: "TASA Explorer", sans-serif;
+ 	font-size: 18px;
+ 	line-height: 1.6;
+ 	color: #333;
+	background-color: #ffffff;
+ 	resize: none;
+ 	outline: none;
+ 	position: absolute;
+ 	top: 62%;
+ 	left: 3%;
+}
+
+.EmployeeCertValue:focus {
+  border-color: #9aa5a0;
+}
+/**************************************INVENTORY********************************************************/
+.INVENTORY{
+	display: non;
+}
+
+.trackinventorypage{
+	display: non;
+}
+
+.tab-container {
+    background: #3b3b3b;
+    padding: 6px;
+    border-radius: 6px 6px 0px 0px;
+    display: inline-flex;
+    gap: 6px;
+    position: absolute;
+    left: 5%;
+    top: 15%;
+    font-family: "TASA Explorer", sans-serif;
+  }
+
+  .tab {
+    padding: 6px 14px;
+    border-radius: 16px;
+    font-size: 15px;
+    color: #e0e0e0;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .tab.active {
+    background: #dcdcdc;
+    color: #000;
+    font-weight: 700;
+  }
+
+  .tab:hover:not(.active) {
+    background: #555;
+  }
+
+  .table-card, .TrashBinContainer, .battery-table-card, .rim-card {
+  background: #fff;
+  margin: 30px auto;
+  width: 92%;
+  border-radius: 0px 0px 10px 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  overflow: hidden;
+  position: absolute;
+  left: 5%;
+  top: 16.5%;
+  font-family: "TASA Explorer", sans-serif;
+  transition: 0.8s;
+}
+
+.inventorytables, .Trashrecords, .battery-inventory-table, .rim-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.inventoryhead, .Trashheadrow, .battery-table-head, .rim-head{
+  background: #4c665d;
+  color: #fff;
+  cursor: pointer;
+}
+
+.inventoryth, .inventorytd, .trashth ,.trashtd, .battery-th , .battery-td, .rim-th, .rim-td{
+  padding: 14px 16px;
+  text-align: left;
+  border-right: 1px solid #d6d6d6;
+  cursor: pointer;
+}
+
+.inventoryth:last-child,
+.inventorytd:last-child {
+  border-right: none;
+}
+
+.inventorybody, .inventorytr, .trashbody, .trashtr, .batterytablebody, .battery-row, .rim-body, .rim-row{
+  border-bottom: 1px solid #ddd;
+}
+
+.inventorybody,  .inventorytr:last-child {
+  border-bottom: none;
+}
+
+a {
+  color: #1f60ff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.sort {
+  font-size: 13px;
+  opacity: 0.7;
+  margin-left: 6px;
+  cursor: pointer;
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: bold;
+  border: 1px solid #aaa;
+  text-transform: uppercase;
+}
+
+.badge.green {
+  color: #1a8a2b;
+  background: #e8f7ec;
+  border-color: #1a8a2b;
+}
+
+.badge.red {
+  color: #c61c1c;
+  background: #fdeaea;
+  border-color: #c61c1c;
+}
+
+.badge.blue {
+  color: #2f5bff;
+  background: #e8edff;
+  border-color: #2f5bff;
+}
+
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 18px;
+  color: #333;
+}
+
+.page {
+  padding: 10px;
+  border-radius: 4px;
+  background: #e5e5e5;
+  cursor: pointer;
+  transition: 0.5s;
+}
+
+.page:hover{
+	background: whitesmoke;
+}
+
+.page.active {
+  background: #4c665d;
+  color: #fff;
+}
+
+.disabled {
+  opacity: 0.5;
+}
+
+.BRAND{
+	font-weight: 700;
+}
+
+.imageproduct{
+	width: auto;
+	height: 10%;
+	text-align: center;
+	cursor: pointer;
+	transition: 0.5s;
+}
+
+.imageproduct:hover{
+	transform: scale(2);
+}
+
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  position: absolute;
+  right: 3%;
+  top: 15%;
+  outline: none;
+}
+
+.filter-select {
+  appearance: none;
+  padding: 10px 30px 10px 14px;
+  border: 1px solid #b8b8b8;
+  background-color: #ffffff;
+  font-size: 16px;
+  cursor: pointer;
+  position: relative;
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  outline: none;
+}
+
+.search-wrapper {
+  position: relative;
+}
+
+.Trashsearch input ,.search-wrapper input {
+  padding: 10px 30px 10px 14px;
+  border: 1px solid #b8b8b8;
+  font-size: 16px;
+  width: 200px;
+  outline: none;
+}
+
+.search-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 16px;
+}
+
+.Dropdownn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%) translateX(300%);
+  pointer-events: none;
+  font-size: 16px;
+  z-index: 2;
+}
+
+.Dropdownn2 {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%) translateX(740%);
+  pointer-events: none;
+  font-size: 16px;
+  z-index: 2;
+}
+
+.addProductBtn{
+	position: absolute;
+	bottom: 2%;
+	text-align: center;
+	right: 3%;
+	background: #243E36;
+	color: #FFFFFF;
+	border-radius: 20px 20px;
+	width: 9%;
+	padding: .5%;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 18px;
+	cursor: pointer;
+	border: solid 3px #243E36;
+	transition: .4s;
+	font-weight: 500;
+	text-transform: uppercase;
+}
+
+.addProductBtn:hover{
+	background: transparent;
+	color: #243E36;
+	transform: scale(1.05) translateY(1px);
+}
+
+.addProductBtn:active{
+	background: transparent;
+	opacity: 60%;
+	color: #243E36;
+	transform: scale(0.9);
+}
+
+.addProductContainer, .UpdateProdInfoContainer, .AddStockBatchContainer, .StockBatchInfoContaine {
+	border-radius: 15px 15px;
+	width: 80%;
+	height: 70%;
+	position: absolute;
+	left: 11%;
+	top: 18%;
+	background: #FFFFFF;
+	border: solid 1px #626262;
+	display: none;
+}
+
+.StockBatchInfoContainer{
+	border-radius: 15px 15px;
+	width: 80%;
+	height: 70%;
+	position: absolute;
+	left: 11%;
+	top: 18%;
+	background: #FFFFFF;
+	border: solid 1px #626262;
+	display: none;
+}
+
+.QuantityBatchInfo, .DateRecievedBatchInfo, .ManufacutingDateBatchInfo, .ExpiryDateBatchInfo, .SUPPLIERBatchInfo, .BNumASB, .QuantityASB, .DateRecievedASB, .ManufacutingDateASB, .ExpiryDateASB, .SUPPLIERASB, .PNameAP, .SKUAP, .BRANDAP, .TypeAP, .SizeAP, .PricePerUnitAP, .WarrantyAP, .PNameUPI, .SKUUPI, .BRANDUPI, .TypeUPI, .SizeUPI, .PricePerUnitUPI, .WarrantyUPI{
+	color: black;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 19px;
+	transition: 0.5s ease-in-out;
+	text-transform: uppercase;
+	padding-top: 1.5%;
+	font-weight: 700;
+}
+
+.PNameAP, .PNameUPI, .BNumASB, .QuantityBatchInfo{
+	position: absolute;
+	top: 10%;
+	left: 3%;
+}
+
+.PNameInputAP, .SKUInputAP, .PNameInputUPI, .SKUInputUPI{
+	outline: none;
+	transition: 0.3s ease-in-out;
+	font-family: "TASA Explorer", sans-serif;
+	cursor: pointer;
+	color: black;
+	font-size: 20px;
+	box-sizing: border-box;
+  	border: 0.5px solid #B6B6B6;
+  	background: transparent;
+  	transition: 0.5s;
+  	height: 10%;
+  	width: 75%;
+  	padding-left: 1%;
+}
+
+.QuantityInputBatchInfo, .DateRecievedInputBatchInfo, .ManufacutingDateInputBatchInfo, .ExpiryDateInputBatchInfo, .SUPPLIERInputBatchInfo, .BNumInputASB, .QuantityInputASB, .DateRecievedInputASB, .ManufacutingDateInputASB, .ExpiryDateInputASB, .SUPPLIERInputASB, .BrandInputAP, .TypeInputAP ,.SizeInputAP ,.WarrantyInputAP, .PricePerUnitInputAP, .BrandInputUPI, .TypeInputUPI ,.SizeInputUPI ,.WarrantyInputUPI, .PricePerUnitInputUPI{
+	outline: none;
+	transition: 0.3s ease-in-out;
+	font-family: "TASA Explorer", sans-serif;
+	cursor: pointer;
+	color: black;
+	font-size: 20px;
+	box-sizing: border-box;
+  	border: 0.5px solid #B6B6B6;
+  	background: transparent;
+  	transition: 0.5s;
+  	height: 10%;
+  	width: 20%;
+  	padding-left: 1%;
+}
+
+.QuantityInputBatchInfo:hover, .DateRecievedInputBatchInfo:hover, .ManufacutingDateInputBatchInfo:hover, .ExpiryDateInputBatchInfo:hover, .BNumInputASB:hover, .QuantityInputASB:hover, .DateRecievedInputASB:hover, .ManufacutingDateInputASB:hover, .ExpiryDateInputASB:hover, .SUPPLIERInputASB:hover, .PNameInputAP:hover, .SKUInputAP:hover, .BrandInputAP:hover, .TypeInputAP:hover ,.SizeInputAP:hover ,.WarrantyInputAP:hover, .PricePerUnitInputAP:hover, .PNameInputUPI:hover, .SKUInputUPI:hover, .BrandInputUPI:hover, .TypeInputUPI:hover ,.SizeInputUPI:hover ,.WarrantyInputUPI:hover, .PricePerUnitInputUPI:hover{
+	box-sizing: border-box;
+  	border: 1.5px solid black;
+  	border-radius: 10px 10px 10px 10px;
+}
+
+.PNameInputAP, .PNameInputUPI, .BNumInputASB, .QuantityInputBatchInfo{
+	position: absolute;
+	top: 19%;
+	left: 3%;
+}
+
+.SKUAP , .SKUUPI, .QuantityASB{
+	position: absolute;
+	top: 30%;
+	left: 3%;
+}
+
+.SKUInputAP, .SKUInputUPI, .QuantityInputASB{
+	position: absolute;
+	top: 39%;
+	left: 3%;
+}
+
+.QuantityInputBatchInfo, .SUPPLIERInputBatchInfo{
+	width: 74%;
+}
+
+.BRANDAP, .BRANDUPI, .DateRecievedASB{
+	position: absolute;
+	top: 49%;
+	left: 3%;
+}
+
+.DateRecievedBatchInfo{
+	position: absolute;
+	top: 35%;
+	left: 3%;
+}
+
+.DateRecievedInputBatchInfo {
+	position: absolute;
+	top: 45%;
+	left: 3%;
+}
+
+.BrandInputAP, .BrandInputUPI, .DateRecievedInputASB{
+	position: absolute;
+	top: 59%;
+	left: 3%;
+}
+
+.TypeAP, .TypeUPI, .ManufacutingDateASB{
+	position: absolute;
+	top: 49%;
+	left: 30%;
+}
+
+.ManufacutingDateBatchInfo{
+	position: absolute;
+	top: 35%;
+	left: 30%;
+}
+
+.ManufacutingDateInputBatchInfo{
+	position: absolute;
+	top: 45%;
+	left: 30%;
+}
+
+.TypeInputAP, .TypeInputUPI, .ManufacutingDateInputASB{
+	position: absolute;
+	top: 59%;
+	left: 30%;
+}
+
+.SizeAP, .SizeUPI, .ExpiryDateASB{
+	position: absolute;
+	top: 49%;
+	left: 57%;
+}
+
+.SizeInputAP, .SizeInputUPI, .ExpiryDateInputASB, .ExpiryDateInputBatchInfo{
+	position: absolute;
+	top: 59%;
+	left: 57%;
+}
+
+.ExpiryDateBatchInfo{
+	position: absolute;
+	top: 35%;
+	left: 57%;
+}
+
+.ExpiryDateInputBatchInfo{
+	position: absolute;
+	top: 45%;
+	left: 57%;
+}
+
+
+.WarrantyAP, .WarrantyUPI, .SUPPLIERASB{
+	position: absolute;
+	top: 69%;
+	left: 3%;
+}
+
+.WarrantyInputAP, .WarrantyInputUPI{
+	position: absolute;
+	top: 79%;
+	left: 3%;
+}
+
+.SUPPLIERInputASB{
+	position: absolute;
+	top: 79%;
+	left: 3%;
+	width: 74%;
+}
+
+.SUPPLIERBatchInfo{
+	position: absolute;
+	top: 62%;
+	left: 3%;
+}
+
+.SUPPLIERInputBatchInfo{
+	position: absolute;
+	top: 72%;
+	left: 3%;
+	height: 15%;
+}
+
+.PricePerUnitAP, .PricePerUnitUPI{
+	position: absolute;
+	top: 69%;
+	left: 30%;
+}
+
+.PricePerUnitInputAP, .PricePerUnitInputUPI{
+	position: absolute;
+	top: 79%;
+	left: 30%;
+}
+
+.cancel_btn{
+	position: absolute;
+	text-align: center;
+	bottom: 2%;
+	left: 9%;
+	background: #243E36;
+	color: #FFFFFF;
+	border-radius: 20px 20px;
+	width: 7%;
+	padding: .5%;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 18px;
+	cursor: pointer;
+	border: solid 3px #243E36;
+	transition: .4s;
+	font-weight: 500;
+	display: none;
+}
+
+.add_btn, .add_btnASB{
+	position: absolute;
+	text-align: center;
+	bottom: 2%;
+	right: 5%;
+	background: #243E36;
+	color: #FFFFFF;
+	border-radius: 20px 20px;
+	width: 7%;
+	padding: .5%;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 18px;
+	cursor: pointer;
+	border: solid 3px #243E36;
+	transition: .4s;
+	font-weight: 500;
+	display: none;
+}
+
+.cancel_btn:hover, .add_btn:hover, .add_btnASB:hover{
+	background: transparent;
+	color: #243E36;
+	transform: scale(1.05) translateY(1px);
+}
+
+.cancel_btn:active, .add_btn:active, .add_btnASB:active{
+	background: transparent;
+	opacity: 60%;
+	color: #243E36;
+	transform: scale(0.9);
+}
+
+.skuid1Container, .BatterySKU1Container{
+	border-radius: 15px 15px;
+	width: 85%;
+	height: 74%;
+	position: absolute;
+	left: 8%;
+	top: 15%;
+	background: #FFFFFF;
+	border: solid 1px #626262;
+	display: none;
+}
+
+.skuid1tab-container, .Batteryskuid1tab-container {
+    background: #3b3b3b;
+    padding: 6px;
+    border-radius: 15px 15px 0px 0px;
+    display: inline-flex;
+    gap: 6px;
+    position: absolute;
+    left: 0%;
+    top: 0%;
+    width: 99.1%;
+    font-family: "TASA Explorer", sans-serif;
+  }
+
+  .skuid1tab, .Batteryskuid1tab {
+    padding: 6px 14px;
+    border-radius: 16px;
+    font-size: 15px;
+    color: #e0e0e0;
+    cursor: pointer;
+    user-select: none;
+    transition: 0.2s, color 0.2s;
+  }
+
+  .Batteryskuid1tab:hover:not(.active), .skuid1tab:hover:not(.active) {
+    background: #555;
+  }
+
+.skuid1Box1, .Batteryskuid1Box1{
+	width: 25%;
+	height: 75%;
+	box-shadow: 0px 0px 15px 0px grey;
+	position: absolute;
+	top: 15%;
+	left: 5%;
+	align-content: center;
+	text-align: center;
+	align-items: center;
+}
+
+.skuid1Box2, .Batteryskuid1Box2{
+	width: 60%;
+	height: 75%;
+	box-shadow: 0px 0px 15px 0px grey;
+	position: absolute;
+	top: 15%;
+	left: 35%;
+}
+
+.skuid1Img, .Batteryskuid1Img{
+	width: 55%;
+	height: auto;
+	padding-bottom: 50%;
+	cursor: pointer;
+}
+
+.skuid1badge{
+	position: absolute;
+	left: 27.5%;
+	top: 57%;
+	transform: scale(1.2);
+	width: 35%;
+}
+
+.line10{
+	width: 25%;
+	height: 0.4%;
+	position: absolute;
+	left: 17%;
+	top: 70%;
+}
+
+.CurrentStockskuid1, .BatteryCurrentStockskuid1{
+	position: absolute;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 20px;
+	left: 25.5%;
+	bottom: 20%;
+	text-transform: uppercase;
+}
+
+
+
+.CurrentStockCountskuid1::before{
+	content: "10";
+	position: absolute;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 20px;
+	left: 46%;
+	bottom: 10%;
+	text-transform: uppercase;
+	font-weight: 400;
+}
+
+.BatteryCurrentStockCountskuid1::before{
+	content: "3";
+	position: absolute;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 20px;
+	left: 46%;
+	bottom: 10%;
+	text-transform: uppercase;
+	font-weight: 400;
+}
+
+.skuid1Settings, .Batteryskuid1Settings{
+	width: 12%;
+	height: auto;
+	padding-bottom: 50%;
+	cursor: pointer;
+	position: absolute;
+	right: 1%;
+	top: 89.5%;
+}
+
+.product-specs-table {
+    width: 100%;
+    height: 100%;
+    border-collapse: collapse;
+    font-family: "TASA Explorer", sans-serif;
+}
+
+.product-specs-table tr {
+    border-bottom: 1px solid #cfcfcf;
+}
+
+.product-specs-table tr:last-child {
+    border-bottom: none;
+}
+
+.spec-label {
+    width: 35%;
+    height: 100%;
+    padding: 16px 18px;
+    font-weight: 700;
+    color: #222;
+    text-transform: uppercase;
+    background: #ffffff;
+    border-right: 1px solid #cfcfcf;
+}
+
+.spec-value {
+    padding: 16px 18px;
+    color: #333;
+    font-weight: 500;
+}
+
+.spec-price {
+    font-weight: 700;
+}
+
+.ProductInfoImgEditContainer, .BatteryProductInfoImgEditContainer{
+	width: 60%;
+	height: 60%;
+	position: absolute;
+	top: 20%;
+	left: 20%;
+	background: whitesmoke;
+	border: 0.5px solid black;
+	box-shadow: 0px 0px 5px 0px grey;
+	z-index: 11;
+	border-radius: 10px 10px;
+	display: none;
+}
+
+.ProductInfoImgEditskuid1Img, .BatteryProductInfoImgEditskuid1Img{
+	width: 35%;
+	height: auto;
+	position: absolute;
+	left: 3%;
+	top: 10%;
+	
+}
+
+.dragimgContainer{
+	width: 45%;
+	height: 65%;
+	background: whitesmoke;
+	border: 2px solid black;
+	border-radius: 10px 10px;
+	position: absolute;
+	right: 10%;
+	top: 16%;
+	cursor: pointer;
+}
+
+.messgeindragimgcontainer{
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 20px;
+	text-align: center;
+	margin-top: 10%;
+}
+
+.messgeindragimgcontainerbtn{
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 16px;
+	text-align: center;
+	margin-top: 10%;
+	width: 70%;
+	background: #3B79FF;
+	height: 10% ;
+	color: whitesmoke;
+	left: 15.5%;
+	position: absolute;
+	border-radius: 2px;
+}
+
+.UpdatebtnStockBatchInfo, .Updatebtnskuid1, .Updatebtnskuid2, .AddStockbtnskuid1, .UpdatebtnBattskuid1{
+	position: absolute;
+	text-align: center;
+	bottom: 2%;
+	right: 5%;
+	background: #243E36;
+	color: #FFFFFF;
+	border-radius: 20px 20px;
+	width: 7%;
+	padding: .5%;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 18px;
+	cursor: pointer;
+	border: solid 3px #243E36;
+	transition: .4s;
+	font-weight: 500;
+	display: none;
+}
+
+.Removebtnskuid1, .RemovebtnStockBatchInfo, .RemovebtnBattskuid1{
+	position: absolute;
+	text-align: center;
+	bottom: 2%;
+	right: 15%;
+	background: transparent;
+	color: #CF1322;
+	border-radius: 20px 20px;
+	width: 7%;
+	padding: .5%;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 18px;
+	cursor: pointer;
+	border: solid 3px #CF1322;
+	transition: .4s;
+	font-weight: 500;
+	display: none;
+}
+
+.Removebtnskuid1:hover, .RemovebtnBattskuid1:hover{
+	background: #CF1322;
+	color: whitesmoke;
+	transform: scale(1.05) translateY(1px);
+}
+
+.Removebtnskuid1:active, .RemovebtnBattskuid1:active{
+	background: darkred;
+	opacity: 60%;
+	color: whitesmoke;
+	transform: scale(0.9);
+}
+
+.Backbtnskuid1, .Backbtnskuid2, .StockBatchBackbtnskuid1, .BackbtnBattskuid1{
+	position: absolute;
+	text-align: center;
+	bottom: 2%;
+	left: 7%;
+	background: #243E36;
+	color: whitesmoke;
+	border-radius: 20px 20px;
+	width: 7%;
+	padding: .5%;
+	font-family: "TASA Explorer", sans-serif;
+	font-size: 18px;
+	cursor: pointer;
+	border: solid 3px #243E36;
+	transition: .4s;
+	font-weight: 500;
+	display: none;
+}
+
+/* Page wrapper */
+.page-wrapper-container {
+    font-family: "TASA Explorer", sans-serif;
+    background-color: #ffffff;
+    top: 12%;
+    left: 5%;
+    width: 90%;
+    position: absolute;
+}
+
+/* Table card */
+.stock-table-card {
+    border: 1px solid #dcdcdc;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    max-width: 100%;
+}
+
+/* Search section */
+.search-bar-wrapper {
+    padding: 12px;
+}
+
+.search-input-field {
+    width: 200px;
+    padding: 6px 10px;
+    border: 1px solid #cfcfcf;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Table */
+.inventory-table-element {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Header */
+.table-header-row {
+    background-color: #ffffff;
+    border-bottom: 1px solid #cfcfcf;
+}
+
+.header-cell-batch,
+.header-cell-quantity,
+.header-cell-manufactured,
+.header-cell-expiry,
+.header-cell-received {
+    padding: 12px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.sort-icon-indicator {
+    margin-left: 6px;
+    font-size: 12px;
+    color: #888888;
+}
+
+/* Body rows */
+.data-row-entry {
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.data-cell-batch,
+.data-cell-quantity,
+.data-cell-manufactured,
+.data-cell-expiry,
+.data-cell-received {
+    padding: 12px;
+    font-size: 14px;
+}
+
+.batch-link-anchor {
+    color: #1a73e8;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+/* Empty spacer rows */
+.empty-row-spacer {
+    height: 40px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+/* Footer */
+.table-footer-summary {
+    padding: 12px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.total-stock-label {
+    color: #000000;
+}
+
+.StockBatchContainer, .PullOutLogGroup{
+	display: none;
+}
+
+.deleteicon{
+	position: relative;
+	left: 2.5%;
+	width: 10%;
+	padding: 3%;
+	height: auto;
+	border-radius: 30%;
+	cursor: pointer;
+}
+
+.data-cell-action{
+	cursor: pointer;
+	transition: 0.5s;
+}
+
+.data-cell-action:hover, .restore:hover,
+.info:hover,
+.remove:hover{
+	filter: brightness(1.1);
+}
+
+.data-cell-action:active, .restore:active,
+.info:active,
+.remove:active{
+	filter: brightness(0.9);
+}
+/* Table */
+.records {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.records th,
+.records td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.headrow th {
+  font-weight: 600;
+  color: #333;
+}
+
+/* Columns */
+.namecol {}
+.datecol {}
+.actioncol {}
+
+/* Sort */
+.sorticon {
+  font-size: 12px;
+  color: #999;
+  margin-left: 5px;
+}
+
+/* Rows */
+.entry {}
+.entity {}
+.deleted {}
+
+/* Controls */
+.controls {
+  display: flex;
+  gap: 5%;
+}
+
+/* Buttons */
+.restore,
+.info,
+.remove {
+  width: 15%;
+  height: 32px;
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.5s;
+  outline: none;
+}
+
+.restore { background: #28a745; }
+.info    { background: #007bff; }
+.remove  { background: #dc3545; }
+
+/* Spacing rows */
+.spacer td {
+  height: 36px;
+}
+
+/* Footer */
+.footer {
+  margin-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #666;
+}
+
+.summary {}
+
+/* Pagination */
+.pager {
+  display: flex;
+  gap: 4px;
+}
+
+.previous,
+.next,
+.current {
+  padding: 6px 10px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.current {
+  background: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}
+
+.TrashBinGroup, .BatteryGroup, .RimsGroup{
+	display: none;
+}
+
+.Trashsearch{
+	position: absolute;
+	right: 3%;
+	top: 15%;
+}
+
+
+.filter-bar-RimsGroup, .filter-bar-BatteryGroup {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  position: absolute;
+  right: 3%;
+  top: 15%;
+  outline: none;
+}
+
+.BATSKU1{
+	cursor: pointer;
+}

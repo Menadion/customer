@@ -1,0 +1,35 @@
+.profile-button {
+    cursor: pointer;
+}
+
+.modal-body .btn-outline-dark {
+    pointer-events: none;
+}
+
+.profile-input {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+
+    background-color: transparent !important;
+
+    padding: 0 !important;
+    margin: 0 0 .5rem 0;
+
+    font-weight: 600;
+}
+
+.profile-input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.profile-input.editing {
+    border: 1px solid #ced4da !important;
+    background-color: #fff !important;
+
+    padding: .375rem .75rem !important;
+    border-radius: .375rem;
+
+    font-weight: 400;
+}

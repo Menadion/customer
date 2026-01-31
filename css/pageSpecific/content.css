@@ -1,0 +1,79 @@
+.service-text-slide {
+    min-height: 500px;
+    padding: 2.5rem 3rem;
+    border-radius: 16px;
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    position: relative;
+    color: white;
+}
+
+.service-text-slide h4 {
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+
+.service-text-slide p {
+    max-width: 700px;
+    margin-bottom: 1rem;
+}
+
+.service-text-slide ul {
+    padding-left: 1.2rem;
+    margin-bottom: 0;
+}
+
+.service-text-slide li {
+    margin-bottom: 0.4rem;
+}
+
+.carousel-indicators {
+    margin-top: 1rem;
+    position: static;
+}
+
+.carousel-indicators [data-bs-target] {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    opacity: 1;
+    margin: 0 6px;
+}
+
+.carousel-indicators .active {
+    background-color: #000;
+    transform: scale(1.2);
+}
+
+/* Overlay */
+.service-text-slide::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    border-radius: inherit;
+}
+
+.service-text-slide > * {
+    position: relative;
+    z-index: 1;
+}
+
+.bg-wheel {
+    background-image: url('../../assets/wheelChange.svg');
+}
+
+.bg-battery {
+    background-image: url('../../assets/battery.svg');
+}
+
+.bg-chassis {
+    background-image: url('../../assets/chassis.svg');
+}

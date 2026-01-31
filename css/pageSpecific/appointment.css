@@ -1,0 +1,116 @@
+.calendar-day {
+    padding: .35rem 0;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background-color .15s ease, color .15s ease;
+}
+
+.calendar-day:hover {
+    background-color: #e9ecef;
+}
+
+.calendar-day.selected {
+    background-color: #198754;
+    color: #fff;
+    font-weight: 600;
+}
+
+.accordion-button {
+    background-color: #4f7f7a; /* teal-ish */
+    color: #fff;
+    border-radius: .5rem;
+}
+
+.accordion-button.collapsed {
+    background-color: #f8f9fa;
+    color: #212529;
+}
+
+.accordion-item {
+    border: none;
+    margin-bottom: .5rem;
+}
+
+.accordion-body {
+    border: 1px solid #dee2e6;
+    border-top: none;
+    border-radius: 0 0 .5rem .5rem;
+    background-color: #fff;
+}
+
+.step-body {
+    height: 380px;          /* adjust once, then forget */
+    overflow: hidden;       /* prevents layout jump */
+    min-height: 420px;
+}
+
+.step-body .col-md-7 {
+    height: 100%;
+    overflow-y: auto;       /* products scroll internally */
+    padding-right: .5rem;   /* avoids scrollbar overlap */
+}
+
+.notes-textarea {
+    height: 120px;        /* pick a comfortable default */
+    max-height: 100%;     /* never exceed parent */
+    resize: none;         /* disables dragging (recommended) */
+    overflow-y: auto;     /* scroll instead of growing */
+}
+
+.qty-group .btn {
+    width: auto;
+    min-width: 42px;  /* keeps them square-ish */
+}
+
+.service-item {
+    cursor: pointer;
+    transition: background-color .15s ease, color .15s ease;
+}
+
+.service-item.active {
+    background-color: #0d6efd; /* Bootstrap primary */
+    color: #fff;
+    font-weight: 500;
+}
+
+.card h6 {
+    letter-spacing: .02em;
+}
+
+small.text-muted {
+    font-size: .75rem;
+}
+
+.btn-outline-secondary {
+    border-radius: 999px;
+}
+
+.edit-row .form-control {
+    max-width: 100%;
+}
+
+.edit-row {
+    padding-bottom: .25rem;
+}
+
+.list-group-item.active {
+    background-color: #044343 !important;
+    border: none !important;
+}
+
+.edit-grid {
+    display: grid;
+    grid-template-columns: 1fr auto; /* input grows, button stays tight */
+    gap: .75rem;
+    align-items: center;
+}
+
+.edit-grid .form-control {
+    width: 100%;
+}
+
+.edit-toggle {
+    white-space: nowrap; /* prevents button from stretching */
+}
+
+

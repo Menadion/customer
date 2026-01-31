@@ -1,0 +1,38 @@
+.book-card {
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.upcoming-card {
+    background: linear-gradient(rgba(0, 80, 80, 0.85), rgba(0, 80, 80, 0.85));
+    background-size: cover;
+    background-position: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.icon-box {
+    width: 44px;
+    height: 44px;
+    background-color: #0d5c5c;
+    border-radius: 10px;
+    font-size: 1.25rem;
+}
+
+.upcoming-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+}
+
+.modal textarea {
+    resize: none;
+}
+
+.form-check-input {
+    cursor: pointer;
+}
+
+.form-check-label {
+    cursor: pointer;
+}
+
