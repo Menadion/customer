@@ -1,4 +1,21 @@
 <?php
+session_start();
+include 'db_connect.php';
+
+$topProfileImage = "../pictures/default_profile.png";
+
+if (isset($_SESSION['customer_id'])) {
+    $stmt = $conn->prepare("SELECT profile_image FROM customer_tbl WHERE customer_id = ?");
+    $stmt->bind_param("i", $_SESSION['customer_id']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+    $stmt->close();
+
+    if (!empty($user['profile_image'])) {
+        $topProfileImage = $user['profile_image'];
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -29,7 +46,7 @@
                 <span>Products</span>
             </a>
 
-            <a href="#">
+            <a href="services_customer.php" class="nav-item">
                 <i class="fa-solid fa-gears"></i>
                 <span>Services</span>
             </a>
@@ -58,9 +75,16 @@
                 </div>
             </div>
 
-            <button class="profile-btn" type="button">
-                <i class="fa-solid fa-user"></i>
-            </button>
+            <div class="profile-dropdown">
+                        <button type="button" class="profile-btn" id="profileToggle">
+                            <img src="<?php echo htmlspecialchars($topProfileImage); ?>" class="top-profile-img" id="profileToggle" alt="Profile">
+                        </button>
+
+                        <div class="profile-menu hidden" id="profileMenu">
+                            <a href="profile_customer.php">Profile</a>
+                            <a href="logout.php">Logout</a>
+                        </div>
+                    </div>
 
         </div>
     </div>
@@ -318,6 +342,80 @@
             </button>
         </div>
         <div class="popup-content" id="popupContent"></div>
+    </div>
+</div>
+
+<!-- PAYMENT POPUP -->
+<div class="popup-overlay" id="paymentPopupOverlay">
+    <div class="payment-popup">
+        <div class="popup-header">
+            <h3>Reservation Payment</h3>
+            <button type="button" class="close-popup" id="closePaymentPopup">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="payment-content">
+            <p class="payment-text">
+                To continue with your appointment reservation, please send the reservation payment using the details below.
+            </p>
+
+            <div class="payment-methods">
+                <div class="payment-box">
+                    <h4>QR PH / GCash / Maya</h4>
+
+                    <!-- CHANGE THIS IMAGE PATH WHEN YOU HAVE THE REAL QR -->
+                    <img src="../pictures/fake_qr.png" alt="QR Payment" class="payment-qr">
+                </div>
+
+                <div class="payment-box">
+                    <h4>Mobile Number</h4>
+
+                    <!-- CHANGE THIS NUMBER WHEN YOU HAVE THE REAL GCASH / MAYA NUMBER -->
+                    <p class="payment-number">09XX-XXX-XXXX</p>
+
+                    <p class="payment-note">
+                        You may use this number for GCash or Maya payment.
+                    </p>
+                </div>
+            </div>
+
+            <div class="payment-buttons">
+                <button type="button" class="cancel-payment-btn" id="cancelPaymentBtn">Cancel</button>
+                <button type="button" class="done-payment-btn" id="donePaymentBtn">Done</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- APPOINTMENT CREATED POPUP -->
+<div class="popup-overlay" id="successPopupOverlay">
+    <div class="success-popup">
+        <div class="popup-header">
+            <h3>Appointment Created</h3>
+            <button type="button" class="close-popup" id="closeSuccessPopup">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="success-content">
+            <p class="success-message">
+                Your appointment has been created.
+            </p>
+
+            <p class="success-instruction">
+                Please screenshot your reservation payment and send it through Facebook Messenger for payment confirmation.
+            </p>
+
+            <!-- CHANGE THIS LINK WHEN YOU HAVE THE REAL FACEBOOK PAGE LINK -->
+            <a href="https://www.facebook.com/" target="_blank" class="facebook-link">
+                Open Facebook Messenger Page
+            </a>
+
+            <div class="payment-buttons">
+                <button type="button" class="done-payment-btn" id="closeSuccessBtn">OK</button>
+            </div>
+        </div>
     </div>
 </div>
 

@@ -226,3 +226,14 @@ body {
         bottom: 14px;
     }
 }
+
+.login-error{
+    background:#ffe5e5;
+    color:#b00020;
+    border:1px solid #ffb3b3;
+    padding:10px;
+    border-radius:8px;
+    margin-bottom:15px;
+    text-align:center;
+    font-size:14px;
+}

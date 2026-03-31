@@ -26,6 +26,21 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+const profileToggle = document.getElementById("profileToggle");
+const profileMenu = document.getElementById("profileMenu");
+
+if (profileToggle && profileMenu) {
+    profileToggle.addEventListener("click", function (e) {
+        e.stopPropagation();
+        profileMenu.classList.toggle("hidden");
+    });
+
+    document.addEventListener("click", function (e) {
+        if (!profileToggle.contains(e.target) && !profileMenu.contains(e.target)) {
+            profileMenu.classList.add("hidden");
+        }
+    });
+}
     if (notificationBtn && notificationBox) {
         notificationBtn.addEventListener("click", function (event) {
             event.stopPropagation();

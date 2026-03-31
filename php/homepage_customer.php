@@ -1,4 +1,21 @@
 <?php
+session_start();
+include 'db_connect.php';
+
+$topProfileImage = "../pictures/default_profile.png";
+
+if (isset($_SESSION['customer_id'])) {
+    $stmt = $conn->prepare("SELECT profile_image FROM customer_tbl WHERE customer_id = ?");
+    $stmt->bind_param("i", $_SESSION['customer_id']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+    $stmt->close();
+
+    if (!empty($user['profile_image'])) {
+        $topProfileImage = $user['profile_image'];
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -17,7 +34,7 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-menu">
-                <a href="#" class="nav-item active">
+                <a href="homepage_customer.php" class="nav-item active">
                     <i class="fa-solid fa-table-cells-large"></i>
                     <span>Homepage</span>
                 </a>
@@ -32,7 +49,7 @@
                     <span>Products</span>
                 </a>
 
-                <a href="#" class="nav-item">
+                <a href="services_customer.php" class="nav-item">
                     <i class="fa-solid fa-gears"></i>
                     <span>Services</span>
                 </a>
@@ -60,9 +77,16 @@
                         </div>
                     </div>
 
-                    <button class="profile-btn" id="profileBtn">
-                        <i class="fa-solid fa-user"></i>
-                    </button>
+                    <div class="profile-dropdown">
+                        <button type="button" class="profile-btn" id="profileToggle">
+                            <img src="<?php echo htmlspecialchars($topProfileImage); ?>" class="top-profile-img" id="profileToggle" alt="Profile">
+                        </button>
+
+                        <div class="profile-menu hidden" id="profileMenu">
+                            <a href="profile_customer.php">Profile</a>
+                            <a href="logout.php">Logout</a>
+                        </div>
+                    </div>
                 </div>
             </div>
 

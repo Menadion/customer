@@ -384,12 +384,70 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    const paymentPopupOverlay = document.getElementById("paymentPopupOverlay");
+    const closePaymentPopup = document.getElementById("closePaymentPopup");
+    const cancelPaymentBtn = document.getElementById("cancelPaymentBtn");
+    const donePaymentBtn = document.getElementById("donePaymentBtn");
+
+    const successPopupOverlay = document.getElementById("successPopupOverlay");
+    const closeSuccessPopup = document.getElementById("closeSuccessPopup");
+    const closeSuccessBtn = document.getElementById("closeSuccessBtn");
+
     finishBtn.addEventListener("click", function () {
-        // no function yet
+        paymentPopupOverlay.classList.add("show");
+    });
+
+    closePaymentPopup.addEventListener("click", function () {
+        paymentPopupOverlay.classList.remove("show");
+    });
+
+    cancelPaymentBtn.addEventListener("click", function () {
+        paymentPopupOverlay.classList.remove("show");
+    });
+
+    donePaymentBtn.addEventListener("click", function () {
+        paymentPopupOverlay.classList.remove("show");
+        successPopupOverlay.classList.add("show");
+    });
+
+    closeSuccessPopup.addEventListener("click", function () {
+        successPopupOverlay.classList.remove("show");
+    });
+
+    closeSuccessBtn.addEventListener("click", function () {
+        successPopupOverlay.classList.remove("show");
+    });
+
+    paymentPopupOverlay.addEventListener("click", function (e) {
+        if (e.target === paymentPopupOverlay) {
+            paymentPopupOverlay.classList.remove("show");
+        }
+    });
+
+    successPopupOverlay.addEventListener("click", function (e) {
+        if (e.target === successPopupOverlay) {
+            successPopupOverlay.classList.remove("show");
+        }
     });
 
     renderCalendar(currentMonth, currentYear);
     generateTimeOptions();
+});
+
+
+const profileToggle = document.getElementById("profileToggle");
+const profileMenu = document.getElementById("profileMenu");
+
+if (profileToggle) {
+    profileToggle.addEventListener("click", function () {
+        profileMenu.classList.toggle("hidden");
+    });
+}
+
+document.addEventListener("click", function (e) {
+    if (!profileToggle.contains(e.target)) {
+        profileMenu.classList.add("hidden");
+    }
 });
 
 function goHome() {

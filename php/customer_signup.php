@@ -1,66 +1,90 @@
 <?php
-$conn = new mysqli("localhost", "root", "", "dh_azada");
+include 'db_connect.php';
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+$message = "";
 
-$error_message = "";
-
-if (isset($_POST['signup'])) {
-
-    // Get inputs
-    $fname = trim($_POST['fname']);
-    $mname = trim($_POST['mname']);
-    $lname = trim($_POST['lname']);
-    $birthday = $_POST['birthday'] ?? null;
-    $mobile = trim($_POST['mobile_number']);
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $fname = trim($_POST['first_name']);
+    $mname = trim($_POST['middle_name']);
+    $lname = trim($_POST['last_name']);
+    $birthday = $_POST['birthday'];
+    $mobile_number = trim($_POST['mobile_number']);
     $email = trim($_POST['email']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
-    // Validate passwords
     if ($password !== $confirm_password) {
-        $error_message = "Passwords do not match.";
-    }
-
-    // Check if email already exists
-    $check = $conn->prepare("SELECT customer_id FROM customer_tbl WHERE email = ?");
-    $check->bind_param("s", $email);
-    $check->execute();
-    $check->store_result();
-
-    if ($check->num_rows > 0) {
-        $error_message = "Email is already registered.";
-    }
-    $check->close();
-
-    // Hash password
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
-    // Insert into DB
-    $stmt = $conn->prepare("
-        INSERT INTO customer_tbl 
-        (fname, mname, lname, birthday, mobile_number, email, password_hash, status) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, 'active')
-    ");
-
-    $stmt->bind_param("sssssss", $fname, $mname, $lname, $birthday, $mobile, $email, $hashed_password);
-
-    if ($stmt->execute()) {
-        echo "<script>
-            alert('Signup successful!');
-            window.location.href = 'customer_login.php';
-        </script>";
-        exit;
+        $message = "Passwords do not match.";
     } else {
-        $error_message = "Something went wrong. Please try again.";
-    }
+        $checkStmt = $conn->prepare("SELECT customer_id FROM customer_tbl WHERE email = ? OR mobile_number = ?");
+        $checkStmt->bind_param("ss", $email, $mobile_number);
+        $checkStmt->execute();
+        $result = $checkStmt->get_result();
 
-    $stmt->close();
+        $emailExists = false;
+        $mobileExists = false;
+
+        while ($row = $result->fetch_assoc()) {
+            $checkEmailStmt = $conn->prepare("SELECT customer_id FROM customer_tbl WHERE email = ?");
+            $checkEmailStmt->bind_param("s", $email);
+            $checkEmailStmt->execute();
+            $checkEmailStmt->store_result();
+            if ($checkEmailStmt->num_rows > 0) {
+                $emailExists = true;
+            }
+            $checkEmailStmt->close();
+
+            $checkMobileStmt = $conn->prepare("SELECT customer_id FROM customer_tbl WHERE mobile_number = ?");
+            $checkMobileStmt->bind_param("s", $mobile_number);
+            $checkMobileStmt->execute();
+            $checkMobileStmt->store_result();
+            if ($checkMobileStmt->num_rows > 0) {
+                $mobileExists = true;
+            }
+            $checkMobileStmt->close();
+
+            break;
+        }
+
+        if ($emailExists) {
+            $message = "Email is already registered.";
+        } elseif ($mobileExists) {
+            $message = "Mobile number is already registered.";
+        } else {
+            $password_hash = password_hash($password, PASSWORD_DEFAULT);
+            $status = "active";
+
+            $stmt = $conn->prepare("
+                INSERT INTO customer_tbl
+                (email, password_hash, fname, mname, lname, birthday, mobile_number, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+
+            $stmt->bind_param(
+                "ssssssss",
+                $email,
+                $password_hash,
+                $fname,
+                $mname,
+                $lname,
+                $birthday,
+                $mobile_number,
+                $status
+            );
+
+            if ($stmt->execute()) {
+                $message = "Account created successfully. You may now log in.";
+            } else {
+                $message = "Error creating account.";
+            }
+
+            $stmt->close();
+        }
+
+        $checkStmt->close();
+    }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -84,24 +108,32 @@ if (isset($_POST['signup'])) {
             <h1>Sign up to</h1>
             <p>D.H Azada Tire Supply Customer Portal</p>
 
+            <?php if (!empty($message)): ?>
+                <p style="color:#1f4037; font-weight:bold; margin-bottom:15px;">
+                    <?php echo htmlspecialchars($message); ?>
+                </p>
+            <?php endif; ?>
+
             <form method="POST" action="">
-                <input type="text" name="fname" placeholder="Enter your first name"
-                value="<?php echo isset($_POST['fname']) ? htmlspecialchars($_POST['fname']) : ''; ?>">
+                <input type="text" name="first_name" placeholder="Enter your first name" required>
+                <input type="text" name="middle_name" placeholder="Enter your middle name">
+                <input type="text" name="last_name" placeholder="Enter your last name" required>
 
-                <input type="text" name="mname" placeholder="Enter your middle name"
-                value="<?php echo isset($_POST['mname']) ? htmlspecialchars($_POST['mname']) : ''; ?>">
+                <div class="date-wrapper">
+                    <input
+                        type="text"
+                        id="birthday"
+                        name="birthday"
+                        placeholder="Enter your birthday"
+                        onfocus="activateBirthday(this)"
+                        onblur="restoreBirthday(this)"
+                        required
+                    >
+                </div>
 
-                <input type="text" name="lname" placeholder="Enter your last name" required
-                value="<?php echo isset($_POST['lname']) ? htmlspecialchars($_POST['lname']) : ''; ?>">
+                <input type="text" name="mobile_number" placeholder="Enter your mobile number" required>
+                <input type="email" name="email" placeholder="Enter your email" required>
 
-                <input type="date" name="birthday"
-                value="<?php echo isset($_POST['birthday']) ? htmlspecialchars($_POST['birthday']) : ''; ?>">
-
-                <input type="tel" name="mobile_number" placeholder="Enter your mobile number" required
-                value="<?php echo isset($_POST['mobile_number']) ? htmlspecialchars($_POST['mobile_number']) : ''; ?>">
-
-                <input type="email" name="email" placeholder="Enter your email" required
-                value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
                 <div class="password-group">
                     <input type="password" id="password" name="password" placeholder="Enter your password" required>
                     <span class="toggle-eye" onclick="togglePassword('password', this)">
@@ -116,15 +148,17 @@ if (isset($_POST['signup'])) {
                     </span>
                 </div>
 
-                <button type="submit" name="signup" class="signup-btn">Sign Up</button>
+                <button type="submit" class="signup-btn">Sign Up</button>
 
                 <p class="login-link">
                     Already have an account?
                     <a href="customer_login.php">Log in</a>
                 </p>
             </form>
+
         </div>
     </div>
+
     <script src="../js/customer_signup.js"></script>
 </body>
 </html>

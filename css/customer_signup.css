@@ -50,10 +50,11 @@ p {
 input {
     width: 100%;
     padding: 12px;
-    margin-bottom: 12px;
     border: 1px solid #ccc;
     border-radius: 8px;
     box-sizing: border-box;
+    margin-bottom: 12px;
+    font-size: 14px;
 }
 
 .password-group {
@@ -104,4 +105,13 @@ input {
 .login-link {
     text-align: center;
     margin-top: 15px;
+}
+
+.date-wrapper {
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.date-wrapper input {
+    margin-bottom: 0;
 }
