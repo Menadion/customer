@@ -4,3 +4,4 @@ http://localhost/D.H-Azada%20-customer/php/customer_login.php
 
 to do:
 Database ng products, transaction and appointment 
+optimize appointment steps

@@ -2,6 +2,41 @@
 session_start();
 include 'db_connect.php';
 
+$upcomingTitle = "UPCOMING APPOINTMENT";
+$upcomingText = "No upcoming appointment";
+$upcomingLink = "php/appointment_customer.php?view=upcoming";
+
+if (isset($_SESSION['customer_id'])) {
+    $customerId = $_SESSION['customer_id'];
+
+    $apptStmt = $conn->prepare("
+        SELECT appt_date, appt_time, appt_status
+        FROM appointments_tbl
+        WHERE customer_id = ?
+          AND appt_status IN ('waiting for approval', 'approved')
+        ORDER BY appt_date ASC, appt_time ASC
+        LIMIT 1
+    ");
+    $apptStmt->bind_param("i", $customerId);
+    $apptStmt->execute();
+    $apptResult = $apptStmt->get_result();
+
+    if ($apptRow = $apptResult->fetch_assoc()) {
+        $formattedDate = date("F j, Y", strtotime($apptRow['appt_date']));
+        $formattedTime = date("g:i A", strtotime($apptRow['appt_time']));
+
+        if ($apptRow['appt_status'] === 'waiting for approval') {
+            $upcomingText = "Waiting for approval";
+        } else {
+            $upcomingText = "Approved - " . $formattedDate . " at " . $formattedTime;
+        }
+
+        $upcomingLink = "appointment_customer.php?view=upcoming";
+    }
+
+    $apptStmt->close();
+}
+
 $topProfileImage = "../pictures/default_profile.png";
 
 if (isset($_SESSION['customer_id'])) {
@@ -79,7 +114,7 @@ if (isset($_SESSION['customer_id'])) {
 
                     <div class="profile-dropdown">
                         <button type="button" class="profile-btn" id="profileToggle">
-                            <img src="<?php echo htmlspecialchars($topProfileImage); ?>" class="top-profile-img" id="profileToggle" alt="Profile">
+                            <img src="<?php echo htmlspecialchars($topProfileImage); ?>" class="top-profile-img" alt="Profile">
                         </button>
 
                         <div class="profile-menu hidden" id="profileMenu">
@@ -102,14 +137,14 @@ if (isset($_SESSION['customer_id'])) {
                     <span>Book Appointment</span>
                 </button>
 
-                <div class="appointment-card">
+                <div class="appointment-card" id="upcomingAppointmentCard" data-link="<?php echo htmlspecialchars($upcomingLink); ?>">
                     <div class="appointment-icon">
                         <i class="fa-solid fa-circle-info"></i>
                     </div>
 
                     <div class="appointment-details">
                         <h3>UPCOMING APPOINTMENT</h3>
-                        <p>No upcoming appointment</p>
+                        <p><?php echo htmlspecialchars($upcomingText); ?></p>
                     </div>
                 </div>
             </div>

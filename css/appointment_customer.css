@@ -889,3 +889,122 @@ hr {
 .hidden {
     display: none;
 }
+
+/* UPCOMING APPOINTMENT VIEW */
+.upcoming-page-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 4px 6px 12px rgba(0, 0, 0, 0.18);
+    min-height: 620px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.empty-upcoming-box {
+    width: 100%;
+    max-width: 620px;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 14px;
+    padding: 30px 20px;
+    border: 1px solid #d8dddd;
+    border-radius: 18px;
+    background: #f9fbfb;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.empty-upcoming-icon {
+    font-size: 62px;
+    color: #024b4d;
+    margin-bottom: 6px;
+}
+
+.empty-upcoming-box h1 {
+    font-size: 36px;
+    color: #024b4d;
+    margin: 0;
+    font-weight: 800;
+}
+
+.empty-upcoming-box p {
+    font-size: 18px;
+    color: #5c5c5c;
+    margin: 0 0 8px;
+    line-height: 1.5;
+    max-width: 460px;
+}
+
+.empty-upcoming-box .next-btn {
+    min-width: 210px;
+    height: 46px;
+    font-size: 17px;
+    border-radius: 24px;
+}
+
+.upcoming-details-card {
+    width: 100%;
+    max-width: 760px;
+    background: #fff;
+    border-radius: 18px;
+    padding: 28px 30px;
+    box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.14);
+    border: 1px solid #d7dddd;
+}
+
+.upcoming-details-card h1 {
+    font-size: 32px;
+    color: #024b4d;
+    margin-bottom: 24px;
+    font-weight: 800;
+}
+
+.upcoming-details-card .confirm-detail-line {
+    font-size: 18px;
+    line-height: 2;
+    color: #333;
+}
+
+.appointment-status-badge {
+    display: inline-block;
+    padding: 7px 16px;
+    border-radius: 18px;
+    background: #e6f4f1;
+    color: #024b4d;
+    font-weight: 700;
+    text-transform: capitalize;
+    margin-left: 6px;
+}
+
+@media (max-width: 768px) {
+    .upcoming-page-card {
+        min-height: auto;
+        padding: 20px;
+    }
+
+    .empty-upcoming-box,
+    .upcoming-details-card {
+        max-width: 100%;
+        padding: 24px 18px;
+    }
+
+    .empty-upcoming-box h1,
+    .upcoming-details-card h1 {
+        font-size: 28px;
+    }
+
+    .empty-upcoming-box p,
+    .upcoming-details-card .confirm-detail-line {
+        font-size: 16px;
+    }
+
+    .empty-upcoming-icon {
+        font-size: 52px;
+    }
+}

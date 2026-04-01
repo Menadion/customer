@@ -30,11 +30,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Upcomming Appoinment
 
-    document.querySelector(".appointment-card").onclick = function(){
+    const appointmentCard = document.getElementById("upcomingAppointmentCard");
 
-        window.location.href = "appointment_customer.php";
-
-        };
+    if (appointmentCard) {
+        appointmentCard.addEventListener("click", function () {
+            const link = this.getAttribute("data-link");
+            if (link) {
+                window.location.href = link;
+            }
+        });
+    }
 
 
     // Book appointment button

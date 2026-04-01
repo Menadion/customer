@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 31, 2026 at 11:33 AM
+-- Generation Time: Apr 01, 2026 at 03:52 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,23 @@ SET time_zone = "+00:00";
 --
 -- Database: `dh_azada_db`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `appointments_tbl`
+--
+
+CREATE TABLE `appointments_tbl` (
+  `appt_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `service_id` int(11) DEFAULT NULL,
+  `employee_id` int(11) DEFAULT NULL,
+  `appt_date` date NOT NULL,
+  `appt_time` time NOT NULL,
+  `appt_status` enum('waiting for approval','approved','rejected','cancelled','completed') NOT NULL DEFAULT 'waiting for approval',
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -49,11 +66,18 @@ CREATE TABLE `customer_tbl` (
 --
 
 INSERT INTO `customer_tbl` (`customer_id`, `email`, `password_hash`, `fname`, `mname`, `lname`, `birthday`, `profile_image`, `vehicle_type`, `mobile_number`, `verification_token`, `created_at`, `last_login`, `status`) VALUES
-(3, 'ricardoabatantonio@gmail.com', '$2y$10$2JZaHpP0uhiyBfOU5GAnW.nC4VUkNLlD85rmRxJdWTtyO9nEzJyaO', 'Ricardo', 'Abat', 'Antonio', '2003-09-25', '../uploads/profile/customer_3_1774948818.png', NULL, '09167798281', NULL, '2026-03-31 16:17:27', '2026-03-31 17:27:57', 'active');
+(4, 'ricardoabatantonio@gmail.com', '$2y$10$Fcl0u3xY/bc0.5M5Hvh2iuD164Wv22zNecc.RtsyHRMcgC6vxoLpi', 'Ricardo', 'Abat', 'Antonio', '2006-07-05', '../uploads/profile/customer_4_1775011163.png', NULL, '09167798281', NULL, '2026-04-01 10:34:14', '2026-04-01 10:34:31', 'active');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `appointments_tbl`
+--
+ALTER TABLE `appointments_tbl`
+  ADD PRIMARY KEY (`appt_id`),
+  ADD KEY `fk_appointments_customer` (`customer_id`);
 
 --
 -- Indexes for table `customer_tbl`
@@ -69,10 +93,26 @@ ALTER TABLE `customer_tbl`
 --
 
 --
+-- AUTO_INCREMENT for table `appointments_tbl`
+--
+ALTER TABLE `appointments_tbl`
+  MODIFY `appt_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `customer_tbl`
 --
 ALTER TABLE `customer_tbl`
-  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `appointments_tbl`
+--
+ALTER TABLE `appointments_tbl`
+  ADD CONSTRAINT `fk_appointments_customer` FOREIGN KEY (`customer_id`) REFERENCES `customer_tbl` (`customer_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

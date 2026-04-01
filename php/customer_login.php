@@ -79,7 +79,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         <label for="email">Email</label>
                         <div class="input-wrapper">
                             <input 
-                                type="text" 
+                                type="email" 
                                 id="email" 
                                 name="email" 
                                 placeholder="Enter your registered email"

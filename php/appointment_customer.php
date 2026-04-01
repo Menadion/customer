@@ -16,13 +16,43 @@ if (isset($_SESSION['customer_id'])) {
         $topProfileImage = $user['profile_image'];
     }
 }
+
+$viewMode = $_GET['view'] ?? 'book';
+$isUpcomingView = ($viewMode === 'upcoming');
+
+$appointmentFound = false;
+$appointmentRow = null;
+
+if (isset($_SESSION['customer_id'])) {
+    $customerId = $_SESSION['customer_id'];
+
+    $apptStmt = $conn->prepare("
+        SELECT appt_date, appt_time, appt_status, created_at
+        FROM appointments_tbl
+        WHERE customer_id = ?
+          AND appt_status IN ('waiting for approval', 'approved')
+        ORDER BY appt_date ASC, appt_time ASC
+        LIMIT 1
+    ");
+    $apptStmt->bind_param("i", $customerId);
+    $apptStmt->execute();
+    $apptResult = $apptStmt->get_result();
+
+    if ($apptResult && $apptResult->num_rows > 0) {
+        $appointmentFound = true;
+        $appointmentRow = $apptResult->fetch_assoc();
+    }
+
+    $apptStmt->close();
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book an Appointment</title>
+    <title><?php echo $isUpcomingView ? 'Upcoming Appointment' : 'Book an Appointment'; ?></title>
     <link rel="stylesheet" href="../css/appointment_customer.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
@@ -60,7 +90,7 @@ if (isset($_SESSION['customer_id'])) {
 
     <main class="main-content">
         <div class="topbar">
-        <h2>Book an Appointment</h2>
+        <h2><?php echo $isUpcomingView ? 'Upcoming Appointment' : 'Book an Appointment'; ?></h2>
 
         <div class="top-icons">
 
@@ -77,7 +107,7 @@ if (isset($_SESSION['customer_id'])) {
 
             <div class="profile-dropdown">
                         <button type="button" class="profile-btn" id="profileToggle">
-                            <img src="<?php echo htmlspecialchars($topProfileImage); ?>" class="top-profile-img" id="profileToggle" alt="Profile">
+                            <img src="<?php echo htmlspecialchars($topProfileImage); ?>" class="top-profile-img" alt="Profile">
                         </button>
 
                         <div class="profile-menu hidden" id="profileMenu">
@@ -90,6 +120,56 @@ if (isset($_SESSION['customer_id'])) {
     </div>
 
         <hr>
+
+        <?php if ($isUpcomingView): ?>
+
+    <div class="upcoming-page-card">
+        <?php if (!$appointmentFound): ?>
+            <div class="empty-upcoming-box">
+                <i class="fa-regular fa-calendar-xmark empty-upcoming-icon"></i>
+                <h1>No appointment created yet</h1>
+                <p>You do not have any upcoming appointment at the moment.</p>
+
+                <button type="button" class="next-btn" onclick="window.location.href='appointment_customer.php'">
+                    Book Appointment
+                </button>
+            </div>
+        <?php else: ?>
+            <div class="upcoming-details-card">
+                <h1>Your Upcoming Appointment</h1>
+
+                <div class="confirm-detail-line">
+                    <strong>Date:</strong>
+                    <?php echo htmlspecialchars(date("F j, Y", strtotime($appointmentRow['appt_date']))); ?>
+                </div>
+
+                <div class="confirm-detail-line">
+                    <strong>Time:</strong>
+                    <?php echo htmlspecialchars(date("g:i A", strtotime($appointmentRow['appt_time']))); ?>
+                </div>
+
+                <div class="confirm-detail-line">
+                    <strong>Status:</strong>
+                    <span class="appointment-status-badge">
+                        <?php echo htmlspecialchars($appointmentRow['appt_status']); ?>
+                    </span>
+                </div>
+
+                <div class="confirm-detail-line">
+                    <strong>Created at:</strong>
+                    <?php echo htmlspecialchars(date("F j, Y g:i A", strtotime($appointmentRow['created_at']))); ?>
+                </div>
+
+                <div class="button-row">
+                    <button type="button" class="back-btn" onclick="window.location.href='homepage_customer.php'">
+                        Back
+                    </button>
+                </div>
+            </div>
+        <?php endif; ?>
+    </div>
+
+<?php else: ?>
 
         <!-- STEP 1 -->
         <div class="appointment-card step-section" id="step1">
@@ -418,6 +498,8 @@ if (isset($_SESSION['customer_id'])) {
         </div>
     </div>
 </div>
+
+<?php endif; ?>
 
 <script src="../js/appointment_customer.js"></script>
 </body>
