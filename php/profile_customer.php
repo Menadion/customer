@@ -197,24 +197,24 @@ $tableCheck = $conn->query("SHOW TABLES LIKE 'transaction_tbl'");
 if ($tableCheck && $tableCheck->num_rows > 0) {
     $historyTableExists = true;
 
-    $historyStmt = $conn->prepare("
-        SELECT transaction_date, total_price, receipt_file
-        FROM transaction_tbl
-        WHERE customer_id = ?
-        ORDER BY transaction_date DESC
-    ");
+    // $historyStmt = $conn->prepare("
+    //     SELECT transaction_date, total_price, receipt_file
+    //     FROM transaction_tbl
+    //     WHERE customer_id = ?
+    //     ORDER BY transaction_date DESC
+    // ");
 
-    if ($historyStmt) {
-        $historyStmt->bind_param("i", $customerId);
-        $historyStmt->execute();
-        $historyResult = $historyStmt->get_result();
+    // if ($historyStmt) {
+    //     $historyStmt->bind_param("i", $customerId);
+    //     $historyStmt->execute();
+    //     $historyResult = $historyStmt->get_result();
 
-        while ($row = $historyResult->fetch_assoc()) {
-            $historyRows[] = $row;
-        }
+    //     while ($row = $historyResult->fetch_assoc()) {
+    //         $historyRows[] = $row;
+    //     }
 
-        $historyStmt->close();
-    }
+    //     $historyStmt->close();
+    // }
 }
 ?>
 <!DOCTYPE html>
