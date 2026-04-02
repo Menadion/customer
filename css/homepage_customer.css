@@ -257,19 +257,19 @@ hr {
 .slide:nth-child(1) {
     background:
         linear-gradient(rgba(0,0,0,0.30), rgba(0,0,0,0.30)),
-        url('pictures/wheel\ change.png') center/cover no-repeat;
+        url('../pictures/wheel\ change.png') center/cover no-repeat;
 }
 
 .slide:nth-child(2) {
     background:
         linear-gradient(rgba(0,0,0,0.32), rgba(0,0,0,0.32)),
-        url('pictures/battery\ change.png') center/cover no-repeat;
+        url('../pictures/battery\ change.png') center/cover no-repeat;
 }
 
 .slide:nth-child(3) {
     background:
         linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)),
-        url('pictures/under\ chassis.png') center/cover no-repeat;
+        url('../pictures/under\ chassis.png') center/cover no-repeat;
 }
 
 .slide-overlay {
@@ -376,4 +376,47 @@ hr {
     .slide-overlay h3 {
         font-size: 28px;
     }
+}
+
+.top-profile-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.profile-btn {
+    text-decoration: none;
+    overflow: hidden;
+}
+
+.profile-dropdown {
+    position: relative;
+    cursor: pointer;
+}
+
+.profile-menu {
+    position: absolute;
+    right: 0;
+    top: 50px;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    width: 140px;
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-menu a {
+    padding: 10px 14px;
+    text-decoration: none;
+    color: #333;
+}
+
+.profile-menu a:hover {
+    background: #f3f3f3;
+}
+
+.hidden {
+    display: none;
 }

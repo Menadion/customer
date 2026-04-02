@@ -30,21 +30,37 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Upcomming Appoinment
 
-    document.querySelector(".appointment-card").onclick = function(){
+    const appointmentCard = document.getElementById("upcomingAppointmentCard");
 
-        window.location.href = "appointment_customer.php";
+    if (appointmentCard) {
+        appointmentCard.addEventListener("click", function () {
+            const link = this.getAttribute("data-link");
+            if (link) {
+                window.location.href = link;
+            }
+        });
+    }
 
-        };
-
-    // Profile button
-    profileBtn.addEventListener("click", function () {
-        alert("Profile page is not connected yet.");
-    });
 
     // Book appointment button
     bookAppointmentBtn.addEventListener("click", function () {
         window.location.href = "appointment_customer.php";
     });
+
+    const profileToggle = document.getElementById("profileToggle");
+const profileMenu = document.getElementById("profileMenu");
+
+if (profileToggle) {
+    profileToggle.addEventListener("click", function () {
+        profileMenu.classList.toggle("hidden");
+    });
+}
+
+document.addEventListener("click", function (e) {
+    if (!profileToggle.contains(e.target)) {
+        profileMenu.classList.add("hidden");
+    }
+});
 
     function showSlide(index) {
         slides.forEach((slide) => slide.classList.remove("active"));

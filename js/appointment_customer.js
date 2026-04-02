@@ -1,4 +1,40 @@
 document.addEventListener("DOMContentLoaded", function () {
+
+const isUpcomingView = window.location.search.includes("view=upcoming");
+if (isUpcomingView) {
+    const notificationBtn = document.getElementById("notificationBtn");
+    const notificationBox = document.getElementById("notificationBox");
+    const profileToggle = document.getElementById("profileToggle");
+    const profileMenu = document.getElementById("profileMenu");
+
+    if (notificationBtn && notificationBox) {
+        notificationBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            notificationBox.classList.toggle("hidden");
+        });
+
+        document.addEventListener("click", function (e) {
+            if (!notificationBtn.contains(e.target) && !notificationBox.contains(e.target)) {
+                notificationBox.classList.add("hidden");
+            }
+        });
+    }
+
+    if (profileToggle && profileMenu) {
+        profileToggle.addEventListener("click", function (e) {
+            e.stopPropagation();
+            profileMenu.classList.toggle("hidden");
+        });
+
+        document.addEventListener("click", function (e) {
+            if (!profileToggle.contains(e.target) && !profileMenu.contains(e.target)) {
+                profileMenu.classList.add("hidden");
+            }
+        });
+    }
+
+    return;
+}
     const step1 = document.getElementById("step1");
     const step2 = document.getElementById("step2");
     const step3 = document.getElementById("step3");
@@ -10,7 +46,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const appointmentDetailsEditBtn = document.getElementById("appointmentDetailsEditBtn");
     const finishBtn = document.getElementById("finishBtn");
 
-    // STEP 1 INPUTS
     const firstName = document.getElementById("firstName");
     const middleName = document.getElementById("middleName");
     const lastName = document.getElementById("lastName");
@@ -21,7 +56,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const selectedDateInput = document.getElementById("selectedDate");
     const selectedTimeInput = document.getElementById("selectedTime");
 
-    // STEP 3 CONFIRM FIELDS
     const confirmNameText = document.getElementById("confirmNameText");
     const confirmMobileText = document.getElementById("confirmMobileText");
     const confirmEmailText = document.getElementById("confirmEmailText");
@@ -31,7 +65,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const confirmProductText = document.getElementById("confirmProductText");
     const confirmNotesText = document.getElementById("confirmNotesText");
 
-    // EDIT FIELDS
     const editButtons = document.querySelectorAll(".edit-btn[data-edit]");
     const nameEditGroup = document.getElementById("nameEditGroup");
     const mobileEditGroup = document.getElementById("mobileEditGroup");
@@ -43,7 +76,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const editMobileNumber = document.getElementById("editMobileNumber");
     const editEmailAddress = document.getElementById("editEmailAddress");
 
-    // CALENDAR
     const calendarGrid = document.getElementById("calendarGrid");
     const monthYear = document.getElementById("monthYear");
     const prevMonth = document.getElementById("prevMonth");
@@ -57,15 +89,51 @@ document.addEventListener("DOMContentLoaded", function () {
     const notificationBtn = document.getElementById("notificationBtn");
     const notificationBox = document.getElementById("notificationBox");
 
-    if(notificationBtn){
-        notificationBtn.addEventListener("click", function(e){
+    const profileToggle = document.getElementById("profileToggle");
+    const profileMenu = document.getElementById("profileMenu");
+
+    const serviceItems = document.querySelectorAll(".service-item");
+    const productTitles = document.querySelectorAll(".selectable-product");
+    const qtyButtons = document.querySelectorAll(".qty-btn");
+    const fakeDropdowns = document.querySelectorAll(".fake-dropdown");
+    const notes = document.getElementById("notes");
+
+    const popupOverlay = document.getElementById("popupOverlay");
+    const popupTitle = document.getElementById("popupTitle");
+    const popupContent = document.getElementById("popupContent");
+    const closePopup = document.getElementById("closePopup");
+
+    const paymentPopupOverlay = document.getElementById("paymentPopupOverlay");
+    const closePaymentPopup = document.getElementById("closePaymentPopup");
+    const cancelPaymentBtn = document.getElementById("cancelPaymentBtn");
+    const donePaymentBtn = document.getElementById("donePaymentBtn");
+
+    const successPopupOverlay = document.getElementById("successPopupOverlay");
+    const closeSuccessPopup = document.getElementById("closeSuccessPopup");
+    const closeSuccessBtn = document.getElementById("closeSuccessBtn");
+
+    if (notificationBtn && notificationBox) {
+        notificationBtn.addEventListener("click", function (e) {
             e.stopPropagation();
             notificationBox.classList.toggle("hidden");
         });
 
-        document.addEventListener("click", function(e){
-            if(!notificationBox.contains(e.target) && !notificationBtn.contains(e.target)){
+        document.addEventListener("click", function (e) {
+            if (!notificationBtn.contains(e.target) && !notificationBox.contains(e.target)) {
                 notificationBox.classList.add("hidden");
+            }
+        });
+    }
+
+    if (profileToggle && profileMenu) {
+        profileToggle.addEventListener("click", function (e) {
+            e.stopPropagation();
+            profileMenu.classList.toggle("hidden");
+        });
+
+        document.addEventListener("click", function (e) {
+            if (!profileToggle.contains(e.target) && !profileMenu.contains(e.target)) {
+                profileMenu.classList.add("hidden");
             }
         });
     }
@@ -73,8 +141,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const today = new Date();
     let currentMonth = today.getMonth();
     let currentYear = today.getFullYear();
-    let selectedDate = null;
-    let selectedTime = null;
 
     function renderCalendar(month, year) {
         calendarGrid.innerHTML = "";
@@ -121,7 +187,6 @@ document.addEventListener("DOMContentLoaded", function () {
             dayBtn.addEventListener("click", function () {
                 document.querySelectorAll(".day-cell").forEach(cell => cell.classList.remove("selected"));
                 this.classList.add("selected");
-                selectedDate = formattedDate;
                 selectedDateInput.value = formattedDate;
             });
 
@@ -147,7 +212,6 @@ document.addEventListener("DOMContentLoaded", function () {
             btn.addEventListener("click", function () {
                 document.querySelectorAll(".time-option").forEach(option => option.classList.remove("selected"));
                 this.classList.add("selected");
-                selectedTime = time;
                 selectedTimeInput.value = time;
                 selectedTimeText.textContent = time;
                 timePopupOverlay.classList.remove("show");
@@ -156,103 +220,6 @@ document.addEventListener("DOMContentLoaded", function () {
             timeOptions.appendChild(btn);
         });
     }
-
-    prevMonth.addEventListener("click", function () {
-        currentMonth--;
-        if (currentMonth < 0) {
-            currentMonth = 11;
-            currentYear--;
-        }
-        renderCalendar(currentMonth, currentYear);
-    });
-
-    nextMonth.addEventListener("click", function () {
-        currentMonth++;
-        if (currentMonth > 11) {
-            currentMonth = 0;
-            currentYear++;
-        }
-        renderCalendar(currentMonth, currentYear);
-    });
-
-    openTimePopup.addEventListener("click", function () {
-        timePopupOverlay.classList.add("show");
-        generateTimeOptions();
-    });
-
-    closeTimePopup.addEventListener("click", function () {
-        timePopupOverlay.classList.remove("show");
-    });
-
-    timePopupOverlay.addEventListener("click", function (e) {
-        if (e.target === timePopupOverlay) {
-            timePopupOverlay.classList.remove("show");
-        }
-    });
-
-    // STEP 2
-    const serviceItems = document.querySelectorAll(".service-item");
-    const productTitles = document.querySelectorAll(".selectable-product");
-    const qtyButtons = document.querySelectorAll(".qty-btn");
-    const fakeDropdowns = document.querySelectorAll(".fake-dropdown");
-    const notes = document.getElementById("notes");
-
-    const popupOverlay = document.getElementById("popupOverlay");
-    const popupTitle = document.getElementById("popupTitle");
-    const popupContent = document.getElementById("popupContent");
-    const closePopup = document.getElementById("closePopup");
-
-    serviceItems.forEach(item => {
-        item.addEventListener("click", function () {
-            this.classList.toggle("active");
-        });
-    });
-
-    productTitles.forEach(item => {
-        item.addEventListener("click", function () {
-            this.classList.toggle("active");
-        });
-    });
-
-    qtyButtons.forEach(button => {
-        button.addEventListener("click", function () {
-            const group = this.getAttribute("data-group");
-            const sameGroupButtons = document.querySelectorAll(`.qty-btn[data-group="${group}"]`);
-            const isAlreadyActive = this.classList.contains("active");
-
-            sameGroupButtons.forEach(btn => btn.classList.remove("active"));
-
-            if (!isAlreadyActive) {
-                this.classList.add("active");
-            }
-        });
-    });
-
-    fakeDropdowns.forEach(dropdown => {
-        dropdown.addEventListener("click", function () {
-            const type = this.getAttribute("data-type");
-
-            if (type === "size") {
-                popupTitle.textContent = "Size";
-                popupContent.innerHTML = "<p>No size yet</p>";
-            } else {
-                popupTitle.textContent = "Brand";
-                popupContent.innerHTML = "<p>No brands yet</p>";
-            }
-
-            popupOverlay.classList.add("show");
-        });
-    });
-
-    closePopup.addEventListener("click", function () {
-        popupOverlay.classList.remove("show");
-    });
-
-    popupOverlay.addEventListener("click", function (e) {
-        if (e.target === popupOverlay) {
-            popupOverlay.classList.remove("show");
-        }
-    });
 
     function formatDate(dateString) {
         if (!dateString) return "-";
@@ -315,7 +282,91 @@ document.addEventListener("DOMContentLoaded", function () {
         confirmNotesText.textContent = notes.value.trim() ? `Notes: ${notes.value.trim()}` : "";
     }
 
-    // STEP CHANGES
+    prevMonth.addEventListener("click", function () {
+        currentMonth--;
+        if (currentMonth < 0) {
+            currentMonth = 11;
+            currentYear--;
+        }
+        renderCalendar(currentMonth, currentYear);
+    });
+
+    nextMonth.addEventListener("click", function () {
+        currentMonth++;
+        if (currentMonth > 11) {
+            currentMonth = 0;
+            currentYear++;
+        }
+        renderCalendar(currentMonth, currentYear);
+    });
+
+    openTimePopup.addEventListener("click", function () {
+        timePopupOverlay.classList.add("show");
+        generateTimeOptions();
+    });
+
+    closeTimePopup.addEventListener("click", function () {
+        timePopupOverlay.classList.remove("show");
+    });
+
+    timePopupOverlay.addEventListener("click", function (e) {
+        if (e.target === timePopupOverlay) {
+            timePopupOverlay.classList.remove("show");
+        }
+    });
+
+    serviceItems.forEach(item => {
+        item.addEventListener("click", function () {
+            this.classList.toggle("active");
+        });
+    });
+
+    productTitles.forEach(item => {
+        item.addEventListener("click", function () {
+            this.classList.toggle("active");
+        });
+    });
+
+    qtyButtons.forEach(button => {
+        button.addEventListener("click", function () {
+            const group = this.getAttribute("data-group");
+            const sameGroupButtons = document.querySelectorAll(`.qty-btn[data-group="${group}"]`);
+            const isAlreadyActive = this.classList.contains("active");
+
+            sameGroupButtons.forEach(btn => btn.classList.remove("active"));
+
+            if (!isAlreadyActive) {
+                this.classList.add("active");
+            }
+        });
+    });
+
+    fakeDropdowns.forEach(dropdown => {
+        dropdown.addEventListener("click", function () {
+            const type = this.getAttribute("data-type");
+
+            if (type === "size") {
+                popupTitle.textContent = "Size";
+                popupContent.innerHTML = "<p>No size yet</p>";
+            } else {
+                popupTitle.textContent = "Brand";
+                popupContent.innerHTML = "<p>No brands yet</p>";
+            }
+
+            popupOverlay.classList.add("show");
+        });
+    });
+
+    closePopup.addEventListener("click", function () {
+        popupOverlay.classList.remove("show");
+    });
+
+    popupOverlay.addEventListener("click", function (e) {
+        if (e.target === popupOverlay) {
+            popupOverlay.classList.remove("show");
+        }
+    });
+
     step1NextBtn.addEventListener("click", function () {
         step1.classList.add("hidden-step");
         step2.classList.remove("hidden-step");
@@ -355,7 +406,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (target === "name") {
                 nameEditGroup.classList.toggle("hidden-edit");
-
                 if (nameEditGroup.classList.contains("hidden-edit")) {
                     firstName.value = editFirstName.value;
                     middleName.value = editMiddleName.value;
@@ -366,7 +416,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (target === "mobile") {
                 mobileEditGroup.classList.toggle("hidden-edit");
-
                 if (mobileEditGroup.classList.contains("hidden-edit")) {
                     mobileNumber.value = editMobileNumber.value;
                     updateConfirmation();
@@ -375,7 +424,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (target === "email") {
                 emailEditGroup.classList.toggle("hidden-edit");
-
                 if (emailEditGroup.classList.contains("hidden-edit")) {
                     emailAddress.value = editEmailAddress.value;
                     updateConfirmation();
@@ -385,7 +433,59 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     finishBtn.addEventListener("click", function () {
-        // no function yet
+        paymentPopupOverlay.classList.add("show");
+    });
+
+    closePaymentPopup.addEventListener("click", function () {
+        paymentPopupOverlay.classList.remove("show");
+    });
+
+    cancelPaymentBtn.addEventListener("click", function () {
+        paymentPopupOverlay.classList.remove("show");
+    });
+
+    donePaymentBtn.addEventListener("click", function () {
+        paymentPopupOverlay.classList.remove("show");
+        successPopupOverlay.classList.add("show");
+    });
+
+    closeSuccessPopup.addEventListener("click", function () {
+        successPopupOverlay.classList.remove("show");
+    });
+
+    closeSuccessBtn.addEventListener("click", function () {
+        const formData = new FormData();
+        formData.append("appt_date", selectedDateInput.value);
+        formData.append("appt_time", selectedTimeInput.value);
+        formData.append("purpose", buildPurposeText());
+
+        fetch("save_appointment.php", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = "homepage_customer.php";
+            } else {
+                alert(data.message || "Failed to save appointment.");
+            }
+        })
+        .catch(() => {
+            alert("Something went wrong while saving the appointment.");
+        });
+    });
+
+    paymentPopupOverlay.addEventListener("click", function (e) {
+        if (e.target === paymentPopupOverlay) {
+            paymentPopupOverlay.classList.remove("show");
+        }
+    });
+
+    successPopupOverlay.addEventListener("click", function (e) {
+        if (e.target === successPopupOverlay) {
+            successPopupOverlay.classList.remove("show");
+        }
     });
 
     renderCalendar(currentMonth, currentYear);

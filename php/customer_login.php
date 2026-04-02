@@ -1,5 +1,44 @@
 <?php
-// customer_login.php
+session_start();
+include 'db_connect.php';
+
+$message = "";
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
+
+    $stmt = $conn->prepare("SELECT customer_id, email, password_hash, fname, lname, status FROM customer_tbl WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows === 0) {
+        $message = "Wrong email or password.";
+    } else {
+        $user = $result->fetch_assoc();
+
+        if (!password_verify($password, $user['password_hash'])) {
+            $message = "Wrong email or password.";
+        } elseif ($user['status'] !== 'active') {
+            $message = "This account is not active.";
+        } else {
+            $_SESSION['customer_id'] = $user['customer_id'];
+            $_SESSION['customer_email'] = $user['email'];
+            $_SESSION['customer_name'] = trim($user['fname'] . ' ' . $user['lname']);
+
+            $updateLogin = $conn->prepare("UPDATE customer_tbl SET last_login = NOW() WHERE customer_id = ?");
+            $updateLogin->bind_param("i", $user['customer_id']);
+            $updateLogin->execute();
+            $updateLogin->close();
+
+            header("Location: homepage_customer.php");
+            exit();
+        }
+    }
+
+    $stmt->close();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -8,8 +47,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>D.H Azada Tire Supply - Customer Login</title>
     <link rel="stylesheet" href="../css/customer_login.css">
-
-    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
@@ -20,7 +57,6 @@
 
     <div class="page-wrapper">
         <div class="login-card">
-            
             <div class="brand-pill">
                 <div class="brand-icon">
                     <i class="fas fa-store"></i>
@@ -32,15 +68,21 @@
                 <h1>Log in to</h1>
                 <p>D.H Azada Tire Supply Customer Portal</p>
 
+                <?php if (!empty($message)): ?>
+                    <p style="color:red; font-weight:bold; margin-bottom:15px;">
+                        <?php echo htmlspecialchars($message); ?>
+                    </p>
+                <?php endif; ?>
+
                 <form id="loginForm" action="" method="POST">
                     <div class="form-group">
                         <label for="email">Email</label>
                         <div class="input-wrapper">
                             <input 
-                                type="text" 
+                                type="email" 
                                 id="email" 
                                 name="email" 
-                                placeholder="Enter your registered username or email"
+                                placeholder="Enter your registered email"
                                 required
                             >
                         </div>
@@ -68,15 +110,6 @@
                         Don’t have an account yet? <a href="customer_signup.php">Sign Up</a>
                     </div>
                 </form>
-            </div>
-        </div>
-
-        <div class="floating-logo">
-            <div class="brand-pill small-pill">
-                <div class="brand-icon">
-                    <i class="fas fa-store"></i>
-                </div>
-                <span>D.H AZADA TIRE SUPPLY</span>
             </div>
         </div>
     </div>

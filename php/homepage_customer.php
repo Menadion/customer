@@ -1,4 +1,56 @@
 <?php
+session_start();
+include 'db_connect.php';
+
+$upcomingTitle = "UPCOMING APPOINTMENT";
+$upcomingText = "No upcoming appointment";
+$upcomingLink = "php/appointment_customer.php?view=upcoming";
+
+if (isset($_SESSION['customer_id'])) {
+    $customerId = $_SESSION['customer_id'];
+
+    $apptStmt = $conn->prepare("
+        SELECT appt_date, appt_time, appt_status
+        FROM appointments_tbl
+        WHERE customer_id = ?
+          AND appt_status IN ('waiting for approval', 'approved')
+        ORDER BY appt_date ASC, appt_time ASC
+        LIMIT 1
+    ");
+    $apptStmt->bind_param("i", $customerId);
+    $apptStmt->execute();
+    $apptResult = $apptStmt->get_result();
+
+    if ($apptRow = $apptResult->fetch_assoc()) {
+        $formattedDate = date("F j, Y", strtotime($apptRow['appt_date']));
+        $formattedTime = date("g:i A", strtotime($apptRow['appt_time']));
+
+        if ($apptRow['appt_status'] === 'waiting for approval') {
+            $upcomingText = "Waiting for approval";
+        } else {
+            $upcomingText = "Approved - " . $formattedDate . " at " . $formattedTime;
+        }
+
+        $upcomingLink = "appointment_customer.php?view=upcoming";
+    }
+
+    $apptStmt->close();
+}
+
+$topProfileImage = "../pictures/default_profile.png";
+
+if (isset($_SESSION['customer_id'])) {
+    $stmt = $conn->prepare("SELECT profile_image FROM customer_tbl WHERE customer_id = ?");
+    $stmt->bind_param("i", $_SESSION['customer_id']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+    $stmt->close();
+
+    if (!empty($user['profile_image'])) {
+        $topProfileImage = $user['profile_image'];
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -17,7 +69,7 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-menu">
-                <a href="#" class="nav-item active">
+                <a href="homepage_customer.php" class="nav-item active">
                     <i class="fa-solid fa-table-cells-large"></i>
                     <span>Homepage</span>
                 </a>
@@ -32,7 +84,7 @@
                     <span>Products</span>
                 </a>
 
-                <a href="#" class="nav-item">
+                <a href="services_customer.php" class="nav-item">
                     <i class="fa-solid fa-gears"></i>
                     <span>Services</span>
                 </a>
@@ -60,9 +112,16 @@
                         </div>
                     </div>
 
-                    <button class="profile-btn" id="profileBtn">
-                        <i class="fa-solid fa-user"></i>
-                    </button>
+                    <div class="profile-dropdown">
+                        <button type="button" class="profile-btn" id="profileToggle">
+                            <img src="<?php echo htmlspecialchars($topProfileImage); ?>" class="top-profile-img" alt="Profile">
+                        </button>
+
+                        <div class="profile-menu hidden" id="profileMenu">
+                            <a href="profile_customer.php">Profile</a>
+                            <a href="logout.php">Logout</a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -78,14 +137,14 @@
                     <span>Book Appointment</span>
                 </button>
 
-                <div class="appointment-card">
+                <div class="appointment-card" id="upcomingAppointmentCard" data-link="<?php echo htmlspecialchars($upcomingLink); ?>">
                     <div class="appointment-icon">
                         <i class="fa-solid fa-circle-info"></i>
                     </div>
 
                     <div class="appointment-details">
                         <h3>UPCOMING APPOINTMENT</h3>
-                        <p>No upcoming appointment</p>
+                        <p><?php echo htmlspecialchars($upcomingText); ?></p>
                     </div>
                 </div>
             </div>

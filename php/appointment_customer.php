@@ -1,11 +1,58 @@
 <?php
+session_start();
+include 'db_connect.php';
+
+$topProfileImage = "../pictures/default_profile.png";
+
+if (isset($_SESSION['customer_id'])) {
+    $stmt = $conn->prepare("SELECT profile_image FROM customer_tbl WHERE customer_id = ?");
+    $stmt->bind_param("i", $_SESSION['customer_id']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+    $stmt->close();
+
+    if (!empty($user['profile_image'])) {
+        $topProfileImage = $user['profile_image'];
+    }
+}
+
+$viewMode = $_GET['view'] ?? 'book';
+$isUpcomingView = ($viewMode === 'upcoming');
+
+$appointmentFound = false;
+$appointmentRow = null;
+
+if (isset($_SESSION['customer_id'])) {
+    $customerId = $_SESSION['customer_id'];
+
+    $apptStmt = $conn->prepare("
+        SELECT appt_date, appt_time, appt_status, created_at
+        FROM appointments_tbl
+        WHERE customer_id = ?
+          AND appt_status IN ('waiting for approval', 'approved')
+        ORDER BY appt_date ASC, appt_time ASC
+        LIMIT 1
+    ");
+    $apptStmt->bind_param("i", $customerId);
+    $apptStmt->execute();
+    $apptResult = $apptStmt->get_result();
+
+    if ($apptResult && $apptResult->num_rows > 0) {
+        $appointmentFound = true;
+        $appointmentRow = $apptResult->fetch_assoc();
+    }
+
+    $apptStmt->close();
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book an Appointment</title>
+    <title><?php echo $isUpcomingView ? 'Upcoming Appointment' : 'Book an Appointment'; ?></title>
     <link rel="stylesheet" href="../css/appointment_customer.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
@@ -29,7 +76,7 @@
                 <span>Products</span>
             </a>
 
-            <a href="#">
+            <a href="services_customer.php" class="nav-item">
                 <i class="fa-solid fa-gears"></i>
                 <span>Services</span>
             </a>
@@ -43,7 +90,7 @@
 
     <main class="main-content">
         <div class="topbar">
-        <h2>Book an Appointment</h2>
+        <h2><?php echo $isUpcomingView ? 'Upcoming Appointment' : 'Book an Appointment'; ?></h2>
 
         <div class="top-icons">
 
@@ -58,14 +105,71 @@
                 </div>
             </div>
 
-            <button class="profile-btn" type="button">
-                <i class="fa-solid fa-user"></i>
-            </button>
+            <div class="profile-dropdown">
+                        <button type="button" class="profile-btn" id="profileToggle">
+                            <img src="<?php echo htmlspecialchars($topProfileImage); ?>" class="top-profile-img" alt="Profile">
+                        </button>
+
+                        <div class="profile-menu hidden" id="profileMenu">
+                            <a href="profile_customer.php">Profile</a>
+                            <a href="logout.php">Logout</a>
+                        </div>
+                    </div>
 
         </div>
     </div>
 
         <hr>
+
+        <?php if ($isUpcomingView): ?>
+
+    <div class="upcoming-page-card">
+        <?php if (!$appointmentFound): ?>
+            <div class="empty-upcoming-box">
+                <i class="fa-regular fa-calendar-xmark empty-upcoming-icon"></i>
+                <h1>No appointment created yet</h1>
+                <p>You do not have any upcoming appointment at the moment.</p>
+
+                <button type="button" class="next-btn" onclick="window.location.href='appointment_customer.php'">
+                    Book Appointment
+                </button>
+            </div>
+        <?php else: ?>
+            <div class="upcoming-details-card">
+                <h1>Your Upcoming Appointment</h1>
+
+                <div class="confirm-detail-line">
+                    <strong>Date:</strong>
+                    <?php echo htmlspecialchars(date("F j, Y", strtotime($appointmentRow['appt_date']))); ?>
+                </div>
+
+                <div class="confirm-detail-line">
+                    <strong>Time:</strong>
+                    <?php echo htmlspecialchars(date("g:i A", strtotime($appointmentRow['appt_time']))); ?>
+                </div>
+
+                <div class="confirm-detail-line">
+                    <strong>Status:</strong>
+                    <span class="appointment-status-badge">
+                        <?php echo htmlspecialchars($appointmentRow['appt_status']); ?>
+                    </span>
+                </div>
+
+                <div class="confirm-detail-line">
+                    <strong>Created at:</strong>
+                    <?php echo htmlspecialchars(date("F j, Y g:i A", strtotime($appointmentRow['created_at']))); ?>
+                </div>
+
+                <div class="button-row">
+                    <button type="button" class="back-btn" onclick="window.location.href='homepage_customer.php'">
+                        Back
+                    </button>
+                </div>
+            </div>
+        <?php endif; ?>
+    </div>
+
+<?php else: ?>
 
         <!-- STEP 1 -->
         <div class="appointment-card step-section" id="step1">
@@ -320,6 +424,82 @@
         <div class="popup-content" id="popupContent"></div>
     </div>
 </div>
+
+<!-- PAYMENT POPUP -->
+<div class="popup-overlay" id="paymentPopupOverlay">
+    <div class="payment-popup">
+        <div class="popup-header">
+            <h3>Reservation Payment</h3>
+            <button type="button" class="close-popup" id="closePaymentPopup">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="payment-content">
+            <p class="payment-text">
+                To continue with your appointment reservation, please send the reservation payment using the details below.
+            </p>
+
+            <div class="payment-methods">
+                <div class="payment-box">
+                    <h4>QR PH / GCash / Maya</h4>
+
+                    <!-- CHANGE THIS IMAGE PATH WHEN YOU HAVE THE REAL QR -->
+                    <img src="../pictures/fake_qr.png" alt="QR Payment" class="payment-qr">
+                </div>
+
+                <div class="payment-box">
+                    <h4>Mobile Number</h4>
+
+                    <!-- CHANGE THIS NUMBER WHEN YOU HAVE THE REAL GCASH / MAYA NUMBER -->
+                    <p class="payment-number">09XX-XXX-XXXX</p>
+
+                    <p class="payment-note">
+                        You may use this number for GCash or Maya payment.
+                    </p>
+                </div>
+            </div>
+
+            <div class="payment-buttons">
+                <button type="button" class="cancel-payment-btn" id="cancelPaymentBtn">Cancel</button>
+                <button type="button" class="done-payment-btn" id="donePaymentBtn">Done</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- APPOINTMENT CREATED POPUP -->
+<div class="popup-overlay" id="successPopupOverlay">
+    <div class="success-popup">
+        <div class="popup-header">
+            <h3>Appointment Created</h3>
+            <button type="button" class="close-popup" id="closeSuccessPopup">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="success-content">
+            <p class="success-message">
+                Your appointment has been created.
+            </p>
+
+            <p class="success-instruction">
+                Please screenshot your reservation payment and send it through Facebook Messenger for payment confirmation.
+            </p>
+
+            <!-- CHANGE THIS LINK WHEN YOU HAVE THE REAL FACEBOOK PAGE LINK -->
+            <a href="https://www.facebook.com/" target="_blank" class="facebook-link">
+                Open Facebook Messenger Page
+            </a>
+
+            <div class="payment-buttons">
+                <button type="button" class="done-payment-btn" id="closeSuccessBtn">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php endif; ?>
 
 <script src="../js/appointment_customer.js"></script>
 </body>

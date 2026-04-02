@@ -34,3 +34,18 @@ document.addEventListener("DOMContentLoaded", function () {
         alert("No transaction data yet.");
     });
 });
+
+const profileToggle = document.getElementById("profileToggle");
+const profileMenu = document.getElementById("profileMenu");
+
+if (profileToggle) {
+    profileToggle.addEventListener("click", function () {
+        profileMenu.classList.toggle("hidden");
+    });
+}
+
+document.addEventListener("click", function (e) {
+    if (!profileToggle.contains(e.target)) {
+        profileMenu.classList.add("hidden");
+    }
+});

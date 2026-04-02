@@ -724,3 +724,287 @@ hr {
 .hidden{
     display:none;
 }
+
+.payment-popup,
+.success-popup {
+    width: 90%;
+    max-width: 520px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.payment-content,
+.success-content {
+    padding-top: 6px;
+}
+
+.payment-text,
+.success-message,
+.success-instruction {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #444;
+    margin-bottom: 14px;
+}
+
+.payment-methods {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.payment-box {
+    border: 1px solid #d4dcdc;
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+    background: #fafafa;
+}
+
+.payment-box h4 {
+    font-size: 16px;
+    color: #024b4d;
+    margin-bottom: 10px;
+}
+
+.payment-qr {
+    width: 100%;
+    max-width: 180px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border-radius: 8px;
+    border: 1px solid #d8d8d8;
+}
+
+.payment-number {
+    font-size: 20px;
+    font-weight: 700;
+    color: #024b4d;
+    margin-bottom: 8px;
+}
+
+.payment-note {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.5;
+}
+
+.payment-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.cancel-payment-btn,
+.done-payment-btn {
+    min-width: 100px;
+    height: 40px;
+    border: none;
+    border-radius: 22px;
+    cursor: pointer;
+    font-size: 15px;
+    padding: 0 18px;
+}
+
+.cancel-payment-btn {
+    background: #d9d9d9;
+    color: #333;
+}
+
+.done-payment-btn {
+    background: #024b4d;
+    color: #fff;
+}
+
+.cancel-payment-btn:hover {
+    background: #c9c9c9;
+}
+
+.done-payment-btn:hover {
+    background: #01393b;
+}
+
+.facebook-link {
+    display: inline-block;
+    margin: 6px 0 10px;
+    color: #024b4d;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.facebook-link:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 700px) {
+    .payment-methods {
+        grid-template-columns: 1fr;
+    }
+}
+
+.top-profile-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.profile-btn {
+    text-decoration: none;
+    overflow: hidden;
+}
+
+.profile-dropdown {
+    position: relative;
+    cursor: pointer;
+}
+
+.profile-menu {
+    position: absolute;
+    right: 0;
+    top: 50px;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    width: 140px;
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-menu a {
+    padding: 10px 14px;
+    text-decoration: none;
+    color: #333;
+}
+
+.profile-menu a:hover {
+    background: #f3f3f3;
+}
+
+.hidden {
+    display: none;
+}
+
+/* UPCOMING APPOINTMENT VIEW */
+.upcoming-page-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 4px 6px 12px rgba(0, 0, 0, 0.18);
+    min-height: 620px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.empty-upcoming-box {
+    width: 100%;
+    max-width: 620px;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 14px;
+    padding: 30px 20px;
+    border: 1px solid #d8dddd;
+    border-radius: 18px;
+    background: #f9fbfb;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.empty-upcoming-icon {
+    font-size: 62px;
+    color: #024b4d;
+    margin-bottom: 6px;
+}
+
+.empty-upcoming-box h1 {
+    font-size: 36px;
+    color: #024b4d;
+    margin: 0;
+    font-weight: 800;
+}
+
+.empty-upcoming-box p {
+    font-size: 18px;
+    color: #5c5c5c;
+    margin: 0 0 8px;
+    line-height: 1.5;
+    max-width: 460px;
+}
+
+.empty-upcoming-box .next-btn {
+    min-width: 210px;
+    height: 46px;
+    font-size: 17px;
+    border-radius: 24px;
+}
+
+.upcoming-details-card {
+    width: 100%;
+    max-width: 760px;
+    background: #fff;
+    border-radius: 18px;
+    padding: 28px 30px;
+    box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.14);
+    border: 1px solid #d7dddd;
+}
+
+.upcoming-details-card h1 {
+    font-size: 32px;
+    color: #024b4d;
+    margin-bottom: 24px;
+    font-weight: 800;
+}
+
+.upcoming-details-card .confirm-detail-line {
+    font-size: 18px;
+    line-height: 2;
+    color: #333;
+}
+
+.appointment-status-badge {
+    display: inline-block;
+    padding: 7px 16px;
+    border-radius: 18px;
+    background: #e6f4f1;
+    color: #024b4d;
+    font-weight: 700;
+    text-transform: capitalize;
+    margin-left: 6px;
+}
+
+@media (max-width: 768px) {
+    .upcoming-page-card {
+        min-height: auto;
+        padding: 20px;
+    }
+
+    .empty-upcoming-box,
+    .upcoming-details-card {
+        max-width: 100%;
+        padding: 24px 18px;
+    }
+
+    .empty-upcoming-box h1,
+    .upcoming-details-card h1 {
+        font-size: 28px;
+    }
+
+    .empty-upcoming-box p,
+    .upcoming-details-card .confirm-detail-line {
+        font-size: 16px;
+    }
+
+    .empty-upcoming-icon {
+        font-size: 52px;
+    }
+}

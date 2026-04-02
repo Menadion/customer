@@ -2,9 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const togglePassword = document.getElementById("togglePassword");
     const passwordInput = document.getElementById("password");
-    const loginForm = document.getElementById("loginForm");
 
-    // show/hide password
     togglePassword.addEventListener("click", function () {
 
         const icon = this.querySelector("i");
@@ -21,14 +19,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     });
 
-    // TEMP LOGIN (no database yet)
-    loginForm.addEventListener("submit", function(e){
+});
 
-        e.preventDefault();
+const email = document.getElementById("email");
 
-        // redirect to homepage
-        window.location.href = "homepage_customer.php";
-
-    });
-
+email.addEventListener("input", function () {
+    if (!email.validity.valid) {
+        email.setCustomValidity("Please enter a valid email address.");
+    } else {
+        email.setCustomValidity("");
+    }
 });
