@@ -4,7 +4,7 @@ include 'db_connect.php';
 
 $upcomingTitle = "UPCOMING APPOINTMENT";
 $upcomingText = "No upcoming appointment";
-$upcomingLink = "php/appointment_customer.php?view=upcoming";
+$upcomingLink = "appointment_customer.php?view=upcoming";
 
 if (isset($_SESSION['customer_id'])) {
     $customerId = $_SESSION['customer_id'];

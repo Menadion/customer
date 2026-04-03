@@ -4,16 +4,43 @@ include 'db_connect.php';
 
 $topProfileImage = "../pictures/default_profile.png";
 
+$customerFirstName = "";
+$customerMiddleName = "";
+$customerLastName = "";
+$customerMobile = "";
+$customerEmail = "";
+$customerVehicleModel = "";
+
 if (isset($_SESSION['customer_id'])) {
-    $stmt = $conn->prepare("SELECT profile_image FROM customer_tbl WHERE customer_id = ?");
+    $stmt = $conn->prepare("
+        SELECT 
+            profile_image,
+            fname,
+            mname,
+            lname,
+            mobile_number,
+            email,
+            vehicle_type
+        FROM customer_tbl
+        WHERE customer_id = ?
+    ");
     $stmt->bind_param("i", $_SESSION['customer_id']);
     $stmt->execute();
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
     $stmt->close();
 
-    if (!empty($user['profile_image'])) {
-        $topProfileImage = $user['profile_image'];
+    if ($user) {
+        if (!empty($user['profile_image'])) {
+            $topProfileImage = $user['profile_image'];
+        }
+
+        $customerFirstName = $user['fname'] ?? "";
+        $customerMiddleName = $user['mname'] ?? "";
+        $customerLastName = $user['lname'] ?? "";
+        $customerMobile = $user['mobile_number'] ?? "";
+        $customerEmail = $user['email'] ?? "";
+        $customerVehicleModel = $user['vehicle_type'] ?? "";
     }
 }
 
@@ -27,10 +54,22 @@ if (isset($_SESSION['customer_id'])) {
     $customerId = $_SESSION['customer_id'];
 
     $apptStmt = $conn->prepare("
-        SELECT appt_date, appt_time, appt_status, created_at
+        SELECT 
+        appt_date,
+        appt_time,
+        appt_status,
+        created_at,
+        purpose,
+        notes,
+        tires_product_id,
+        tires_qty,
+        batteries_product_id,
+        magwheels_product_id,
+        magwheels_qty,
+        total_cost
         FROM appointments_tbl
         WHERE customer_id = ?
-          AND appt_status IN ('waiting for approval', 'approved')
+        AND appt_status IN ('waiting for approval','approved')
         ORDER BY appt_date ASC, appt_time ASC
         LIMIT 1
     ");
@@ -44,6 +83,82 @@ if (isset($_SESSION['customer_id'])) {
     }
 
     $apptStmt->close();
+
+    $upcomingTireText = "-";
+    $upcomingBatteryText = "-";
+    $upcomingMagwheelText = "-";
+
+    if ($appointmentFound && $appointmentRow) {
+        if (!empty($appointmentRow['tires_product_id'])) {
+            $stmt = $conn->prepare("SELECT brand, size, price FROM product_tbl WHERE product_id = ? LIMIT 1");
+            $stmt->bind_param("i", $appointmentRow['tires_product_id']);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($row = $result->fetch_assoc()) {
+                $qty = (int)($appointmentRow['tires_qty'] ?? 1);
+                $upcomingTireText = $qty . "x " . $row['brand'] . " " . $row['size'] . " - PHP " . number_format($row['price'], 2);
+            }
+            $stmt->close();
+        }
+
+        if (!empty($appointmentRow['batteries_product_id'])) {
+            $stmt = $conn->prepare("SELECT brand, size, price FROM product_tbl WHERE product_id = ? LIMIT 1");
+            $stmt->bind_param("i", $appointmentRow['batteries_product_id']);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($row = $result->fetch_assoc()) {
+                $upcomingBatteryText = $row['brand'] . " " . $row['size'] . " - PHP " . number_format($row['price'], 2);
+            }
+            $stmt->close();
+        }
+
+        if (!empty($appointmentRow['magwheels_product_id'])) {
+            $stmt = $conn->prepare("SELECT brand, size, price FROM product_tbl WHERE product_id = ? LIMIT 1");
+            $stmt->bind_param("i", $appointmentRow['magwheels_product_id']);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($row = $result->fetch_assoc()) {
+                $qty = (int)($appointmentRow['magwheels_qty'] ?? 1);
+                $upcomingMagwheelText = $qty . "x " . $row['brand'] . " " . $row['size'] . " - PHP " . number_format($row['price'], 2);
+            }
+            $stmt->close();
+        }
+    }
+}
+
+$appointmentProducts = [
+    'tires' => [],
+    'batteries' => [],
+    'magwheels' => []
+];
+
+$productQuery = $conn->query("
+    SELECT 
+        p.product_id,
+        p.item_name,
+        p.brand,
+        p.size,
+        p.price,
+        p.category,
+        p.status,
+        COALESCE(SUM(sb.quantity), 0) AS stock
+    FROM product_tbl p
+    LEFT JOIN stockbatch_tbl sb ON p.product_id = sb.product_id
+    WHERE p.category IN ('tire', 'battery', 'rim')
+    GROUP BY p.product_id, p.item_name, p.brand, p.size, p.price, p.category, p.status
+    ORDER BY p.category, p.brand, p.size
+");
+
+if ($productQuery) {
+    while ($row = $productQuery->fetch_assoc()) {
+        if ($row['category'] === 'tire') {
+            $appointmentProducts['tires'][] = $row;
+        } elseif ($row['category'] === 'battery') {
+            $appointmentProducts['batteries'][] = $row;
+        } elseif ($row['category'] === 'rim') {
+            $appointmentProducts['magwheels'][] = $row;
+        }
+    }
 }
 
 ?>
@@ -160,6 +275,35 @@ if (isset($_SESSION['customer_id'])) {
                     <?php echo htmlspecialchars(date("F j, Y g:i A", strtotime($appointmentRow['created_at']))); ?>
                 </div>
 
+                <div class="confirm-detail-line">
+                    <strong>Purpose:</strong>
+                    <?php echo !empty($appointmentRow['purpose']) ? htmlspecialchars($appointmentRow['purpose']) : '-'; ?>
+                </div>
+
+                <div class="confirm-detail-line">
+                    <strong>Tires:</strong>
+                    <?php echo htmlspecialchars($upcomingTireText); ?>
+                </div>
+
+                <div class="confirm-detail-line">
+                    <strong>Battery:</strong>
+                    <?php echo htmlspecialchars($upcomingBatteryText); ?>
+                </div>
+
+                <div class="confirm-detail-line">
+                    <strong>Magwheels:</strong>
+                    <?php echo htmlspecialchars($upcomingMagwheelText); ?>
+                </div>
+
+                <div class="confirm-detail-line">
+                    <strong>Notes:</strong>
+                    <?php echo !empty($appointmentRow['notes']) ? htmlspecialchars($appointmentRow['notes']) : '-'; ?>
+                </div>
+
+                <div class="confirm-detail-line">
+                    <strong>Total Cost:</strong>
+                    <?php echo "PHP " . number_format((float)($appointmentRow['total_cost'] ?? 0), 2); ?>
+                </div>
                 <div class="button-row">
                     <button type="button" class="back-btn" onclick="window.location.href='homepage_customer.php'">
                         Back
@@ -174,7 +318,6 @@ if (isset($_SESSION['customer_id'])) {
         <!-- STEP 1 -->
         <div class="appointment-card step-section" id="step1">
             <h1>DETAILS</h1>
-
             <div class="details-grid">
                 <div class="left-panel">
                     <h2 class="section-title">Choose Date</h2>
@@ -219,14 +362,14 @@ if (isset($_SESSION['customer_id'])) {
                         <h2>Personal Information</h2>
 
                         <div class="name-row">
-                            <input type="text" id="firstName" placeholder="First Name">
-                            <input type="text" id="middleName" placeholder="Middle Name">
+                            <input type="text" id="firstName" placeholder="First Name" value="<?php echo htmlspecialchars($customerFirstName); ?>">
+                            <input type="text" id="middleName" placeholder="Middle Name" value="<?php echo htmlspecialchars($customerMiddleName); ?>">
                         </div>
 
-                        <input type="text" id="lastName" placeholder="Last Name">
-                        <input type="text" id="mobileNumber" placeholder="Mobile Number">
-                        <input type="email" id="emailAddress" placeholder="Email Address">
-                        <textarea id="vehicleModel" placeholder="Vehicle Name/Model"></textarea>
+                        <input type="text" id="lastName" placeholder="Last Name" value="<?php echo htmlspecialchars($customerLastName); ?>">
+                        <input type="text" id="mobileNumber" placeholder="Mobile Number" value="<?php echo htmlspecialchars($customerMobile); ?>">
+                        <input type="email" id="emailAddress" placeholder="Email Address" value="<?php echo htmlspecialchars($customerEmail); ?>">
+                        <textarea id="vehicleModel" placeholder="Vehicle Name/Model"><?php echo htmlspecialchars($customerVehicleModel); ?></textarea>
                     </div>
                 </div>
             </div>
@@ -246,81 +389,84 @@ if (isset($_SESSION['customer_id'])) {
                     <h2>SERVICES</h2>
 
                     <div class="service-list">
-                        <button type="button" class="service-item">TIRE AND WHEEL CHANGE</button>
+                        <button type="button" class="service-item" data-enables="tires">TIRE AND WHEEL CHANGE</button>
+                        <button type="button" class="service-item" data-enables="batteries">BATTERY CHANGE</button>
+                        <button type="button" class="service-item" data-enables="magwheels">MAGWHEEL CHANGE</button>
                         <button type="button" class="service-item">UNDERCHASSIS</button>
                         <button type="button" class="service-item">VULCANIZE</button>
-                        <button type="button" class="service-item">BATTERY CHANGE</button>
                     </div>
 
                     <textarea id="notes" class="notes-box" placeholder="Notes:"></textarea>
                 </div>
 
                 <div class="products-section">
-                    <h2>PRODUCTS</h2>
+                        <h2>PRODUCTS</h2>
 
-                    <div class="product-group">
-                        <button type="button" class="product-title selectable-product">TIRES</button>
+                        <!-- TIRES -->
+                        <div class="product-group product-group-disabled" data-product-group="tires">
+                            <button type="button" class="product-title selectable-product">TIRES</button>
 
-                        <div class="dropdown-group">
-                            <button type="button" class="fake-dropdown" data-type="size">
-                                <span class="dropdown-label">Size</span>
-                                <i class="fa-solid fa-chevron-down"></i>
+                            <button type="button"
+                                    class="select-product-btn"
+                                    data-product-type="tires">
+                                Select Brand and Size
                             </button>
 
-                            <button type="button" class="fake-dropdown" data-type="brand">
-                                <span class="dropdown-label">Brand</span>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </button>
+                            <div class="selected-product-info" id="tiresSelectedInfo">
+                                <div><strong>Selected:</strong> <span id="tiresSelectedText">None</span></div>
+                                <div><strong>Price:</strong> <span id="tiresPriceText">-</span></div>
+                            </div>
+
+                            <div class="quantity-simple-row">
+                                <label for="tiresQtyInput">Quantity</label>
+                                <input type="number" id="tiresQtyInput" class="qty-number-input" min="1" max="4" value="1">
+                            </div>
+
+                            <input type="hidden" id="tiresProductId">
                         </div>
 
-                        <div class="quantity-row">
-                            <button type="button" class="qty-btn" data-group="tires">1</button>
-                            <button type="button" class="qty-btn" data-group="tires">2</button>
-                            <button type="button" class="qty-btn" data-group="tires">3</button>
-                            <button type="button" class="qty-btn" data-group="tires">4</button>
-                        </div>
-                    </div>
+                        <!-- BATTERIES -->
+                        <div class="product-group product-group-disabled" data-product-group="batteries">
+                            <button type="button" class="product-title selectable-product">BATTERIES</button>
 
-                    <div class="product-group">
-                        <button type="button" class="product-title selectable-product">BATTERIES</button>
-
-                        <div class="dropdown-group">
-                            <button type="button" class="fake-dropdown" data-type="size">
-                                <span class="dropdown-label">Size</span>
-                                <i class="fa-solid fa-chevron-down"></i>
+                            <button type="button"
+                                    class="select-product-btn"
+                                    data-product-type="batteries">
+                                Select Brand and Size
                             </button>
 
-                            <button type="button" class="fake-dropdown" data-type="brand">
-                                <span class="dropdown-label">Brand</span>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </button>
-                        </div>
-                    </div>
+                            <div class="selected-product-info" id="batteriesSelectedInfo">
+                                <div><strong>Selected:</strong> <span id="batteriesSelectedText">None</span></div>
+                                <div><strong>Price:</strong> <span id="batteriesPriceText">-</span></div>
+                            </div>
 
-                    <div class="product-group">
-                        <button type="button" class="product-title selectable-product">MAGWHEELS</button>
-
-                        <div class="dropdown-group">
-                            <button type="button" class="fake-dropdown" data-type="size">
-                                <span class="dropdown-label">Size</span>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </button>
-
-                            <button type="button" class="fake-dropdown" data-type="brand">
-                                <span class="dropdown-label">Brand</span>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </button>
+                            <input type="hidden" id="batteriesProductId">
                         </div>
 
-                        <div class="quantity-row">
-                            <button type="button" class="qty-btn" data-group="magwheels">1</button>
-                            <button type="button" class="qty-btn" data-group="magwheels">2</button>
-                            <button type="button" class="qty-btn" data-group="magwheels">3</button>
-                            <button type="button" class="qty-btn" data-group="magwheels">4</button>
+                        <!-- MAGWHEELS -->
+                        <div class="product-group product-group-disabled" data-product-group="magwheels">
+                            <button type="button" class="product-title selectable-product">MAGWHEELS</button>
+
+                            <button type="button"
+                                    class="select-product-btn"
+                                    data-product-type="magwheels">
+                                Select Brand and Size
+                            </button>
+
+                            <div class="selected-product-info" id="magwheelsSelectedInfo">
+                                <div><strong>Selected:</strong> <span id="magwheelsSelectedText">None</span></div>
+                                <div><strong>Price:</strong> <span id="magwheelsPriceText">-</span></div>
+                            </div>
+
+                            <div class="quantity-simple-row">
+                                <label for="magwheelsQtyInput">Quantity</label>
+                                <input type="number" id="magwheelsQtyInput" class="qty-number-input" min="1" max="4" value="1">
+                            </div>
+
+                            <input type="hidden" id="magwheelsProductId">
                         </div>
                     </div>
                 </div>
-            </div>
 
             <div class="button-row">
                 <button type="button" class="back-btn" id="step2BackBtn">Back</button>
@@ -334,59 +480,20 @@ if (isset($_SESSION['customer_id'])) {
 
             <div class="confirm-box">
                 <div class="confirm-header-row">
-                    <h2>Personal Info</h2>
-                </div>
-
-                <div class="confirm-line">
-                    <div class="confirm-text">
-                        <strong>Name :</strong>
-                        <span id="confirmNameText">-</span>
-
-                        <div class="edit-input-group hidden-edit" id="nameEditGroup">
-                            <input type="text" id="editFirstName" placeholder="First Name">
-                            <input type="text" id="editMiddleName" placeholder="Middle Name">
-                            <input type="text" id="editLastName" placeholder="Last Name">
-                        </div>
-                    </div>
-                    <button type="button" class="edit-btn" data-edit="name">Edit</button>
-                </div>
-
-                <div class="confirm-line">
-                    <div class="confirm-text">
-                        <strong>Mobile Number:</strong>
-                        <span id="confirmMobileText">-</span>
-
-                        <div class="edit-input-group hidden-edit" id="mobileEditGroup">
-                            <input type="text" id="editMobileNumber" placeholder="Mobile Number">
-                        </div>
-                    </div>
-                    <button type="button" class="edit-btn" data-edit="mobile">Edit</button>
-                </div>
-
-                <div class="confirm-line">
-                    <div class="confirm-text">
-                        <strong>Email:</strong>
-                        <span id="confirmEmailText">-</span>
-
-                        <div class="edit-input-group hidden-edit" id="emailEditGroup">
-                            <input type="email" id="editEmailAddress" placeholder="Email Address">
-                        </div>
-                    </div>
-                    <button type="button" class="edit-btn" data-edit="email">Edit</button>
-                </div>
-            </div>
-
-            <div class="confirm-box">
-                <div class="confirm-header-row">
                     <h2>Appointment Details</h2>
                     <button type="button" class="edit-btn" id="appointmentDetailsEditBtn">Edit</button>
                 </div>
 
+                <div class="confirm-detail-line"><strong>Full Name:</strong> <span id="confirmNameText">-</span></div>
+                <div class="confirm-detail-line"><strong>Mobile Number:</strong> <span id="confirmMobileText">-</span></div>
+                <div class="confirm-detail-line"><strong>Email:</strong> <span id="confirmEmailText">-</span></div>
+                <div class="confirm-detail-line"><strong>Vehicle Name/Model:</strong> <span id="confirmVehicleText">-</span></div>
                 <div class="confirm-detail-line"><strong>Date:</strong> <span id="confirmDateText">-</span></div>
                 <div class="confirm-detail-line"><strong>Time:</strong> <span id="confirmTimeText">-</span></div>
                 <div class="confirm-detail-line"><strong>Purpose of Visit:</strong> <span id="confirmPurposeText">-</span></div>
                 <div class="confirm-detail-line"><span id="confirmProductText"></span></div>
                 <div class="confirm-detail-line"><span id="confirmNotesText"></span></div>
+                <div class="confirm-detail-line"><strong>Total Cost:</strong> <span id="confirmTotalText">PHP 0.00</span></div>
             </div>
 
             <div class="button-row">
@@ -394,8 +501,6 @@ if (isset($_SESSION['customer_id'])) {
                 <button type="button" class="next-btn" id="finishBtn">Finish</button>
             </div>
         </div>
-    </main>
-</div>
 
 <!-- TIME POPUP -->
 <div class="popup-overlay" id="timePopupOverlay">
@@ -414,14 +519,35 @@ if (isset($_SESSION['customer_id'])) {
 
 <!-- DROPDOWN POPUP -->
 <div class="popup-overlay" id="popupOverlay">
-    <div class="popup-box">
+    <div class="product-picker-popup">
         <div class="popup-header">
-            <h3 id="popupTitle">Options</h3>
+            <h3 id="popupTitle">Select Product</h3>
             <button type="button" class="close-popup" id="closePopup">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
-        <div class="popup-content" id="popupContent"></div>
+
+        <div class="product-picker-toolbar">
+            <input type="text" id="popupSearchInput" placeholder="Search brand or size">
+
+            <select id="popupSortSelect" class="popup-sort-select">
+                <option value="default">Sort By</option>
+                <option value="price_asc">Low to High Cost</option>
+                <option value="price_desc">High to Low Cost</option>
+                <option value="brand_asc">Alphabetical A - Z</option>
+                <option value="brand_desc">Alphabetical Z - A</option>
+            </select>
+        </div>
+
+        <div class="product-picker-table-header">
+            <div>BRAND</div>
+            <div>SIZE</div>
+            <div>PRICE</div>
+            <div>STOCK</div>
+            <div>STATUS</div>
+        </div>
+
+        <div class="product-picker-list" id="popupProductList"></div>
     </div>
 </div>
 
@@ -435,27 +561,36 @@ if (isset($_SESSION['customer_id'])) {
             </button>
         </div>
 
-        <div class="payment-content">
+                <div class="payment-content">
             <p class="payment-text">
                 To continue with your appointment reservation, please send the reservation payment using the details below.
             </p>
+
+            <div class="payment-summary-box">
+                <div class="payment-summary-line">
+                    <strong>Total Cost:</strong>
+                    <span id="paymentTotalText">PHP 0.00</span>
+                </div>
+                <div class="payment-summary-line">
+                    <strong>Reservation Fee (30%):</strong>
+                    <span id="reservationFeeText">PHP 0.00</span>
+                </div>
+            </div>
 
             <div class="payment-methods">
                 <div class="payment-box">
                     <h4>QR PH / GCash / Maya</h4>
 
-                    <!-- CHANGE THIS IMAGE PATH WHEN YOU HAVE THE REAL QR -->
                     <img src="../pictures/fake_qr.png" alt="QR Payment" class="payment-qr">
                 </div>
 
                 <div class="payment-box">
                     <h4>Mobile Number</h4>
 
-                    <!-- CHANGE THIS NUMBER WHEN YOU HAVE THE REAL GCASH / MAYA NUMBER -->
                     <p class="payment-number">09XX-XXX-XXXX</p>
 
                     <p class="payment-note">
-                        You may use this number for GCash or Maya payment.
+                        Please send exactly the reservation fee amount shown above.
                     </p>
                 </div>
             </div>
@@ -502,5 +637,8 @@ if (isset($_SESSION['customer_id'])) {
 <?php endif; ?>
 
 <script src="../js/appointment_customer.js"></script>
+<script>
+const appointmentProductData = <?php echo json_encode($appointmentProducts, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
+</script>
 </body>
 </html>

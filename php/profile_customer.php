@@ -28,6 +28,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $fname = trim($_POST['first_name'] ?? '');
         $mname = trim($_POST['middle_name'] ?? '');
         $lname = trim($_POST['last_name'] ?? '');
+        $mobileNumber = trim($_POST['mobile_number'] ?? '');
+        $birthdayInput = trim($_POST['birthday'] ?? '');
         $newPassword = $_POST['new_password'] ?? '';
         $confirmPassword = $_POST['confirm_password'] ?? '';
 
@@ -57,10 +59,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             $stmt = $conn->prepare("
                 UPDATE customer_tbl
-                SET fname = ?, mname = ?, lname = ?, password_hash = ?
+                SET fname = ?, mname = ?, lname = ?, mobile_number = ?, birthday = ?, password_hash = ?
                 WHERE customer_id = ?
             ");
-            $stmt->bind_param("ssssi", $fname, $mname, $lname, $passwordHash, $customerId);
+            $stmt->bind_param("ssssssi", $fname, $mname, $lname, $mobileNumber, $birthdayInput, $passwordHash, $customerId);
 
             if ($stmt->execute()) {
                 $_SESSION['customer_name'] = trim($fname . ' ' . $lname);
@@ -77,10 +79,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         } else {
             $stmt = $conn->prepare("
                 UPDATE customer_tbl
-                SET fname = ?, mname = ?, lname = ?
+                SET fname = ?, mname = ?, lname = ?, mobile_number = ?, birthday = ?
                 WHERE customer_id = ?
             ");
-            $stmt->bind_param("sssi", $fname, $mname, $lname, $customerId);
+            $stmt->bind_param("sssssi", $fname, $mname, $lname, $mobileNumber, $birthdayInput, $customerId);
 
             if ($stmt->execute()) {
                 $_SESSION['customer_name'] = trim($fname . ' ' . $lname);
@@ -161,7 +163,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     GET CUSTOMER INFO
 */
 $stmt = $conn->prepare("
-    SELECT customer_id, fname, mname, lname, email, birthday, profile_image
+    SELECT customer_id, fname, mname, lname, email, birthday, mobile_number, created_at, profile_image
     FROM customer_tbl
     WHERE customer_id = ?
 ");
@@ -174,6 +176,8 @@ $stmt->close();
 $fullName = trim(($user['fname'] ?? '') . ' ' . ($user['mname'] ?? '') . ' ' . ($user['lname'] ?? ''));
 $email = $user['email'] ?? '';
 $birthday = $user['birthday'] ?? '';
+$mobile = $user['mobile_number'] ?? '';
+$createdAt = $user['created_at'] ?? '';
 $profileImage = !empty($user['profile_image']) ? $user['profile_image'] : $defaultProfileImage;
 
 /*
@@ -186,36 +190,11 @@ if (!empty($birthday)) {
     $age = $today->diff($birthDate)->y;
 }
 
-/*
-    HISTORY
-    Leave empty if table is not available yet or no records yet
-*/
-$historyRows = [];
-$historyTableExists = false;
-
-$tableCheck = $conn->query("SHOW TABLES LIKE 'transaction_tbl'");
-if ($tableCheck && $tableCheck->num_rows > 0) {
-    $historyTableExists = true;
-
-    $historyStmt = $conn->prepare("
-        SELECT transaction_date, total_price, receipt_file
-        FROM transaction_tbl
-        WHERE customer_id = ?
-        ORDER BY transaction_date DESC
-    ");
-
-    if ($historyStmt) {
-        $historyStmt->bind_param("i", $customerId);
-        $historyStmt->execute();
-        $historyResult = $historyStmt->get_result();
-
-        while ($row = $historyResult->fetch_assoc()) {
-            $historyRows[] = $row;
-        }
-
-        $historyStmt->close();
-    }
+$memberSince = "";
+if (!empty($createdAt)) {
+    $memberSince = date("F j, Y", strtotime($createdAt));
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -296,11 +275,13 @@ if ($tableCheck && $tableCheck->num_rows > 0) {
         <?php endif; ?>
 
         <div class="profile-card">
+            <div class="profile-banner"></div>
+
             <div class="profile-card-top">
                 <button type="button" class="edit-btn" id="editProfileBtn">Edit</button>
             </div>
 
-            <div class="profile-info-section">
+            <div class="profile-header">
                 <div class="profile-image-box" id="openImageModal">
                     <img
                         src="<?php echo htmlspecialchars($profileImage); ?>"
@@ -310,97 +291,101 @@ if ($tableCheck && $tableCheck->num_rows > 0) {
                     >
                 </div>
 
-                <div class="profile-details">
-                    <div class="view-mode" id="viewMode">
-                        <h1 id="displayName"><?php echo htmlspecialchars($fullName); ?></h1>
-                        <p class="profile-email"><?php echo htmlspecialchars($email); ?></p>
-                        <p class="profile-age">
-                            <strong>Age:</strong>
-                            <span id="displayAge"><?php echo htmlspecialchars($age); ?></span>
-                        </p>
+                <div class="profile-identity">
+                    <h1 id="displayName"><?php echo htmlspecialchars($fullName); ?></h1>
+                    <p class="profile-email"><?php echo htmlspecialchars($email); ?></p>
+                </div>
+            </div>
+
+            <!-- VIEW MODE -->
+            <div class="view-mode" id="viewMode">
+                <div class="profile-form-grid" id="profileInfoGrid">
+                    <div class="profile-info-field">
+                        <label>Age</label>
+                        <div class="profile-info-value"><?php echo htmlspecialchars($age ?: "-"); ?></div>
                     </div>
 
-                    <div class="edit-mode hidden" id="editMode">
-                        <form method="POST" action="">
-                            <input type="hidden" name="action" value="update_profile">
+                    <div class="profile-info-field">
+                        <label>Mobile Number</label>
+                        <div class="profile-info-value"><?php echo htmlspecialchars($mobile ?: "-"); ?></div>
+                    </div>
 
-                            <div class="form-group">
-                                <label for="firstName">First Name</label>
-                                <input type="text" id="firstName" name="first_name" value="<?php echo htmlspecialchars($user['fname'] ?? ''); ?>" required>
-                            </div>
+                    <div class="profile-info-field">
+                        <label>Birthday</label>
+                        <div class="profile-info-value">
+                            <?php echo !empty($birthday) ? date("F j, Y", strtotime($birthday)) : "-"; ?>
+                        </div>
+                    </div>
 
-                            <div class="form-group">
-                                <label for="middleName">Middle Name</label>
-                                <input type="text" id="middleName" name="middle_name" value="<?php echo htmlspecialchars($user['mname'] ?? ''); ?>">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="lastName">Last Name</label>
-                                <input type="text" id="lastName" name="last_name" value="<?php echo htmlspecialchars($user['lname'] ?? ''); ?>" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="newPassword">New Password</label>
-                                <input type="password" id="newPassword" name="new_password" placeholder="Enter new password">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="confirmPassword">Confirm Password</label>
-                                <input type="password" id="confirmPassword" name="confirm_password" placeholder="Confirm new password">
-                            </div>
-
-                            <div class="edit-actions">
-                                <button type="submit" class="save-btn">Save</button>
-                                <button type="button" class="cancel-btn" id="cancelEditBtn">Cancel</button>
-                            </div>
-                        </form>
+                    <div class="profile-info-field">
+                        <label>Member Since</label>
+                        <div class="profile-info-value"><?php echo htmlspecialchars($memberSince ?: "-"); ?></div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <hr class="section-divider">
+            <!-- EDIT MODE -->
+            <div class="edit-mode hidden" id="editMode">
+                <form method="POST" action="" class="profile-edit-form">
+                    <input type="hidden" name="action" value="update_profile">
 
-        <div class="history-section">
-            <h3>History</h3>
+                    <div class="profile-form-grid">
+                        <div class="form-group">
+                            <label for="firstName">First Name</label>
+                            <input type="text" id="firstName" name="first_name" value="<?php echo htmlspecialchars($user['fname'] ?? ''); ?>" required>
+                        </div>
 
-            <div class="history-card">
-                <div class="history-header">
-                    <div>Date</div>
-                    <div>Price</div>
-                    <div>Receipt</div>
-                </div>
+                        <div class="form-group">
+                            <label for="middleName">Middle Name</label>
+                            <input type="text" id="middleName" name="middle_name" value="<?php echo htmlspecialchars($user['mname'] ?? ''); ?>">
+                        </div>
 
-                <?php if (!empty($historyRows)): ?>
-                    <?php foreach ($historyRows as $row): ?>
-                        <div class="history-row">
-                            <div>
-                                <?php
-                                echo htmlspecialchars(
-                                    date("d, M Y h:i A", strtotime($row['transaction_date']))
-                                );
-                                ?>
-                            </div>
-                            <div>
-                                PHP <?php echo htmlspecialchars(number_format((float)$row['total_price'], 2)); ?>
-                            </div>
-                            <div>
-                                <?php if (!empty($row['receipt_file'])): ?>
-                                    <a href="<?php echo htmlspecialchars($row['receipt_file']); ?>" target="_blank" class="receipt-link">View Receipt</a>
-                                <?php endif; ?>
+                        <div class="form-group">
+                            <label for="lastName">Last Name</label>
+                            <input type="text" id="lastName" name="last_name" value="<?php echo htmlspecialchars($user['lname'] ?? ''); ?>" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mobileNumber">Mobile Number</label>
+                            <input type="text" id="mobileNumber" name="mobile_number" value="<?php echo htmlspecialchars($mobile ?? ''); ?>">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="birthday">Birthday</label>
+                            <input type="date" id="birthday" name="birthday" value="<?php echo htmlspecialchars($birthday ?? ''); ?>">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="memberSinceDisplay">Member Since</label>
+                            <input type="text" id="memberSinceDisplay" value="<?php echo htmlspecialchars($memberSince ?: '-'); ?>" readonly>
+                        </div>
+                       <div class="password-toggle-row">
+                            <label for="changePasswordToggle" class="password-toggle-label">
+                                <input type="checkbox" id="changePasswordToggle">
+                                Change Password
+                            </label>
+                        </div>
+
+                        <div class="password-fields hidden" id="passwordFields">
+                            <div class="password-grid">
+                                <div class="form-group">
+                                    <label for="newPassword">New Password</label>
+                                    <input type="password" id="newPassword" name="new_password" placeholder="Enter new password">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="confirmPassword">Confirm Password</label>
+                                    <input type="password" id="confirmPassword" name="confirm_password" placeholder="Confirm new password">
+                                </div>
                             </div>
                         </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
 
-            <?php if (!empty($historyRows)): ?>
-                <div class="show-more-wrap">
-                    <button type="button" class="show-more-btn">
-                        Show more <i class="fa-solid fa-angle-down"></i>
-                    </button>
-                </div>
-            <?php endif; ?>
+                    <div class="edit-actions">
+                        <button type="submit" class="save-btn">Save</button>
+                        <button type="button" class="cancel-btn" id="cancelEditBtn">Cancel</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </main>
 </div>

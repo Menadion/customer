@@ -2,7 +2,7 @@
 $host = "localhost";
 $user = "root";
 $password = "";
-$database = "dh_azada_db";
+$database = "dh_azada";
 
 $conn = new mysqli($host, $user, $password, $database);
 
