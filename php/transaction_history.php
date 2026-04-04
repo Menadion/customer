@@ -2,6 +2,12 @@
 session_start();
 include 'db_connect.php';
 
+if (!isset($_SESSION['customer_id'])) {
+    header("Location: customer_login.php");
+    exit();
+}
+
+$customerId = $_SESSION['customer_id'];
 $topProfileImage = "../pictures/default_profile.png";
 
 if (isset($_SESSION['customer_id'])) {
@@ -16,9 +22,95 @@ if (isset($_SESSION['customer_id'])) {
         $topProfileImage = $user['profile_image'];
     }
 }
+
+$fromDate = $_GET['from'] ?? '';
+$toDate = $_GET['to'] ?? '';
+
+$historyRows = [];
+
+$sql = "
+    SELECT 
+        t.transaction_id,
+        t.appt_id,
+        t.total_amount,
+        t.payment_method,
+        t.created_at,
+        a.purpose,
+        a.tires_product_id,
+        a.tires_qty,
+        a.batteries_product_id,
+        a.magwheels_product_id,
+        a.magwheels_qty
+    FROM transaction_tbl t
+    LEFT JOIN appointments_tbl a ON t.appt_id = a.appt_id
+    WHERE t.customer_id = ?
+";
+
+$params = [$customerId];
+$types = "i";
+
+if (!empty($fromDate)) {
+    $sql .= " AND DATE(t.created_at) >= ?";
+    $params[] = $fromDate;
+    $types .= "s";
+}
+
+if (!empty($toDate)) {
+    $sql .= " AND DATE(t.created_at) <= ?";
+    $params[] = $toDate;
+    $types .= "s";
+}
+
+$sql .= " ORDER BY t.created_at DESC";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param($types, ...$params);
+$stmt->execute();
+$result = $stmt->get_result();
+
+while ($row = $result->fetch_assoc()) {
+    $row['items_used'] = [];
+
+    if (!empty($row['tires_product_id'])) {
+        $productStmt = $conn->prepare("SELECT brand, size FROM product_tbl WHERE product_id = ?");
+        $productStmt->bind_param("i", $row['tires_product_id']);
+        $productStmt->execute();
+        $productResult = $productStmt->get_result();
+        if ($product = $productResult->fetch_assoc()) {
+            $qty = (int)($row['tires_qty'] ?? 1);
+            $row['items_used'][] = $qty . "x Tire - " . $product['brand'] . " " . $product['size'];
+        }
+        $productStmt->close();
+    }
+
+    if (!empty($row['batteries_product_id'])) {
+        $productStmt = $conn->prepare("SELECT brand, size FROM product_tbl WHERE product_id = ?");
+        $productStmt->bind_param("i", $row['batteries_product_id']);
+        $productStmt->execute();
+        $productResult = $productStmt->get_result();
+        if ($product = $productResult->fetch_assoc()) {
+            $row['items_used'][] = "Battery - " . $product['brand'] . " " . $product['size'];
+        }
+        $productStmt->close();
+    }
+
+    if (!empty($row['magwheels_product_id'])) {
+        $productStmt = $conn->prepare("SELECT brand, size FROM product_tbl WHERE product_id = ?");
+        $productStmt->bind_param("i", $row['magwheels_product_id']);
+        $productStmt->execute();
+        $productResult = $productStmt->get_result();
+        if ($product = $productResult->fetch_assoc()) {
+            $qty = (int)($row['magwheels_qty'] ?? 1);
+            $row['items_used'][] = $qty . "x Magwheel - " . $product['brand'] . " " . $product['size'];
+        }
+        $productStmt->close();
+    }
+
+    $historyRows[] = $row;
+}
+
+$stmt->close();
 ?>
-<!DOCTYPE html>
-<html lang="en">
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -60,39 +152,38 @@ if (isset($_SESSION['customer_id'])) {
         </div>
     </aside>
 
-    <main class="content-area">
-            <div class="top-bar">
-                <main class="main-content">
-    <div class="topbar">
-        <h2>Transaction History</h2>
+    <main class="main-content">
+        <div class="topbar">
+            <h2>Transaction History</h2>
 
-        <div class="top-icons">
-            <div class="notification-wrapper">
-                <button class="icon-btn" id="notificationBtn" type="button">
-                    <i class="fa-solid fa-bell"></i>
-                </button>
+            <div class="top-icons">
+                <div class="notification-wrapper">
+                    <button class="icon-btn" id="notificationBtn" type="button">
+                        <i class="fa-solid fa-bell"></i>
+                    </button>
 
-                <div class="notification-box hidden" id="notificationBox">
-                    <h4>Notifications</h4>
-                    <div class="notification-empty">No notification yet</div>
+                    <div class="notification-box hidden" id="notificationBox">
+                        <h4>Notifications</h4>
+                        <div class="notification-empty">No notification yet</div>
+                    </div>
+                </div>
+
+                <div class="profile-dropdown">
+                    <button type="button" class="profile-btn" id="profileToggle">
+                        <img src="<?php echo htmlspecialchars($topProfileImage); ?>" class="top-profile-img" alt="Profile">
+                    </button>
+
+                    <div class="profile-menu hidden" id="profileMenu">
+                        <a href="profile_customer.php">Profile</a>
+                        <a href="logout.php">Logout</a>
+                    </div>
                 </div>
             </div>
-
-            <div class="profile-dropdown">
-                        <button type="button" class="profile-btn" id="profileToggle">
-                            <img src="<?php echo htmlspecialchars($topProfileImage); ?>" class="top-profile-img" id="profileToggle" alt="Profile">
-                        </button>
-
-                        <div class="profile-menu hidden" id="profileMenu">
-                            <a href="profile_customer.php">Profile</a>
-                            <a href="logout.php">Logout</a>
-                        </div>
-                    </div>
         </div>
-    </div>
+
         <hr>
 
-        <div class="filter-section">
+        <form method="GET" action="" class="filter-section">
             <button type="button" class="filter-btn" id="toggleFilterBtn">
                 <i class="fa-solid fa-sliders"></i>
                 <span>Filter by date</span>
@@ -101,31 +192,80 @@ if (isset($_SESSION['customer_id'])) {
             <div class="date-filter-box hidden" id="dateFilterBox">
                 <div class="date-group">
                     <label for="fromDate">From</label>
-                    <input type="date" id="fromDate">
+                    <input type="date" id="fromDate" name="from" value="<?php echo htmlspecialchars($fromDate); ?>">
                 </div>
 
                 <div class="date-group">
                     <label for="toDate">To</label>
-                    <input type="date" id="toDate">
+                    <input type="date" id="toDate" name="to" value="<?php echo htmlspecialchars($toDate); ?>">
                 </div>
 
-                <button type="button" class="apply-btn" id="applyDateBtn">Apply</button>
+                <button type="submit" class="apply-btn">Apply</button>
             </div>
-        </div>
+        </form>
 
         <div class="history-card">
-            <div class="history-header">
+            <div class="history-header history-header-wide">
                 <div>Date</div>
                 <div>Price</div>
                 <div>Receipt</div>
             </div>
 
-            <div class="empty-history">
-                <i class="fa-regular fa-folder-open"></i>
-                <h3>No transaction history yet</h3>
-                <p>No records available because the database is not connected yet.</p>
-            </div>
+            <?php if (empty($historyRows)): ?>
+                <div class="empty-history">
+                    <i class="fa-regular fa-folder-open"></i>
+                    <h3>No transaction history yet</h3>
+                    <p>No transaction records found for this customer.</p>
+                </div>
+            <?php else: ?>
+                <?php foreach ($historyRows as $row): ?>
+                   <div class="history-row history-row-wide">
+
+                        <div>
+                            <?php echo htmlspecialchars(date("M j, Y g:i A", strtotime($row['created_at']))); ?>
+                        </div>
+
+                        <div>
+                            PHP <?php echo htmlspecialchars(number_format((float)$row['total_amount'], 2)); ?>
+                        </div>
+
+                        <div>
+                            <button type="button"
+                                class="receipt-btn openReceiptBtn"
+                                data-transaction-id="<?php echo $row['transaction_id']; ?>"
+                                data-date="<?php echo date('F j, Y g:i A', strtotime($row['created_at'])); ?>"
+                                data-price="<?php echo number_format((float)$row['total_amount'],2); ?>"
+                                data-payment="<?php echo $row['payment_method']; ?>"
+                                data-services="<?php echo $row['purpose']; ?>"
+                                data-items="<?php echo implode(' | ', $row['items_used']); ?>"
+                            >
+                                View
+                            </button>
+                        </div>
+
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </div>
+        <div class="receipt-modal-overlay hidden" id="receiptModal">
+    <div class="receipt-modal">
+        <div class="receipt-modal-header">
+            <h3>Transaction Receipt</h3>
+            <button type="button" class="close-receipt-btn" id="closeReceiptBtn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="receipt-body">
+            <div class="receipt-line"><strong>Transaction ID:</strong> <span id="receiptTransactionId">-</span></div>
+            <div class="receipt-line"><strong>Date:</strong> <span id="receiptDate">-</span></div>
+            <div class="receipt-line"><strong>Payment Method:</strong> <span id="receiptPayment">-</span></div>
+            <div class="receipt-line"><strong>Services Used:</strong> <span id="receiptServices">-</span></div>
+            <div class="receipt-line"><strong>Items Used:</strong> <span id="receiptItems">-</span></div>
+            <div class="receipt-line receipt-total"><strong>Total Amount:</strong> <span id="receiptPrice">PHP 0.00</span></div>
+        </div>
+    </div>
+</div>
     </main>
 </div>
 

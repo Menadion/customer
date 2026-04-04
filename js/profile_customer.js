@@ -136,4 +136,17 @@ document.addEventListener("click", function (e) {
             handleSelectedFile(file);
         });
     }
+
+  const changePasswordToggle = document.getElementById("changePasswordToggle");
+    const passwordFields = document.getElementById("passwordFields");
+
+    if (changePasswordToggle && passwordFields) {
+        changePasswordToggle.addEventListener("change", function () {
+            if (this.checked) {
+                passwordFields.classList.remove("hidden");
+            } else {
+                passwordFields.classList.add("hidden");
+            }
+        });
+    }
 });

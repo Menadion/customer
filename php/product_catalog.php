@@ -16,9 +16,77 @@ if (isset($_SESSION['customer_id'])) {
         $topProfileImage = $user['profile_image'];
     }
 }
+
+$tires = [];
+$batteries = [];
+$rims = [];
+
+$tireQuery = $conn->query("
+    SELECT 
+        p.product_id,
+        p.brand,
+        p.size,
+        p.price,
+        p.status,
+        COALESCE(SUM(sb.quantity), 0) AS stock
+    FROM product_tbl p
+    LEFT JOIN stockbatch_tbl sb ON p.product_id = sb.product_id
+    WHERE p.category = 'tire'
+    GROUP BY p.product_id, p.brand, p.size, p.price, p.status
+    ORDER BY p.brand ASC
+");
+
+if ($tireQuery) {
+    while ($row = $tireQuery->fetch_assoc()) {
+        $tires[] = $row;
+    }
+}
+
+$batteryQuery = $conn->query("
+    SELECT 
+        p.product_id,
+        p.brand,
+        p.size,
+        p.price,
+        p.status,
+        COALESCE(SUM(sb.quantity), 0) AS stock
+    FROM product_tbl p
+    LEFT JOIN stockbatch_tbl sb ON p.product_id = sb.product_id
+    WHERE p.category = 'battery'
+    GROUP BY p.product_id, p.brand, p.size, p.price, p.status
+    ORDER BY p.brand ASC
+");
+
+if ($batteryQuery) {
+    while ($row = $batteryQuery->fetch_assoc()) {
+        $batteries[] = $row;
+    }
+}
+
+$rimQuery = $conn->query("
+    SELECT 
+        p.product_id,
+        p.brand,
+        p.size,
+        p.price,
+        p.status,
+        COALESCE(SUM(sb.quantity), 0) AS stock
+    FROM product_tbl p
+    LEFT JOIN stockbatch_tbl sb ON p.product_id = sb.product_id
+    WHERE p.category = 'rim'
+    GROUP BY p.product_id, p.brand, p.size, p.price, p.status
+    ORDER BY p.brand ASC
+");
+
+if ($rimQuery) {
+    while ($row = $rimQuery->fetch_assoc()) {
+        $rims[] = $row;
+    }
+}
+
 ?>
-<!DOCTYPE html>
-<html lang="en">
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -78,7 +146,7 @@ if (isset($_SESSION['customer_id'])) {
 
                 <div class="profile-dropdown">
                         <button type="button" class="profile-btn" id="profileToggle">
-                            <img src="<?php echo htmlspecialchars($topProfileImage); ?>" class="top-profile-img" id="profileToggle" alt="Profile">
+                            <img src="<?php echo htmlspecialchars($topProfileImage); ?>" class="top-profile-img" alt="Profile">
                         </button>
 
                         <div class="profile-menu hidden" id="profileMenu">
@@ -99,9 +167,21 @@ if (isset($_SESSION['customer_id'])) {
                     <button class="tab-btn" data-tab="rims">Rims</button>
                 </div>
 
-                <div class="search-box">
-                    <input type="text" placeholder="Search" id="searchInput">
-                    <i class="fa-solid fa-magnifying-glass"></i>
+                <div class="header-actions">
+                    <div class="sort-box">
+                        <select id="sortSelect">
+                            <option value="">Sort By</option>
+                            <option value="price-low-high">Low to High Cost</option>
+                            <option value="price-high-low">High to Low Cost</option>
+                            <option value="brand-a-z">Alphabetical A - Z</option>
+                            <option value="brand-z-a">Alphabetical Z - A</option>
+                        </select>
+                    </div>
+
+                    <div class="search-box">
+                        <input type="text" placeholder="Search" id="searchInput">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
                 </div>
             </div>
 
@@ -114,24 +194,75 @@ if (isset($_SESSION['customer_id'])) {
             </div>
 
             <div class="tab-content active" id="tab-tires">
-                <div class="empty-state">
-                    <i class="fa-solid fa-box-open"></i>
-                    <h3>No tires available</h3>
-                </div>
+                <?php if (!empty($tires)): ?>
+                    <?php foreach ($tires as $item): ?>
+                        <div class="product-row"
+                            data-brand="<?php echo htmlspecialchars(strtolower($item['brand'])); ?>"
+                            data-size="<?php echo htmlspecialchars(strtolower($item['size'])); ?>"
+                            data-price="<?php echo htmlspecialchars((string)$item['price']); ?>"
+                            data-status="<?php echo htmlspecialchars(strtolower($item['status'] ?: 'available')); ?>">
+
+                            <div><?php echo htmlspecialchars($item['brand']); ?></div>
+                            <div><?php echo htmlspecialchars($item['size']); ?></div>
+                            <div>PHP <?php echo htmlspecialchars(number_format((float)$item['price'], 2)); ?></div>
+                            <div><?php echo htmlspecialchars($item['stock']); ?></div>
+                            <div><?php echo htmlspecialchars($item['status'] ?: 'available'); ?></div>
+
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="empty-state">
+                        <i class="fa-solid fa-box-open"></i>
+                        <h3>No tires available</h3>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <div class="tab-content" id="tab-battery">
-                <div class="empty-state">
-                    <i class="fa-solid fa-car-battery"></i>
-                    <h3>No battery available</h3>
-                </div>
+                <?php if (!empty($batteries)): ?>
+                    <?php foreach ($batteries as $item): ?>
+                        <div class="product-row"
+                            data-brand="<?php echo htmlspecialchars(strtolower($item['brand'])); ?>"
+                            data-size="<?php echo htmlspecialchars(strtolower($item['size'])); ?>"
+                            data-price="<?php echo htmlspecialchars((string)$item['price']); ?>"
+                            data-status="<?php echo htmlspecialchars(strtolower($item['status'] ?: 'available')); ?>">
+                            <div><?php echo htmlspecialchars($item['brand']); ?></div>
+                            <div><?php echo htmlspecialchars($item['size']); ?></div>
+                            <div>PHP <?php echo htmlspecialchars(number_format((float)$item['price'], 2)); ?></div>
+                            <div><?php echo htmlspecialchars($item['stock']); ?></div>
+                            <div><?php echo htmlspecialchars($item['status'] ?: 'available'); ?></div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="empty-state">
+                        <i class="fa-solid fa-car-battery"></i>
+                        <h3>No battery available</h3>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <div class="tab-content" id="tab-rims">
-                <div class="empty-state">
-                    <i class="fa-solid fa-circle-notch"></i>
-                    <h3>No rims available</h3>
-                </div>
+                <?php if (!empty($rims)): ?>
+                    <?php foreach ($rims as $item): ?>
+                        <div class="product-row"
+                            data-brand="<?php echo htmlspecialchars(strtolower($item['brand'])); ?>"
+                            data-size="<?php echo htmlspecialchars(strtolower($item['size'])); ?>"
+                            data-price="<?php echo htmlspecialchars((string)$item['price']); ?>"
+                            data-status="<?php echo htmlspecialchars(strtolower($item['status'] ?: 'available')); ?>">
+
+                            <div><?php echo htmlspecialchars($item['brand']); ?></div>
+                            <div><?php echo htmlspecialchars($item['size']); ?></div>
+                            <div>PHP <?php echo htmlspecialchars(number_format((float)$item['price'], 2)); ?></div>
+                            <div><?php echo htmlspecialchars($item['stock']); ?></div>
+                            <div><?php echo htmlspecialchars($item['status'] ?: 'available'); ?></div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="empty-state">
+                        <i class="fa-solid fa-circle-notch"></i>
+                        <h3>No rims available</h3>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </main>

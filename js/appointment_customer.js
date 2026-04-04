@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
+    const isUpcomingView = window.location.search.includes("view=upcoming");
 
-const isUpcomingView = window.location.search.includes("view=upcoming");
-if (isUpcomingView) {
     const notificationBtn = document.getElementById("notificationBtn");
     const notificationBox = document.getElementById("notificationBox");
     const profileToggle = document.getElementById("profileToggle");
@@ -33,11 +32,19 @@ if (isUpcomingView) {
         });
     }
 
-    return;
-}
+    if (isUpcomingView) {
+        return;
+    }
+
     const step1 = document.getElementById("step1");
     const step2 = document.getElementById("step2");
     const step3 = document.getElementById("step3");
+
+    if (step1 && step2 && step3) {
+        step1.classList.remove("hidden-step");
+        step2.classList.add("hidden-step");
+        step3.classList.add("hidden-step");
+    }
 
     const step1NextBtn = document.getElementById("step1NextBtn");
     const step2BackBtn = document.getElementById("step2BackBtn");
@@ -59,11 +66,13 @@ if (isUpcomingView) {
     const confirmNameText = document.getElementById("confirmNameText");
     const confirmMobileText = document.getElementById("confirmMobileText");
     const confirmEmailText = document.getElementById("confirmEmailText");
+    const confirmVehicleText = document.getElementById("confirmVehicleText");
     const confirmDateText = document.getElementById("confirmDateText");
     const confirmTimeText = document.getElementById("confirmTimeText");
     const confirmPurposeText = document.getElementById("confirmPurposeText");
     const confirmProductText = document.getElementById("confirmProductText");
     const confirmNotesText = document.getElementById("confirmNotesText");
+    const confirmTotalText = document.getElementById("confirmTotalText");
 
     const editButtons = document.querySelectorAll(".edit-btn[data-edit]");
     const nameEditGroup = document.getElementById("nameEditGroup");
@@ -86,63 +95,42 @@ if (isUpcomingView) {
     const timeOptions = document.getElementById("timeOptions");
     const selectedTimeText = document.getElementById("selectedTimeText");
 
-    const notificationBtn = document.getElementById("notificationBtn");
-    const notificationBox = document.getElementById("notificationBox");
-
-    const profileToggle = document.getElementById("profileToggle");
-    const profileMenu = document.getElementById("profileMenu");
-
     const serviceItems = document.querySelectorAll(".service-item");
-    const productTitles = document.querySelectorAll(".selectable-product");
-    const qtyButtons = document.querySelectorAll(".qty-btn");
-    const fakeDropdowns = document.querySelectorAll(".fake-dropdown");
     const notes = document.getElementById("notes");
 
+    const selectProductButtons = document.querySelectorAll(".select-product-btn");
+    const popupSearchInput = document.getElementById("popupSearchInput");
+    const popupSortSelect = document.getElementById("popupSortSelect");
     const popupOverlay = document.getElementById("popupOverlay");
     const popupTitle = document.getElementById("popupTitle");
-    const popupContent = document.getElementById("popupContent");
     const closePopup = document.getElementById("closePopup");
 
     const paymentPopupOverlay = document.getElementById("paymentPopupOverlay");
     const closePaymentPopup = document.getElementById("closePaymentPopup");
     const cancelPaymentBtn = document.getElementById("cancelPaymentBtn");
     const donePaymentBtn = document.getElementById("donePaymentBtn");
+    const paymentTotalText = document.getElementById("paymentTotalText");
+    const reservationFeeText = document.getElementById("reservationFeeText");
 
     const successPopupOverlay = document.getElementById("successPopupOverlay");
     const closeSuccessPopup = document.getElementById("closeSuccessPopup");
     const closeSuccessBtn = document.getElementById("closeSuccessBtn");
 
-    if (notificationBtn && notificationBox) {
-        notificationBtn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            notificationBox.classList.toggle("hidden");
-        });
+    let currentProductType = null;
 
-        document.addEventListener("click", function (e) {
-            if (!notificationBtn.contains(e.target) && !notificationBox.contains(e.target)) {
-                notificationBox.classList.add("hidden");
-            }
-        });
-    }
-
-    if (profileToggle && profileMenu) {
-        profileToggle.addEventListener("click", function (e) {
-            e.stopPropagation();
-            profileMenu.classList.toggle("hidden");
-        });
-
-        document.addEventListener("click", function (e) {
-            if (!profileToggle.contains(e.target) && !profileMenu.contains(e.target)) {
-                profileMenu.classList.add("hidden");
-            }
-        });
-    }
+    const selectedProductState = {
+        tires: null,
+        batteries: null,
+        magwheels: null
+    };
 
     const today = new Date();
     let currentMonth = today.getMonth();
     let currentYear = today.getFullYear();
 
     function renderCalendar(month, year) {
+        if (!calendarGrid || !monthYear) return;
+
         calendarGrid.innerHTML = "";
 
         const firstDay = new Date(year, month, 1).getDay();
@@ -187,7 +175,9 @@ if (isUpcomingView) {
             dayBtn.addEventListener("click", function () {
                 document.querySelectorAll(".day-cell").forEach(cell => cell.classList.remove("selected"));
                 this.classList.add("selected");
-                selectedDateInput.value = formattedDate;
+                if (selectedDateInput) {
+                    selectedDateInput.value = formattedDate;
+                }
             });
 
             calendarGrid.appendChild(dayBtn);
@@ -195,6 +185,8 @@ if (isUpcomingView) {
     }
 
     function generateTimeOptions() {
+        if (!timeOptions) return;
+
         timeOptions.innerHTML = "";
 
         const hours = [
@@ -212,9 +204,9 @@ if (isUpcomingView) {
             btn.addEventListener("click", function () {
                 document.querySelectorAll(".time-option").forEach(option => option.classList.remove("selected"));
                 this.classList.add("selected");
-                selectedTimeInput.value = time;
-                selectedTimeText.textContent = time;
-                timePopupOverlay.classList.remove("show");
+                if (selectedTimeInput) selectedTimeInput.value = time;
+                if (selectedTimeText) selectedTimeText.textContent = time;
+                if (timePopupOverlay) timePopupOverlay.classList.remove("show");
             });
 
             timeOptions.appendChild(btn);
@@ -241,252 +233,579 @@ if (isUpcomingView) {
     function buildProductText() {
         const productLines = [];
 
-        const tireSelected = document.querySelector('.product-group:nth-of-type(1) .product-title.active');
-        const tireQty = document.querySelector('.qty-btn[data-group="tires"].active');
+        const tiresGroupEnabled = document.querySelector('.product-group[data-product-group="tires"]')?.classList.contains("product-group-enabled");
+        const batteriesGroupEnabled = document.querySelector('.product-group[data-product-group="batteries"]')?.classList.contains("product-group-enabled");
+        const magwheelsGroupEnabled = document.querySelector('.product-group[data-product-group="magwheels"]')?.classList.contains("product-group-enabled");
 
-        if (tireSelected) {
-            const qty = tireQty ? tireQty.textContent.trim() + "x " : "";
-            productLines.push(`${qty}TIRES`);
+        const tireItem = selectedProductState.tires;
+        const tireQty = document.getElementById("tiresQtyInput")?.value || "1";
+
+        if (tiresGroupEnabled && tireItem) {
+            productLines.push(
+                `${tireQty}x TIRES - ${tireItem.brand} ${tireItem.size} - PHP ${Number(tireItem.price).toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                })}`
+            );
         }
 
-        const batterySelected = document.querySelector('.product-group:nth-of-type(2) .product-title.active');
-        if (batterySelected) {
-            productLines.push(`BATTERIES`);
+        const batteryItem = selectedProductState.batteries;
+        if (batteriesGroupEnabled && batteryItem) {
+            productLines.push(
+                `BATTERIES - ${batteryItem.brand} ${batteryItem.size} - PHP ${Number(batteryItem.price).toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                })}`
+            );
         }
 
-        const magSelected = document.querySelector('.product-group:nth-of-type(3) .product-title.active');
-        const magQty = document.querySelector('.qty-btn[data-group="magwheels"].active');
+        const magItem = selectedProductState.magwheels;
+        const magQty = document.getElementById("magwheelsQtyInput")?.value || "1";
 
-        if (magSelected) {
-            const qty = magQty ? magQty.textContent.trim() + "x " : "";
-            productLines.push(`${qty}MAGWHEELS`);
+        if (magwheelsGroupEnabled && magItem) {
+            productLines.push(
+                `${magQty}x MAGWHEELS - ${magItem.brand} ${magItem.size} - PHP ${Number(magItem.price).toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                })}`
+            );
         }
 
         return productLines.length ? productLines.join(" | ") : "-";
     }
 
-    function updateConfirmation() {
-        const fullName = [
-            firstName.value.trim(),
-            middleName.value.trim(),
-            lastName.value.trim()
-        ].filter(Boolean).join(" ");
+    function computeTotalCost() {
+        let total = 0;
 
-        confirmNameText.textContent = fullName || "-";
-        confirmMobileText.textContent = mobileNumber.value.trim() || "-";
-        confirmEmailText.textContent = emailAddress.value.trim() || "-";
-        confirmDateText.textContent = formatDate(selectedDateInput.value);
-        confirmTimeText.textContent = selectedTimeInput.value || "-";
-        confirmPurposeText.textContent = buildPurposeText();
-        confirmProductText.textContent = buildProductText();
-        confirmNotesText.textContent = notes.value.trim() ? `Notes: ${notes.value.trim()}` : "";
+        const tireEnabled = document.querySelector('[data-product-group="tires"]')?.classList.contains("product-group-enabled");
+        const batteryEnabled = document.querySelector('[data-product-group="batteries"]')?.classList.contains("product-group-enabled");
+        const magEnabled = document.querySelector('[data-product-group="magwheels"]')?.classList.contains("product-group-enabled");
+
+        if (tireEnabled && selectedProductState.tires) {
+            const qty = parseInt(document.getElementById("tiresQtyInput")?.value || "1", 10);
+            total += Number(selectedProductState.tires.price) * qty;
+        }
+
+        if (batteryEnabled && selectedProductState.batteries) {
+            total += Number(selectedProductState.batteries.price);
+        }
+
+        if (magEnabled && selectedProductState.magwheels) {
+            const qty = parseInt(document.getElementById("magwheelsQtyInput")?.value || "1", 10);
+            total += Number(selectedProductState.magwheels.price) * qty;
+        }
+
+        return total;
     }
 
-    prevMonth.addEventListener("click", function () {
-        currentMonth--;
-        if (currentMonth < 0) {
-            currentMonth = 11;
-            currentYear--;
+
+        function updatePaymentSummary() {
+        const totalCost = computeTotalCost();
+        const reservationFee = totalCost * 0.30;
+
+        if (paymentTotalText) {
+            paymentTotalText.textContent = "PHP " + totalCost.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
         }
-        renderCalendar(currentMonth, currentYear);
-    });
 
-    nextMonth.addEventListener("click", function () {
-        currentMonth++;
-        if (currentMonth > 11) {
-            currentMonth = 0;
-            currentYear++;
+        if (reservationFeeText) {
+            reservationFeeText.textContent = "PHP " + reservationFee.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
         }
-        renderCalendar(currentMonth, currentYear);
+    }
+
+    function renderProductPopup(productType, keyword = "") {
+    if (typeof appointmentProductData === "undefined") return;
+
+    const products = appointmentProductData[productType] || [];
+    const searchKeyword = keyword.trim().toLowerCase();
+    const popupList = document.getElementById("popupProductList");
+    const sortValue = popupSortSelect ? popupSortSelect.value : "default";
+
+    if (!popupList || !popupTitle) return;
+
+    popupTitle.textContent = "Select Brand and Size";
+    popupList.innerHTML = "";
+
+    let filteredProducts = products.filter(item => {
+        const searchableText = `${item.brand} ${item.size} ${item.item_name}`.toLowerCase();
+        return searchableText.includes(searchKeyword);
     });
 
-    openTimePopup.addEventListener("click", function () {
-        timePopupOverlay.classList.add("show");
-        generateTimeOptions();
-    });
+    filteredProducts.sort((a, b) => {
+        const priceA = Number(a.price) || 0;
+        const priceB = Number(b.price) || 0;
+        const brandA = (a.brand || "").toLowerCase();
+        const brandB = (b.brand || "").toLowerCase();
 
-    closeTimePopup.addEventListener("click", function () {
-        timePopupOverlay.classList.remove("show");
-    });
-
-    timePopupOverlay.addEventListener("click", function (e) {
-        if (e.target === timePopupOverlay) {
-            timePopupOverlay.classList.remove("show");
+        switch (sortValue) {
+            case "price_asc":
+                return priceA - priceB;
+            case "price_desc":
+                return priceB - priceA;
+            case "brand_asc":
+                return brandA.localeCompare(brandB);
+            case "brand_desc":
+                return brandB.localeCompare(brandA);
+            default:
+                return 0;
         }
     });
+
+    if (filteredProducts.length === 0) {
+        popupList.innerHTML = `<div class="product-picker-empty">No matching products found.</div>`;
+        return;
+    }
+
+    filteredProducts.forEach(item => {
+
+        const stock = parseInt(item.stock ?? 0, 10);
+        const isOutOfStock = stock <= 0;
+
+        const row = document.createElement("div");
+        row.className = "product-picker-row";
+
+        if (isOutOfStock) {
+            row.classList.add("out-of-stock-row");
+        }
+
+        row.innerHTML = `
+            <div>${item.brand ?? "-"}</div>
+            <div>${item.size ?? "-"}</div>
+            <div>PHP ${Number(item.price).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })}</div>
+            <div>${stock}</div>
+            <div>${isOutOfStock ? "out of stock" : "available"}</div>
+        `;
+
+        if (!isOutOfStock) {
+            row.addEventListener("click", function () {
+                selectedProductState[productType] = item;
+                applySelectedProduct(productType);
+                updateConfirmation();
+                if (popupOverlay) popupOverlay.classList.remove("show");
+            });
+        }
+
+        popupList.appendChild(row);
+    });
+}
+
+    function applySelectedProduct(productType) {
+        const item = selectedProductState[productType];
+        if (!item) return;
+
+        const button = document.querySelector(`.select-product-btn[data-product-type="${productType}"]`);
+        const selectedText = document.getElementById(`${productType}SelectedText`);
+        const priceText = document.getElementById(`${productType}PriceText`);
+        const productIdInput = document.getElementById(`${productType}ProductId`);
+
+        const displayText = `${item.brand} - ${item.size}`;
+
+        if (button) button.textContent = displayText;
+        if (selectedText) selectedText.textContent = displayText;
+        if (priceText) {
+            priceText.textContent = `PHP ${Number(item.price).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })}`;
+        }
+        if (productIdInput) productIdInput.value = item.product_id;
+
+        updateQuantityLimit(productType);
+    }
+
+    function updateQuantityLimit(productType) {
+        const item = selectedProductState[productType];
+        const qtyInput = document.getElementById(`${productType}QtyInput`);
+
+        if (!qtyInput) return;
+
+        if (!item) {
+            qtyInput.min = 1;
+            qtyInput.max = 1;
+            qtyInput.value = 1;
+            return;
+        }
+
+        const stock = Math.max(1, parseInt(item.stock || 0, 10));
+
+        qtyInput.min = 1;
+        qtyInput.max = stock;
+
+        let currentValue = parseInt(qtyInput.value || "1", 10);
+
+        if (isNaN(currentValue) || currentValue < 1) {
+            currentValue = 1;
+        }
+
+        if (currentValue > stock) {
+            currentValue = stock;
+        }
+
+        qtyInput.value = currentValue;
+    }
+
+    function updateConfirmation() {
+        const fullName = [
+            firstName?.value.trim(),
+            middleName?.value.trim(),
+            lastName?.value.trim()
+        ].filter(Boolean).join(" ");
+
+        if (confirmNameText) confirmNameText.textContent = fullName || "-";
+        if (confirmMobileText) confirmMobileText.textContent = mobileNumber?.value.trim() || "-";
+        if (confirmEmailText) confirmEmailText.textContent = emailAddress?.value.trim() || "-";
+        if (confirmVehicleText) confirmVehicleText.textContent = vehicleModel?.value.trim() || "-";
+        if (confirmDateText) confirmDateText.textContent = formatDate(selectedDateInput?.value);
+        if (confirmTimeText) confirmTimeText.textContent = selectedTimeInput?.value || "-";
+        if (confirmPurposeText) confirmPurposeText.textContent = buildPurposeText();
+        if (confirmProductText) confirmProductText.textContent = buildProductText();
+        if (confirmNotesText) confirmNotesText.textContent = notes?.value.trim() ? `Notes: ${notes.value.trim()}` : "";
+
+        const totalCost = computeTotalCost();
+        if (confirmTotalText) {
+            confirmTotalText.textContent = "PHP " + totalCost.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+    }
+
+    if (prevMonth) {
+        prevMonth.addEventListener("click", function () {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar(currentMonth, currentYear);
+        });
+    }
+
+    if (nextMonth) {
+        nextMonth.addEventListener("click", function () {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar(currentMonth, currentYear);
+        });
+    }
+
+    if (openTimePopup) {
+        openTimePopup.addEventListener("click", function () {
+            if (timePopupOverlay) timePopupOverlay.classList.add("show");
+            generateTimeOptions();
+        });
+    }
+
+    if (closeTimePopup) {
+        closeTimePopup.addEventListener("click", function () {
+            if (timePopupOverlay) timePopupOverlay.classList.remove("show");
+        });
+    }
+
+    if (timePopupOverlay) {
+        timePopupOverlay.addEventListener("click", function (e) {
+            if (e.target === timePopupOverlay) {
+                timePopupOverlay.classList.remove("show");
+            }
+        });
+    }
+
+    function updateProductGroupAvailability() {
+        const allGroups = document.querySelectorAll(".product-group[data-product-group]");
+
+        allGroups.forEach(group => {
+            group.classList.remove("product-group-enabled");
+            group.classList.add("product-group-disabled");
+        });
+
+        const activeServices = document.querySelectorAll(".service-item.active[data-enables]");
+
+        activeServices.forEach(service => {
+            const targetGroup = service.getAttribute("data-enables");
+            const matchingGroup = document.querySelector(`.product-group[data-product-group="${targetGroup}"]`);
+
+            if (matchingGroup) {
+                matchingGroup.classList.remove("product-group-disabled");
+                matchingGroup.classList.add("product-group-enabled");
+            }
+        });
+
+        ["tires", "batteries", "magwheels"].forEach(productType => {
+            const group = document.querySelector(`.product-group[data-product-group="${productType}"]`);
+            const enabled = group?.classList.contains("product-group-enabled");
+
+            if (!enabled) {
+                selectedProductState[productType] = null;
+
+                const button = document.querySelector(`.select-product-btn[data-product-type="${productType}"]`);
+                const selectedText = document.getElementById(`${productType}SelectedText`);
+                const priceText = document.getElementById(`${productType}PriceText`);
+                const productIdInput = document.getElementById(`${productType}ProductId`);
+                const qtyInput = document.getElementById(`${productType}QtyInput`);
+
+                if (button) button.textContent = "Select Brand and Size";
+                if (selectedText) selectedText.textContent = "None";
+                if (priceText) priceText.textContent = "-";
+                if (productIdInput) productIdInput.value = "";
+                if (qtyInput) {
+                    qtyInput.value = 1;
+                    qtyInput.min = 1;
+                    qtyInput.max = 1;
+                }
+            }
+        });
+
+        updateConfirmation();
+    }
 
     serviceItems.forEach(item => {
         item.addEventListener("click", function () {
             this.classList.toggle("active");
+            updateProductGroupAvailability();
         });
     });
 
-    productTitles.forEach(item => {
-        item.addEventListener("click", function () {
-            this.classList.toggle("active");
-        });
-    });
+    updateProductGroupAvailability();
 
-    qtyButtons.forEach(button => {
-        button.addEventListener("click", function () {
-            const group = this.getAttribute("data-group");
-            const sameGroupButtons = document.querySelectorAll(`.qty-btn[data-group="${group}"]`);
-            const isAlreadyActive = this.classList.contains("active");
+    ["tires", "magwheels"].forEach(productType => {
+        const qtyInput = document.getElementById(`${productType}QtyInput`);
 
-            sameGroupButtons.forEach(btn => btn.classList.remove("active"));
+        if (qtyInput) {
+            qtyInput.addEventListener("input", function () {
+                const item = selectedProductState[productType];
+                const maxStock = item ? parseInt(item.stock || 1, 10) : 1;
+                let value = parseInt(this.value || "1", 10);
 
-            if (!isAlreadyActive) {
-                this.classList.add("active");
-            }
-        });
-    });
+                if (isNaN(value) || value < 1) value = 1;
+                if (value > maxStock) value = maxStock;
 
-    fakeDropdowns.forEach(dropdown => {
-        dropdown.addEventListener("click", function () {
-            const type = this.getAttribute("data-type");
+                this.value = value;
+                updateConfirmation();
+            });
 
-            if (type === "size") {
-                popupTitle.textContent = "Size";
-                popupContent.innerHTML = "<p>No size yet</p>";
-            } else {
-                popupTitle.textContent = "Brand";
-                popupContent.innerHTML = "<p>No brands yet</p>";
-            }
+            qtyInput.addEventListener("change", function () {
+                const item = selectedProductState[productType];
+                const maxStock = item ? parseInt(item.stock || 1, 10) : 1;
+                let value = parseInt(this.value || "1", 10);
 
-            popupOverlay.classList.add("show");
-        });
-    });
+                if (isNaN(value) || value < 1) value = 1;
+                if (value > maxStock) value = maxStock;
 
-    closePopup.addEventListener("click", function () {
-        popupOverlay.classList.remove("show");
-    });
-
-    popupOverlay.addEventListener("click", function (e) {
-        if (e.target === popupOverlay) {
-            popupOverlay.classList.remove("show");
+                this.value = value;
+                updateConfirmation();
+            });
         }
     });
+    selectProductButtons.forEach(button => {
+        button.addEventListener("click", function () {
+            currentProductType = this.getAttribute("data-product-type");
 
-    step1NextBtn.addEventListener("click", function () {
-        step1.classList.add("hidden-step");
-        step2.classList.remove("hidden-step");
+            if (popupSearchInput) popupSearchInput.value = "";
+            if (popupSortSelect) popupSortSelect.value = "default";
+
+            if (popupOverlay) popupOverlay.classList.add("show");
+            renderProductPopup(currentProductType);
+        });
     });
 
-    step2BackBtn.addEventListener("click", function () {
-        step2.classList.add("hidden-step");
-        step1.classList.remove("hidden-step");
-    });
+    if (popupSearchInput) {
+        popupSearchInput.addEventListener("input", function () {
+            if (currentProductType) {
+                renderProductPopup(currentProductType, this.value);
+            }
+        });
+    }
 
-    step2NextBtn.addEventListener("click", function () {
-        updateConfirmation();
+    if (popupSortSelect) {
+        popupSortSelect.addEventListener("change", function () {
+            if (currentProductType) {
+                renderProductPopup(currentProductType, popupSearchInput ? popupSearchInput.value : "");
+            }
+        });
+    }
 
-        editFirstName.value = firstName.value;
-        editMiddleName.value = middleName.value;
-        editLastName.value = lastName.value;
-        editMobileNumber.value = mobileNumber.value;
-        editEmailAddress.value = emailAddress.value;
+    if (closePopup) {
+        closePopup.addEventListener("click", function () {
+            if (popupOverlay) popupOverlay.classList.remove("show");
+        });
+    }
 
-        step2.classList.add("hidden-step");
-        step3.classList.remove("hidden-step");
-    });
+    if (popupOverlay) {
+        popupOverlay.addEventListener("click", function (e) {
+            if (e.target === popupOverlay) {
+                popupOverlay.classList.remove("show");
+            }
+        });
+    }
 
-    step3BackBtn.addEventListener("click", function () {
-        step3.classList.add("hidden-step");
-        step2.classList.remove("hidden-step");
-    });
+    if (step1NextBtn) {
+        step1NextBtn.addEventListener("click", function () {
+            if (step1) step1.classList.add("hidden-step");
+            if (step2) step2.classList.remove("hidden-step");
+        });
+    }
 
-    appointmentDetailsEditBtn.addEventListener("click", function () {
-        step3.classList.add("hidden-step");
-        step2.classList.remove("hidden-step");
-    });
+    if (step2BackBtn) {
+        step2BackBtn.addEventListener("click", function () {
+            if (step2) step2.classList.add("hidden-step");
+            if (step1) step1.classList.remove("hidden-step");
+        });
+    }
+
+    if (step2NextBtn) {
+        step2NextBtn.addEventListener("click", function () {
+            updateConfirmation();
+
+            if (editFirstName && firstName) editFirstName.value = firstName.value;
+            if (editMiddleName && middleName) editMiddleName.value = middleName.value;
+            if (editLastName && lastName) editLastName.value = lastName.value;
+            if (editMobileNumber && mobileNumber) editMobileNumber.value = mobileNumber.value;
+            if (editEmailAddress && emailAddress) editEmailAddress.value = emailAddress.value;
+
+            if (step2) step2.classList.add("hidden-step");
+            if (step3) step3.classList.remove("hidden-step");
+        });
+    }
+
+    if (step3BackBtn) {
+        step3BackBtn.addEventListener("click", function () {
+            if (step3) step3.classList.add("hidden-step");
+            if (step2) step2.classList.remove("hidden-step");
+        });
+    }
+
+    if (appointmentDetailsEditBtn) {
+        appointmentDetailsEditBtn.addEventListener("click", function () {
+            if (step3) step3.classList.add("hidden-step");
+            if (step2) step2.classList.remove("hidden-step");
+        });
+    }
 
     editButtons.forEach(button => {
         button.addEventListener("click", function () {
             const target = this.getAttribute("data-edit");
 
-            if (target === "name") {
+            if (target === "name" && nameEditGroup) {
                 nameEditGroup.classList.toggle("hidden-edit");
                 if (nameEditGroup.classList.contains("hidden-edit")) {
-                    firstName.value = editFirstName.value;
-                    middleName.value = editMiddleName.value;
-                    lastName.value = editLastName.value;
+                    if (firstName && editFirstName) firstName.value = editFirstName.value;
+                    if (middleName && editMiddleName) middleName.value = editMiddleName.value;
+                    if (lastName && editLastName) lastName.value = editLastName.value;
                     updateConfirmation();
                 }
             }
 
-            if (target === "mobile") {
+            if (target === "mobile" && mobileEditGroup) {
                 mobileEditGroup.classList.toggle("hidden-edit");
                 if (mobileEditGroup.classList.contains("hidden-edit")) {
-                    mobileNumber.value = editMobileNumber.value;
+                    if (mobileNumber && editMobileNumber) mobileNumber.value = editMobileNumber.value;
                     updateConfirmation();
                 }
             }
 
-            if (target === "email") {
+            if (target === "email" && emailEditGroup) {
                 emailEditGroup.classList.toggle("hidden-edit");
                 if (emailEditGroup.classList.contains("hidden-edit")) {
-                    emailAddress.value = editEmailAddress.value;
+                    if (emailAddress && editEmailAddress) emailAddress.value = editEmailAddress.value;
                     updateConfirmation();
                 }
             }
         });
     });
 
-    finishBtn.addEventListener("click", function () {
-        paymentPopupOverlay.classList.add("show");
-    });
-
-    closePaymentPopup.addEventListener("click", function () {
-        paymentPopupOverlay.classList.remove("show");
-    });
-
-    cancelPaymentBtn.addEventListener("click", function () {
-        paymentPopupOverlay.classList.remove("show");
-    });
-
-    donePaymentBtn.addEventListener("click", function () {
-        paymentPopupOverlay.classList.remove("show");
-        successPopupOverlay.classList.add("show");
-    });
-
-    closeSuccessPopup.addEventListener("click", function () {
-        successPopupOverlay.classList.remove("show");
-    });
-
-    closeSuccessBtn.addEventListener("click", function () {
-        const formData = new FormData();
-        formData.append("appt_date", selectedDateInput.value);
-        formData.append("appt_time", selectedTimeInput.value);
-        formData.append("purpose", buildPurposeText());
-
-        fetch("save_appointment.php", {
-            method: "POST",
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                window.location.href = "homepage_customer.php";
-            } else {
-                alert(data.message || "Failed to save appointment.");
-            }
-        })
-        .catch(() => {
-            alert("Something went wrong while saving the appointment.");
+    if (finishBtn) {
+        finishBtn.addEventListener("click", function () {
+            updateConfirmation();
+            updatePaymentSummary();
+            if (paymentPopupOverlay) paymentPopupOverlay.classList.add("show");
         });
-    });
+    }
 
-    paymentPopupOverlay.addEventListener("click", function (e) {
-        if (e.target === paymentPopupOverlay) {
-            paymentPopupOverlay.classList.remove("show");
-        }
-    });
+    if (closePaymentPopup) {
+        closePaymentPopup.addEventListener("click", function () {
+            if (paymentPopupOverlay) paymentPopupOverlay.classList.remove("show");
+        });
+    }
 
-    successPopupOverlay.addEventListener("click", function (e) {
-        if (e.target === successPopupOverlay) {
-            successPopupOverlay.classList.remove("show");
-        }
-    });
+    if (cancelPaymentBtn) {
+        cancelPaymentBtn.addEventListener("click", function () {
+            if (paymentPopupOverlay) paymentPopupOverlay.classList.remove("show");
+        });
+    }
+
+    if (donePaymentBtn) {
+        donePaymentBtn.addEventListener("click", function () {
+            if (paymentPopupOverlay) paymentPopupOverlay.classList.remove("show");
+            if (successPopupOverlay) successPopupOverlay.classList.add("show");
+        });
+    }
+
+    if (closeSuccessPopup) {
+        closeSuccessPopup.addEventListener("click", function () {
+            if (successPopupOverlay) successPopupOverlay.classList.remove("show");
+        });
+    }
+
+    if (closeSuccessBtn) {
+        closeSuccessBtn.addEventListener("click", function () {
+            const formData = new FormData();
+            formData.append("appt_date", selectedDateInput?.value || "");
+            formData.append("appt_time", selectedTimeInput?.value || "");
+            formData.append("purpose", buildPurposeText());
+            formData.append("notes", notes?.value || "");
+
+            formData.append("tires_product_id", document.getElementById("tiresProductId")?.value || "");
+            formData.append("tires_qty", document.getElementById("tiresQtyInput")?.value || "1");
+
+            formData.append("batteries_product_id", document.getElementById("batteriesProductId")?.value || "");
+
+            formData.append("magwheels_product_id", document.getElementById("magwheelsProductId")?.value || "");
+            formData.append("magwheels_qty", document.getElementById("magwheelsQtyInput")?.value || "1");
+
+            fetch("save_appointment.php", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = "homepage_customer.php";
+                } else {
+                    alert(data.message || "Failed to save appointment.");
+                }
+            })
+            .catch(() => {
+                alert("Something went wrong while saving the appointment.");
+            });
+        });
+    }
+
+    if (paymentPopupOverlay) {
+        paymentPopupOverlay.addEventListener("click", function (e) {
+            if (e.target === paymentPopupOverlay) {
+                paymentPopupOverlay.classList.remove("show");
+            }
+        });
+    }
+
+    if (successPopupOverlay) {
+        successPopupOverlay.addEventListener("click", function (e) {
+            if (e.target === successPopupOverlay) {
+                successPopupOverlay.classList.remove("show");
+            }
+        });
+    }
 
     renderCalendar(currentMonth, currentYear);
     generateTimeOptions();
