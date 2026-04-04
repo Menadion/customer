@@ -16,16 +16,10 @@ $customerId = $_SESSION['customer_id'];
 
 $apptDate = $_POST['appt_date'] ?? '';
 $apptTimeRaw = $_POST['appt_time'] ?? '';
-$purpose = trim($_POST['purpose'] ?? '');
+$services = $_POST['services'] ?? [];
+
 $notes = trim($_POST['notes'] ?? '');
-
-$tiresProductId = !empty($_POST['tires_product_id']) ? (int)$_POST['tires_product_id'] : null;
-$tiresQty = !empty($_POST['tires_qty']) ? (int)$_POST['tires_qty'] : null;
-
-$batteriesProductId = !empty($_POST['batteries_product_id']) ? (int)$_POST['batteries_product_id'] : null;
-
-$magwheelsProductId = !empty($_POST['magwheels_product_id']) ? (int)$_POST['magwheels_product_id'] : null;
-$magwheelsQty = !empty($_POST['magwheels_qty']) ? (int)$_POST['magwheels_qty'] : null;
+$notes = ($notes === '' || $notes === '-') ? null : $notes;
 
 if ($apptDate === '' || $apptTimeRaw === '') {
     echo json_encode([
@@ -35,7 +29,17 @@ if ($apptDate === '' || $apptTimeRaw === '') {
     exit();
 }
 
-$timeObj = DateTime::createFromFormat('g:i A', $apptTimeRaw);
+if (empty($services)) {
+    echo json_encode([
+        "success" => false,
+        "message" => "At least one service is required."
+    ]);
+    exit();
+}
+
+$timeObj = DateTime::createFromFormat('g:i A', $apptTimeRaw)
+    ?: DateTime::createFromFormat('H:i:s', $apptTimeRaw);
+
 if (!$timeObj) {
     echo json_encode([
         "success" => false,
@@ -43,93 +47,91 @@ if (!$timeObj) {
     ]);
     exit();
 }
+
 $apptTime = $timeObj->format('H:i:s');
-
-/*
-    Compute total cost based on selected products
-*/
-$totalCost = 0;
-
-if ($tiresProductId) {
-    $stmtTire = $conn->prepare("SELECT price FROM product_tbl WHERE product_id = ? LIMIT 1");
-    $stmtTire->bind_param("i", $tiresProductId);
-    $stmtTire->execute();
-    $resultTire = $stmtTire->get_result();
-    if ($rowTire = $resultTire->fetch_assoc()) {
-        $totalCost += ((float)$rowTire['price']) * ($tiresQty ?: 1);
-    }
-    $stmtTire->close();
-}
-
-if ($batteriesProductId) {
-    $stmtBattery = $conn->prepare("SELECT price FROM product_tbl WHERE product_id = ? LIMIT 1");
-    $stmtBattery->bind_param("i", $batteriesProductId);
-    $stmtBattery->execute();
-    $resultBattery = $stmtBattery->get_result();
-    if ($rowBattery = $resultBattery->fetch_assoc()) {
-        $totalCost += (float)$rowBattery['price'];
-    }
-    $stmtBattery->close();
-}
-
-if ($magwheelsProductId) {
-    $stmtMag = $conn->prepare("SELECT price FROM product_tbl WHERE product_id = ? LIMIT 1");
-    $stmtMag->bind_param("i", $magwheelsProductId);
-    $stmtMag->execute();
-    $resultMag = $stmtMag->get_result();
-    if ($rowMag = $resultMag->fetch_assoc()) {
-        $totalCost += ((float)$rowMag['price']) * ($magwheelsQty ?: 1);
-    }
-    $stmtMag->close();
-}
-
 $stmt = $conn->prepare("
     INSERT INTO appointments_tbl
     (
         customer_id,
-        service_id,
         employee_id,
         appt_date,
         appt_time,
-        purpose,
         notes,
-        tires_product_id,
-        tires_qty,
-        batteries_product_id,
-        magwheels_product_id,
-        magwheels_qty,
-        total_cost,
         appt_status,
         created_at
     )
     VALUES
-    (?, NULL, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'waiting for approval', NOW())
+    (?, NULL, ?, ?, ?, 'waiting for approval', NOW())
 ");
 
 $stmt->bind_param(
-    "issssiiiiid",
+    "isss",
     $customerId,
     $apptDate,
     $apptTime,
-    $purpose,
-    $notes,
-    $tiresProductId,
-    $tiresQty,
-    $batteriesProductId,
-    $magwheelsProductId,
-    $magwheelsQty,
-    $totalCost
+    $notes
 );
 
-if ($stmt->execute()) {
+$conn->begin_transaction();
+$checkStmt = $conn->prepare("
+    SELECT COUNT(*) as total
+    FROM appointments_tbl
+    WHERE appt_date = ?
+    AND appt_time = ?
+    AND appt_status != 'cancelled'
+");
+
+$checkStmt->bind_param("ss", $apptDate, $apptTime);
+$checkStmt->execute();
+
+$result = $checkStmt->get_result()->fetch_assoc();
+
+if ($result['total'] > 0) {
+    throw new Exception("Selected time slot is already booked.");
+}
+
+$checkStmt->close();
+
+try {
+    if (!$stmt->execute()) {
+        throw new Exception($stmt->error);
+    }
+
+    $apptId = $conn->insert_id;
+
+    $serviceStmt = $conn->prepare("
+        INSERT INTO appointment_services_tbl (appt_id, service_id)
+        VALUES (?, ?)
+    ");
+
+    foreach ($services as $serviceId) {
+        $serviceId = (int)$serviceId;
+
+        if ($serviceId <= 0) {
+            throw new Exception("Invalid service ID");
+        }
+
+        $serviceStmt->bind_param("ii", $apptId, $serviceId);
+
+        if (!$serviceStmt->execute()) {
+            throw new Exception($serviceStmt->error);
+        }
+    }
+
+    $serviceStmt->close();
+    $conn->commit();
+
     echo json_encode([
         "success" => true,
         "message" => "Appointment saved."
     ]);
-} else {
+
+} catch (Exception $e) {
+    $conn->rollback();
+
     echo json_encode([
         "success" => false,
-        "message" => "Failed to save appointment."
+        "message" => $e->getMessage()
     ]);
 }
 

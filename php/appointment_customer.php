@@ -11,6 +11,21 @@ $customerMobile = "";
 $customerEmail = "";
 $customerVehicleModel = "";
 
+$services = [];
+
+$result = $conn->query("
+    SELECT service_id, service_name, service_category 
+    FROM service_tbl 
+    WHERE status = 'active'
+    ORDER BY service_id ASC
+");
+
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $services[] = $row;
+    }
+}
+
 if (isset($_SESSION['customer_id'])) {
     $stmt = $conn->prepare("
         SELECT 
@@ -30,10 +45,6 @@ if (isset($_SESSION['customer_id'])) {
     $user = $result->fetch_assoc();
     $stmt->close();
 
-<<<<<<< HEAD
-    if (!empty($user['profile_image'])) {
-        $topProfileImage = $user['profile_image'];
-=======
     if ($user) {
         if (!empty($user['profile_image'])) {
             $topProfileImage = $user['profile_image'];
@@ -45,7 +56,6 @@ if (isset($_SESSION['customer_id'])) {
         $customerMobile = $user['mobile_number'] ?? "";
         $customerEmail = $user['email'] ?? "";
         $customerVehicleModel = $user['vehicle_type'] ?? "";
->>>>>>> Ric
     }
 }
 
@@ -53,38 +63,32 @@ $viewMode = $_GET['view'] ?? 'book';
 $isUpcomingView = ($viewMode === 'upcoming');
 
 $appointmentFound = false;
-$appointmentRow = null;
 
 if (isset($_SESSION['customer_id'])) {
     $customerId = $_SESSION['customer_id'];
 
     $apptStmt = $conn->prepare("
-<<<<<<< HEAD
-        SELECT appt_date, appt_time, appt_status, created_at
-        FROM appointments_tbl
-        WHERE customer_id = ?
-          AND appt_status IN ('waiting for approval', 'approved')
-=======
         SELECT 
-        appt_date,
-        appt_time,
-        appt_status,
-        created_at,
-        purpose,
-        notes,
-        tires_product_id,
-        tires_qty,
-        batteries_product_id,
-        magwheels_product_id,
-        magwheels_qty,
-        total_cost
-        FROM appointments_tbl
-        WHERE customer_id = ?
-        AND appt_status IN ('waiting for approval','approved')
->>>>>>> Ric
-        ORDER BY appt_date ASC, appt_time ASC
+            a.appt_date,
+            a.appt_time,
+            a.appt_status,
+            a.created_at,
+            a.notes,
+            GROUP_CONCAT(s.service_name SEPARATOR ', ') AS services
+        FROM appointments_tbl a
+        LEFT JOIN appointment_services_tbl aps ON a.appt_id = aps.appt_id
+        LEFT JOIN service_tbl s ON aps.service_id = s.service_id
+        WHERE a.customer_id = ?
+        AND a.appt_status IN ('pending','approved','waiting for approval')
+        GROUP BY a.appt_id
+        ORDER BY a.appt_date ASC, a.appt_time ASC
         LIMIT 1
     ");
+
+    if (!$apptStmt) {
+        die("Prepare failed: " . $conn->error);
+    }
+
     $apptStmt->bind_param("i", $customerId);
     $apptStmt->execute();
     $apptResult = $apptStmt->get_result();
@@ -95,49 +99,7 @@ if (isset($_SESSION['customer_id'])) {
     }
 
     $apptStmt->close();
-<<<<<<< HEAD
-=======
-
-    $upcomingTireText = "-";
-    $upcomingBatteryText = "-";
-    $upcomingMagwheelText = "-";
-
-    if ($appointmentFound && $appointmentRow) {
-        if (!empty($appointmentRow['tires_product_id'])) {
-            $stmt = $conn->prepare("SELECT brand, size, price FROM product_tbl WHERE product_id = ? LIMIT 1");
-            $stmt->bind_param("i", $appointmentRow['tires_product_id']);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            if ($row = $result->fetch_assoc()) {
-                $qty = (int)($appointmentRow['tires_qty'] ?? 1);
-                $upcomingTireText = $qty . "x " . $row['brand'] . " " . $row['size'] . " - PHP " . number_format($row['price'], 2);
-            }
-            $stmt->close();
-        }
-
-        if (!empty($appointmentRow['batteries_product_id'])) {
-            $stmt = $conn->prepare("SELECT brand, size, price FROM product_tbl WHERE product_id = ? LIMIT 1");
-            $stmt->bind_param("i", $appointmentRow['batteries_product_id']);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            if ($row = $result->fetch_assoc()) {
-                $upcomingBatteryText = $row['brand'] . " " . $row['size'] . " - PHP " . number_format($row['price'], 2);
-            }
-            $stmt->close();
-        }
-
-        if (!empty($appointmentRow['magwheels_product_id'])) {
-            $stmt = $conn->prepare("SELECT brand, size, price FROM product_tbl WHERE product_id = ? LIMIT 1");
-            $stmt->bind_param("i", $appointmentRow['magwheels_product_id']);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            if ($row = $result->fetch_assoc()) {
-                $qty = (int)($appointmentRow['magwheels_qty'] ?? 1);
-                $upcomingMagwheelText = $qty . "x " . $row['brand'] . " " . $row['size'] . " - PHP " . number_format($row['price'], 2);
-            }
-            $stmt->close();
-        }
-    }
+    $appointmentNotes = $appointmentRow['notes'] ?? "-";
 }
 
 $appointmentProducts = [
@@ -173,7 +135,6 @@ if ($productQuery) {
             $appointmentProducts['magwheels'][] = $row;
         }
     }
->>>>>>> Ric
 }
 
 ?>
@@ -290,38 +251,15 @@ if ($productQuery) {
                     <?php echo htmlspecialchars(date("F j, Y g:i A", strtotime($appointmentRow['created_at']))); ?>
                 </div>
 
-<<<<<<< HEAD
-=======
                 <div class="confirm-detail-line">
-                    <strong>Purpose:</strong>
-                    <?php echo !empty($appointmentRow['purpose']) ? htmlspecialchars($appointmentRow['purpose']) : '-'; ?>
-                </div>
-
-                <div class="confirm-detail-line">
-                    <strong>Tires:</strong>
-                    <?php echo htmlspecialchars($upcomingTireText); ?>
-                </div>
-
-                <div class="confirm-detail-line">
-                    <strong>Battery:</strong>
-                    <?php echo htmlspecialchars($upcomingBatteryText); ?>
-                </div>
-
-                <div class="confirm-detail-line">
-                    <strong>Magwheels:</strong>
-                    <?php echo htmlspecialchars($upcomingMagwheelText); ?>
-                </div>
+                    <strong>Service:</strong>
+                    <?php echo !empty($appointmentRow['services']) ? htmlspecialchars($appointmentRow['services']) : '-'; ?>
 
                 <div class="confirm-detail-line">
                     <strong>Notes:</strong>
                     <?php echo !empty($appointmentRow['notes']) ? htmlspecialchars($appointmentRow['notes']) : '-'; ?>
                 </div>
 
-                <div class="confirm-detail-line">
-                    <strong>Total Cost:</strong>
-                    <?php echo "PHP " . number_format((float)($appointmentRow['total_cost'] ?? 0), 2); ?>
-                </div>
->>>>>>> Ric
                 <div class="button-row">
                     <button type="button" class="back-btn" onclick="window.location.href='homepage_customer.php'">
                         Back
@@ -336,10 +274,6 @@ if ($productQuery) {
         <!-- STEP 1 -->
         <div class="appointment-card step-section" id="step1">
             <h1>DETAILS</h1>
-<<<<<<< HEAD
-
-=======
->>>>>>> Ric
             <div class="details-grid">
                 <div class="left-panel">
                     <h2 class="section-title">Choose Date</h2>
@@ -384,16 +318,6 @@ if ($productQuery) {
                         <h2>Personal Information</h2>
 
                         <div class="name-row">
-<<<<<<< HEAD
-                            <input type="text" id="firstName" placeholder="First Name">
-                            <input type="text" id="middleName" placeholder="Middle Name">
-                        </div>
-
-                        <input type="text" id="lastName" placeholder="Last Name">
-                        <input type="text" id="mobileNumber" placeholder="Mobile Number">
-                        <input type="email" id="emailAddress" placeholder="Email Address">
-                        <textarea id="vehicleModel" placeholder="Vehicle Name/Model"></textarea>
-=======
                             <input type="text" id="firstName" placeholder="First Name" value="<?php echo htmlspecialchars($customerFirstName); ?>">
                             <input type="text" id="middleName" placeholder="Middle Name" value="<?php echo htmlspecialchars($customerMiddleName); ?>">
                         </div>
@@ -402,7 +326,6 @@ if ($productQuery) {
                         <input type="text" id="mobileNumber" placeholder="Mobile Number" value="<?php echo htmlspecialchars($customerMobile); ?>">
                         <input type="email" id="emailAddress" placeholder="Email Address" value="<?php echo htmlspecialchars($customerEmail); ?>">
                         <textarea id="vehicleModel" placeholder="Vehicle Name/Model"><?php echo htmlspecialchars($customerVehicleModel); ?></textarea>
->>>>>>> Ric
                     </div>
                 </div>
             </div>
@@ -422,91 +345,22 @@ if ($productQuery) {
                     <h2>SERVICES</h2>
 
                     <div class="service-list">
-<<<<<<< HEAD
-                        <button type="button" class="service-item">TIRE AND WHEEL CHANGE</button>
-                        <button type="button" class="service-item">UNDERCHASSIS</button>
-                        <button type="button" class="service-item">VULCANIZE</button>
-                        <button type="button" class="service-item">BATTERY CHANGE</button>
-=======
-                        <button type="button" class="service-item" data-enables="tires">TIRE AND WHEEL CHANGE</button>
-                        <button type="button" class="service-item" data-enables="batteries">BATTERY CHANGE</button>
-                        <button type="button" class="service-item" data-enables="magwheels">MAGWHEEL CHANGE</button>
-                        <button type="button" class="service-item">UNDERCHASSIS</button>
-                        <button type="button" class="service-item">VULCANIZE</button>
->>>>>>> Ric
+                    <?php foreach ($services as $service): ?>
+                        <button 
+                            type="button"
+                            class="service-item"
+                            data-service-id="<?php echo $service['service_id']; ?>"
+                            data-category="<?php echo $service['service_category']; ?>"
+                        >
+                            <?php echo strtoupper(htmlspecialchars($service['service_name'])); ?>
+                        </button>
+                    <?php endforeach; ?>
                     </div>
 
                     <textarea id="notes" class="notes-box" placeholder="Notes:"></textarea>
                 </div>
 
                 <div class="products-section">
-<<<<<<< HEAD
-                    <h2>PRODUCTS</h2>
-
-                    <div class="product-group">
-                        <button type="button" class="product-title selectable-product">TIRES</button>
-
-                        <div class="dropdown-group">
-                            <button type="button" class="fake-dropdown" data-type="size">
-                                <span class="dropdown-label">Size</span>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </button>
-
-                            <button type="button" class="fake-dropdown" data-type="brand">
-                                <span class="dropdown-label">Brand</span>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </button>
-                        </div>
-
-                        <div class="quantity-row">
-                            <button type="button" class="qty-btn" data-group="tires">1</button>
-                            <button type="button" class="qty-btn" data-group="tires">2</button>
-                            <button type="button" class="qty-btn" data-group="tires">3</button>
-                            <button type="button" class="qty-btn" data-group="tires">4</button>
-                        </div>
-                    </div>
-
-                    <div class="product-group">
-                        <button type="button" class="product-title selectable-product">BATTERIES</button>
-
-                        <div class="dropdown-group">
-                            <button type="button" class="fake-dropdown" data-type="size">
-                                <span class="dropdown-label">Size</span>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </button>
-
-                            <button type="button" class="fake-dropdown" data-type="brand">
-                                <span class="dropdown-label">Brand</span>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="product-group">
-                        <button type="button" class="product-title selectable-product">MAGWHEELS</button>
-
-                        <div class="dropdown-group">
-                            <button type="button" class="fake-dropdown" data-type="size">
-                                <span class="dropdown-label">Size</span>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </button>
-
-                            <button type="button" class="fake-dropdown" data-type="brand">
-                                <span class="dropdown-label">Brand</span>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </button>
-                        </div>
-
-                        <div class="quantity-row">
-                            <button type="button" class="qty-btn" data-group="magwheels">1</button>
-                            <button type="button" class="qty-btn" data-group="magwheels">2</button>
-                            <button type="button" class="qty-btn" data-group="magwheels">3</button>
-                            <button type="button" class="qty-btn" data-group="magwheels">4</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-=======
                         <h2>PRODUCTS</h2>
 
                         <!-- TIRES -->
@@ -574,7 +428,6 @@ if ($productQuery) {
                         </div>
                     </div>
                 </div>
->>>>>>> Ric
 
             <div class="button-row">
                 <button type="button" class="back-btn" id="step2BackBtn">Back</button>
@@ -588,73 +441,20 @@ if ($productQuery) {
 
             <div class="confirm-box">
                 <div class="confirm-header-row">
-<<<<<<< HEAD
-                    <h2>Personal Info</h2>
-                </div>
-
-                <div class="confirm-line">
-                    <div class="confirm-text">
-                        <strong>Name :</strong>
-                        <span id="confirmNameText">-</span>
-
-                        <div class="edit-input-group hidden-edit" id="nameEditGroup">
-                            <input type="text" id="editFirstName" placeholder="First Name">
-                            <input type="text" id="editMiddleName" placeholder="Middle Name">
-                            <input type="text" id="editLastName" placeholder="Last Name">
-                        </div>
-                    </div>
-                    <button type="button" class="edit-btn" data-edit="name">Edit</button>
-                </div>
-
-                <div class="confirm-line">
-                    <div class="confirm-text">
-                        <strong>Mobile Number:</strong>
-                        <span id="confirmMobileText">-</span>
-
-                        <div class="edit-input-group hidden-edit" id="mobileEditGroup">
-                            <input type="text" id="editMobileNumber" placeholder="Mobile Number">
-                        </div>
-                    </div>
-                    <button type="button" class="edit-btn" data-edit="mobile">Edit</button>
-                </div>
-
-                <div class="confirm-line">
-                    <div class="confirm-text">
-                        <strong>Email:</strong>
-                        <span id="confirmEmailText">-</span>
-
-                        <div class="edit-input-group hidden-edit" id="emailEditGroup">
-                            <input type="email" id="editEmailAddress" placeholder="Email Address">
-                        </div>
-                    </div>
-                    <button type="button" class="edit-btn" data-edit="email">Edit</button>
-                </div>
-            </div>
-
-            <div class="confirm-box">
-                <div class="confirm-header-row">
-=======
->>>>>>> Ric
                     <h2>Appointment Details</h2>
                     <button type="button" class="edit-btn" id="appointmentDetailsEditBtn">Edit</button>
                 </div>
 
-<<<<<<< HEAD
-=======
                 <div class="confirm-detail-line"><strong>Full Name:</strong> <span id="confirmNameText">-</span></div>
                 <div class="confirm-detail-line"><strong>Mobile Number:</strong> <span id="confirmMobileText">-</span></div>
                 <div class="confirm-detail-line"><strong>Email:</strong> <span id="confirmEmailText">-</span></div>
                 <div class="confirm-detail-line"><strong>Vehicle Name/Model:</strong> <span id="confirmVehicleText">-</span></div>
->>>>>>> Ric
                 <div class="confirm-detail-line"><strong>Date:</strong> <span id="confirmDateText">-</span></div>
                 <div class="confirm-detail-line"><strong>Time:</strong> <span id="confirmTimeText">-</span></div>
                 <div class="confirm-detail-line"><strong>Purpose of Visit:</strong> <span id="confirmPurposeText">-</span></div>
                 <div class="confirm-detail-line"><span id="confirmProductText"></span></div>
                 <div class="confirm-detail-line"><span id="confirmNotesText"></span></div>
-<<<<<<< HEAD
-=======
                 <div class="confirm-detail-line"><strong>Total Cost:</strong> <span id="confirmTotalText">PHP 0.00</span></div>
->>>>>>> Ric
             </div>
 
             <div class="button-row">
@@ -662,11 +462,6 @@ if ($productQuery) {
                 <button type="button" class="next-btn" id="finishBtn">Finish</button>
             </div>
         </div>
-<<<<<<< HEAD
-    </main>
-</div>
-=======
->>>>>>> Ric
 
 <!-- TIME POPUP -->
 <div class="popup-overlay" id="timePopupOverlay">
@@ -685,22 +480,13 @@ if ($productQuery) {
 
 <!-- DROPDOWN POPUP -->
 <div class="popup-overlay" id="popupOverlay">
-<<<<<<< HEAD
-    <div class="popup-box">
-        <div class="popup-header">
-            <h3 id="popupTitle">Options</h3>
-=======
     <div class="product-picker-popup">
         <div class="popup-header">
             <h3 id="popupTitle">Select Product</h3>
->>>>>>> Ric
             <button type="button" class="close-popup" id="closePopup">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
-<<<<<<< HEAD
-        <div class="popup-content" id="popupContent"></div>
-=======
 
         <div class="product-picker-toolbar">
             <input type="text" id="popupSearchInput" placeholder="Search brand or size">
@@ -723,7 +509,6 @@ if ($productQuery) {
         </div>
 
         <div class="product-picker-list" id="popupProductList"></div>
->>>>>>> Ric
     </div>
 </div>
 
@@ -737,17 +522,11 @@ if ($productQuery) {
             </button>
         </div>
 
-<<<<<<< HEAD
-        <div class="payment-content">
-=======
                 <div class="payment-content">
->>>>>>> Ric
             <p class="payment-text">
                 To continue with your appointment reservation, please send the reservation payment using the details below.
             </p>
 
-<<<<<<< HEAD
-=======
             <div class="payment-summary-box">
                 <div class="payment-summary-line">
                     <strong>Total Cost:</strong>
@@ -759,33 +538,20 @@ if ($productQuery) {
                 </div>
             </div>
 
->>>>>>> Ric
             <div class="payment-methods">
                 <div class="payment-box">
                     <h4>QR PH / GCash / Maya</h4>
 
-<<<<<<< HEAD
-                    <!-- CHANGE THIS IMAGE PATH WHEN YOU HAVE THE REAL QR -->
-=======
->>>>>>> Ric
                     <img src="../pictures/fake_qr.png" alt="QR Payment" class="payment-qr">
                 </div>
 
                 <div class="payment-box">
                     <h4>Mobile Number</h4>
 
-<<<<<<< HEAD
-                    <!-- CHANGE THIS NUMBER WHEN YOU HAVE THE REAL GCASH / MAYA NUMBER -->
-                    <p class="payment-number">09XX-XXX-XXXX</p>
-
-                    <p class="payment-note">
-                        You may use this number for GCash or Maya payment.
-=======
                     <p class="payment-number">09XX-XXX-XXXX</p>
 
                     <p class="payment-note">
                         Please send exactly the reservation fee amount shown above.
->>>>>>> Ric
                     </p>
                 </div>
             </div>
@@ -832,11 +598,8 @@ if ($productQuery) {
 <?php endif; ?>
 
 <script src="../js/appointment_customer.js"></script>
-<<<<<<< HEAD
-=======
 <script>
-const appointmentProductData = <?php echo json_encode($appointmentProducts, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
+    const appointmentProductData = <?php echo json_encode($appointmentProducts, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
 </script>
->>>>>>> Ric
 </body>
 </html>
