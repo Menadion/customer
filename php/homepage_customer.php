@@ -10,13 +10,21 @@ if (isset($_SESSION['customer_id'])) {
     $customerId = $_SESSION['customer_id'];
 
     $apptStmt = $conn->prepare("
-        SELECT appt_date, appt_time, appt_status
-        FROM appointments_tbl
-        WHERE customer_id = ?
-          AND appt_status IN ('waiting for approval', 'approved')
-        ORDER BY appt_date ASC, appt_time ASC
+        SELECT 
+            a.appt_date,
+            a.appt_time,
+            a.appt_status,
+            GROUP_CONCAT(s.service_name SEPARATOR ', ') AS services
+        FROM appointments_tbl a
+        LEFT JOIN appointment_services_tbl aps ON a.appt_id = aps.appt_id
+        LEFT JOIN service_tbl s ON aps.service_id = s.service_id
+        WHERE a.customer_id = ?
+        AND a.appt_status IN ('waiting for approval', 'approved')
+        GROUP BY a.appt_id
+        ORDER BY a.appt_date ASC, a.appt_time ASC
         LIMIT 1
     ");
+
     $apptStmt->bind_param("i", $customerId);
     $apptStmt->execute();
     $apptResult = $apptStmt->get_result();
@@ -25,11 +33,16 @@ if (isset($_SESSION['customer_id'])) {
         $formattedDate = date("F j, Y", strtotime($apptRow['appt_date']));
         $formattedTime = date("g:i A", strtotime($apptRow['appt_time']));
 
-        if ($apptRow['appt_status'] === 'waiting for approval') {
-            $upcomingText = "Waiting for approval";
-        } else {
-            $upcomingText = "Approved - " . $formattedDate . " at " . $formattedTime;
-        }
+        $servicesText = $apptRow['services'] ?? '-';
+
+        $statusText = ($apptRow['appt_status'] === 'waiting for approval')
+            ? "Waiting for approval"
+            : "Approved";
+
+        $upcomingText = $formattedDate 
+            . " • " . $formattedTime 
+            . " • " . $servicesText 
+            . " • " . $statusText;
 
         $upcomingLink = "appointment_customer.php?view=upcoming";
     }
@@ -49,6 +62,16 @@ if (isset($_SESSION['customer_id'])) {
 
     if (!empty($user['profile_image'])) {
         $topProfileImage = $user['profile_image'];
+    }
+}
+
+$upcomingTitle = "UPCOMING APPOINTMENT";
+
+if ($apptRow) {
+    if ($apptRow['appt_status'] === 'waiting for approval') {
+        $upcomingTitle = "PENDING APPOINTMENT";
+    } else {
+        $upcomingTitle = "UPCOMING APPOINTMENT";
     }
 }
 ?>
@@ -143,7 +166,7 @@ if (isset($_SESSION['customer_id'])) {
                     </div>
 
                     <div class="appointment-details">
-                        <h3>UPCOMING APPOINTMENT</h3>
+                        <h3><?php echo htmlspecialchars($upcomingTitle); ?></h3>
                         <p><?php echo htmlspecialchars($upcomingText); ?></p>
                     </div>
                 </div>
