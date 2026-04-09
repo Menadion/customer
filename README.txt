@@ -7,19 +7,9 @@ account authentication
 
 
 DB related:
-1) Added columns to appointments_tbl
+1) Added columns to customer_tbl (created_at)
 
-ALTER TABLE appointments_tbl
-ADD COLUMN purpose TEXT AFTER appt_time,
-ADD COLUMN notes TEXT AFTER purpose,
-ADD COLUMN tires_product_id INT NULL,
-ADD COLUMN tires_qty INT NULL,
-ADD COLUMN batteries_product_id INT NULL,
-ADD COLUMN magwheels_product_id INT NULL,
-ADD COLUMN magwheels_qty INT NULL,
-ADD COLUMN total_cost DECIMAL(10,2) NULL;
+ALTER TABLE customer_tbl
+MODIFY created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
-2)fix for appt_id auto increment
 
-ALTER TABLE appointments_tbl
-MODIFY appt_id INT NOT NULL AUTO_INCREMENT;

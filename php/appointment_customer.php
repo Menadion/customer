@@ -363,13 +363,13 @@ if ($productQuery) {
 
                         <div class="name-row">
                             <input type="text" id="firstName" placeholder="First Name" value="<?php echo htmlspecialchars($customerFirstName); ?>">
-                            <input type="text" id="middleName" placeholder="Middle Name" value="<?php echo htmlspecialchars($customerMiddleName); ?>">
+                            <input type="text" id="middleName" placeholder="Middle Name(optional)" value="<?php echo htmlspecialchars($customerMiddleName); ?>">
                         </div>
 
                         <input type="text" id="lastName" placeholder="Last Name" value="<?php echo htmlspecialchars($customerLastName); ?>">
                         <input type="text" id="mobileNumber" placeholder="Mobile Number" value="<?php echo htmlspecialchars($customerMobile); ?>">
                         <input type="email" id="emailAddress" placeholder="Email Address" value="<?php echo htmlspecialchars($customerEmail); ?>">
-                        <textarea id="vehicleModel" placeholder="Vehicle Name/Model"><?php echo htmlspecialchars($customerVehicleModel); ?></textarea>
+                        <textarea id="vehicleModel" placeholder="Vehicle Name/Model(optional)"><?php echo htmlspecialchars($customerVehicleModel); ?></textarea>
                     </div>
                 </div>
             </div>
@@ -581,13 +581,13 @@ if ($productQuery) {
                 <div class="payment-box">
                     <h4>QR PH / GCash / Maya</h4>
 
-                    <img src="../pictures/fake_qr.png" alt="QR Payment" class="payment-qr">
+                    <img src="../pictures/qrcode.jpg" alt="QR Payment" class="payment-qr">
                 </div>
 
                 <div class="payment-box">
                     <h4>Mobile Number</h4>
 
-                    <p class="payment-number">09XX-XXX-XXXX</p>
+                    <p class="payment-number">0916-889-391</p>
 
                     <p class="payment-note">
                         Please send exactly the reservation fee amount shown above.

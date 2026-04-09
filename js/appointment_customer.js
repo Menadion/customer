@@ -47,8 +47,97 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const step1NextBtn = document.getElementById("step1NextBtn");
+   if (step1NextBtn) {
+    step1NextBtn.addEventListener("click", function () {
+
+        const selectedDate = document.getElementById("selectedDate")?.value.trim();
+        const selectedTime = document.getElementById("selectedTime")?.value.trim();
+
+        const firstName = document.getElementById("firstName")?.value.trim();
+        const lastName = document.getElementById("lastName")?.value.trim();
+        const mobile = document.getElementById("mobileNumber")?.value.trim();
+        const email = document.getElementById("emailAddress")?.value.trim();
+        const vehicle = document.getElementById("vehicleModel")?.value.trim();
+
+        if (!selectedDate) {
+            alert("Please select a calendar date.");
+            return;
+        }
+
+        if (!selectedTime) {
+            alert("Please select a time.");
+            return;
+        }
+
+        if (!firstName) {
+            alert("Please enter your first name.");
+            return;
+        }
+
+        if (!lastName) {
+            alert("Please enter your last name.");
+            return;
+        }
+
+        if (!mobile) {
+            alert("Please enter your mobile number.");
+            return;
+        }
+
+        if (!email) {
+            alert("Please enter your email address.");
+            return;
+        }
+
+        if (step1) step1.classList.add("hidden-step");
+        if (step2) step2.classList.remove("hidden-step");
+    });
+}
     const step2BackBtn = document.getElementById("step2BackBtn");
-    const step2NextBtn = document.getElementById("step2NextBtn");
+    if (step2NextBtn) {
+    step2NextBtn.addEventListener("click", function () {
+        const tireService = document.querySelector('.service-item[data-enables="tires"]')?.classList.contains("active");
+        const batteryService = document.querySelector('.service-item[data-enables="batteries"]')?.classList.contains("active");
+        const magwheelService = document.querySelector('.service-item[data-enables="magwheels"]')?.classList.contains("active");
+
+        const tireProduct = document.getElementById("tiresProductId")?.value.trim();
+        const batteryProduct = document.getElementById("batteriesProductId")?.value.trim();
+        const magProduct = document.getElementById("magwheelsProductId")?.value.trim();
+
+        const selectedServices = document.querySelectorAll(".service-item.active");
+
+        if (selectedServices.length === 0) {
+            alert("Please select a service.");
+            return;
+        }
+
+        if (tireService && !tireProduct) {
+            alert("Please select a tire product and size.");
+            return;
+        }
+
+        if (batteryService && !batteryProduct) {
+            alert("Please select a battery product and size.");
+            return;
+        }
+
+        if (magwheelService && !magProduct) {
+            alert("Please select a magwheel product and size.");
+            return;
+        }
+
+        updateConfirmation();
+
+        if (editFirstName && firstName) editFirstName.value = firstName.value;
+        if (editMiddleName && middleName) editMiddleName.value = middleName.value;
+        if (editLastName && lastName) editLastName.value = lastName.value;
+        if (editMobileNumber && mobileNumber) editMobileNumber.value = mobileNumber.value;
+        if (editEmailAddress && emailAddress) editEmailAddress.value = emailAddress.value;
+
+        if (step2) step2.classList.add("hidden-step");
+        if (step3) step3.classList.remove("hidden-step");
+    });
+}
     const step3BackBtn = document.getElementById("step3BackBtn");
     const appointmentDetailsEditBtn = document.getElementById("appointmentDetailsEditBtn");
     const finishBtn = document.getElementById("finishBtn");
@@ -649,32 +738,10 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    if (step1NextBtn) {
-        step1NextBtn.addEventListener("click", function () {
-            if (step1) step1.classList.add("hidden-step");
-            if (step2) step2.classList.remove("hidden-step");
-        });
-    }
-
     if (step2BackBtn) {
         step2BackBtn.addEventListener("click", function () {
             if (step2) step2.classList.add("hidden-step");
             if (step1) step1.classList.remove("hidden-step");
-        });
-    }
-
-    if (step2NextBtn) {
-        step2NextBtn.addEventListener("click", function () {
-            updateConfirmation();
-
-            if (editFirstName && firstName) editFirstName.value = firstName.value;
-            if (editMiddleName && middleName) editMiddleName.value = middleName.value;
-            if (editLastName && lastName) editLastName.value = lastName.value;
-            if (editMobileNumber && mobileNumber) editMobileNumber.value = mobileNumber.value;
-            if (editEmailAddress && emailAddress) editEmailAddress.value = emailAddress.value;
-
-            if (step2) step2.classList.add("hidden-step");
-            if (step3) step3.classList.remove("hidden-step");
         });
     }
 
