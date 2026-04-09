@@ -46,33 +46,49 @@ if (isset($_SESSION['customer_id'])) {
 
 $viewMode = $_GET['view'] ?? 'book';
 $isUpcomingView = ($viewMode === 'upcoming');
+$showBlockedMessage = false;
 
 $appointmentFound = false;
 $appointmentRow = null;
+
+if (!$isUpcomingView && $appointmentFound) {
+    $showBlockedMessage = true;
+}
 
 if (isset($_SESSION['customer_id'])) {
     $customerId = $_SESSION['customer_id'];
 
     $apptStmt = $conn->prepare("
-        SELECT 
-        appt_date,
-        appt_time,
-        appt_status,
-        created_at,
-        purpose,
-        notes,
-        tires_product_id,
-        tires_qty,
-        batteries_product_id,
-        magwheels_product_id,
-        magwheels_qty,
-        total_cost
-        FROM appointments_tbl
-        WHERE customer_id = ?
-        AND appt_status IN ('waiting for approval','approved')
-        ORDER BY appt_date ASC, appt_time ASC
-        LIMIT 1
-    ");
+    SELECT 
+        a.appt_id,
+        a.appt_date,
+        a.appt_time,
+        a.appt_status,
+        a.created_at,
+        a.purpose,
+        a.notes,
+        a.tires_product_id,
+        a.tires_qty,
+        a.batteries_product_id,
+        a.magwheels_product_id,
+        a.magwheels_qty,
+        a.total_cost
+    FROM appointments_tbl a
+    WHERE a.customer_id = ?
+      AND (
+            a.appt_status = 'waiting for approval'
+            OR (
+                a.appt_status = 'approved'
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM transaction_tbl t
+                    WHERE t.appt_id = a.appt_id
+                )
+            )
+          )
+    ORDER BY a.appt_date ASC, a.appt_time ASC
+    LIMIT 1
+");
     $apptStmt->bind_param("i", $customerId);
     $apptStmt->execute();
     $apptResult = $apptStmt->get_result();
@@ -250,6 +266,30 @@ if ($productQuery) {
                 </button>
             </div>
         <?php else: ?>
+
+    <?php if ($showBlockedMessage): ?>
+        <div class="upcoming-page-card">
+            <div class="empty-upcoming-box">
+                <i class="fa-solid fa-circle-exclamation empty-upcoming-icon"></i>
+                <h1>Existing appointment found</h1>
+                <p>
+                    You can't create more appointments because you already have an existing appointment
+                    that is waiting for approval or already approved.
+                </p>
+
+                <div class="button-row" style="justify-content:center; gap:12px;">
+                    <button type="button" class="back-btn" onclick="window.location.href='homepage_customer.php'">
+                        Back
+                    </button>
+
+                    <button type="button" class="next-btn" onclick="window.location.href='appointment_customer.php?view=upcoming'">
+                        View Appointment
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    <?php else: ?>
             <div class="upcoming-details-card">
                 <h1>Your Upcoming Appointment</h1>
 
@@ -310,7 +350,8 @@ if ($productQuery) {
                     </button>
                 </div>
             </div>
-        <?php endif; ?>
+            <?php endif; ?>
+<?php endif; ?>
     </div>
 
 <?php else: ?>

@@ -1,6 +1,7 @@
 <?php
 session_start();
 include 'db_connect.php';
+include 'appointment_guard.php';
 
 $topProfileImage = "../pictures/default_profile.png";
 
@@ -38,7 +39,12 @@ if (isset($_SESSION['customer_id'])) {
                 <span>Homepage</span>
             </a>
 
-            <a href="appointment_customer.php" class="nav-item">
+            <a
+                href="appointment_customer.php"
+                class="nav-item guard-appointment-link"
+                data-has-existing-appointment="<?php echo $hasExistingAppointment ? '1' : '0'; ?>"
+                data-allow-upcoming-view="0"
+            >
                 <i class="fa-regular fa-calendar-check"></i>
                 <span>Appointment</span>
             </a>
@@ -196,5 +202,6 @@ if (isset($_SESSION['customer_id'])) {
 </div>
 
 <script src="../js/services_customer.js"></script>
+<script src="../js/appointment_guard.js"></script>
 </body>
 </html>

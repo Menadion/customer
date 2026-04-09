@@ -5,23 +5,36 @@ include 'db_connect.php';
 $upcomingTitle = "UPCOMING APPOINTMENT";
 $upcomingText = "No upcoming appointment";
 $upcomingLink = "appointment_customer.php?view=upcoming";
+$hasExistingAppointment = false;
 
 if (isset($_SESSION['customer_id'])) {
     $customerId = $_SESSION['customer_id'];
 
     $apptStmt = $conn->prepare("
-        SELECT appt_date, appt_time, appt_status
-        FROM appointments_tbl
-        WHERE customer_id = ?
-          AND appt_status IN ('waiting for approval', 'approved')
-        ORDER BY appt_date ASC, appt_time ASC
-        LIMIT 1
-    ");
+    SELECT a.appt_id, a.appt_date, a.appt_time, a.appt_status
+    FROM appointments_tbl a
+    WHERE a.customer_id = ?
+      AND (
+            a.appt_status = 'waiting for approval'
+            OR (
+                a.appt_status = 'approved'
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM transaction_tbl t
+                    WHERE t.appt_id = a.appt_id
+                )
+            )
+          )
+    ORDER BY a.appt_date ASC, a.appt_time ASC
+    LIMIT 1
+");
     $apptStmt->bind_param("i", $customerId);
     $apptStmt->execute();
     $apptResult = $apptStmt->get_result();
 
     if ($apptRow = $apptResult->fetch_assoc()) {
+        $hasExistingAppointment = true;
+
         $formattedDate = date("F j, Y", strtotime($apptRow['appt_date']));
         $formattedTime = date("g:i A", strtotime($apptRow['appt_time']));
 
@@ -74,7 +87,12 @@ if (isset($_SESSION['customer_id'])) {
                     <span>Homepage</span>
                 </a>
 
-                <a href="appointment_customer.php" class="nav-item">
+                <a
+                    href="appointment_customer.php"
+                    class="nav-item"
+                    id="sidebarAppointmentLink"
+                    data-has-existing-appointment="<?php echo $hasExistingAppointment ? '1' : '0'; ?>"
+                >
                     <i class="fa-regular fa-calendar-check"></i>
                     <span>Appointment</span>
                 </a>
@@ -130,7 +148,11 @@ if (isset($_SESSION['customer_id'])) {
             <h1 class="welcome-text">Welcome User</h1>
 
             <div class="top-cards">
-                <button class="book-card" id="bookAppointmentBtn">
+                <button
+                    class="book-card"
+                    id="bookAppointmentBtn"
+                    data-has-existing-appointment="<?php echo $hasExistingAppointment ? '1' : '0'; ?>"
+                >
                     <div class="book-icon">
                         <i class="fa-regular fa-calendar"></i>
                     </div>

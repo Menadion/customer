@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 25, 2026 at 07:49 AM
+-- Generation Time: Mar 16, 2026 at 11:25 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `dh_azada`
+-- Database: `sendtojas`
 --
 
 -- --------------------------------------------------------
@@ -28,7 +28,7 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `appointments_tbl` (
-  `appt_id` int(11) NOT NULL,
+  `app_id` int(11) NOT NULL,
   `customer_id` int(11) DEFAULT NULL,
   `service_id` int(11) DEFAULT NULL,
   `employee_id` int(11) DEFAULT NULL,
@@ -37,14 +37,6 @@ CREATE TABLE `appointments_tbl` (
   `appt_status` enum('pending','completed','cancelled') DEFAULT NULL,
   `created_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `appointments_tbl`
---
-
-INSERT INTO `appointments_tbl` (`appt_id`, `customer_id`, `service_id`, `employee_id`, `appt_date`, `appt_time`, `appt_status`, `created_at`) VALUES
-(4, 1, 1, 1, '2026-03-25', '10:00:00', 'completed', '2026-03-23 17:02:34'),
-(5, 1, 1, NULL, '2026-03-30', '10:00:00', '', NULL);
 
 -- --------------------------------------------------------
 
@@ -67,13 +59,6 @@ CREATE TABLE `customer_tbl` (
   `status` enum('active','inactive') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `customer_tbl`
---
-
-INSERT INTO `customer_tbl` (`customer_id`, `email`, `password_hash`, `fname`, `mname`, `lname`, `birthday`, `vehicle_type`, `mobile_number`, `created_at`, `last_login`, `status`) VALUES
-(1, 'test@gmail.com', '123', 'John', NULL, 'Doe', NULL, NULL, '09123456789', NULL, NULL, 'active');
-
 -- --------------------------------------------------------
 
 --
@@ -94,13 +79,6 @@ CREATE TABLE `employee_tbl` (
   `status` enum('active','inactive') DEFAULT NULL,
   `last_login` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `employee_tbl`
---
-
-INSERT INTO `employee_tbl` (`employee_id`, `email`, `password_hash`, `uRole_name`, `uRole_desc`, `fname`, `mname`, `lname`, `birthday`, `created_at`, `status`, `last_login`) VALUES
-(1, 'admin@gmail.com', 'admin123', 'admin', 'admin', 'admin', 'admin', 'admin', '1999-01-01', '2026-03-22 21:52:56', 'active', '2026-03-22 21:52:56');
 
 -- --------------------------------------------------------
 
@@ -134,13 +112,6 @@ CREATE TABLE `service_tbl` (
   `created_at` datetime DEFAULT NULL,
   `status` enum('active','inactive') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `service_tbl`
---
-
-INSERT INTO `service_tbl` (`service_id`, `service_name`, `service_type`, `price`, `created_at`, `status`) VALUES
-(1, 'Tire Replacement', 'Repair', 500.00, '2026-03-23 17:02:08', 'active');
 
 -- --------------------------------------------------------
 
@@ -199,18 +170,11 @@ CREATE TABLE `transaction_tbl` (
   `transaction_id` int(11) NOT NULL,
   `employee_id` int(11) DEFAULT NULL,
   `customer_id` int(11) DEFAULT NULL,
-  `appt_id` int(11) DEFAULT NULL,
+  `app_id` int(11) DEFAULT NULL,
   `total_amount` decimal(10,2) DEFAULT NULL,
   `payment_method` enum('cash','card','gcash') DEFAULT NULL,
   `created_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `transaction_tbl`
---
-
-INSERT INTO `transaction_tbl` (`transaction_id`, `employee_id`, `customer_id`, `appt_id`, `total_amount`, `payment_method`, `created_at`) VALUES
-(1, 1, 1, 4, 500.00, 'cash', '2026-03-25 14:44:35');
 
 --
 -- Indexes for dumped tables
@@ -220,7 +184,7 @@ INSERT INTO `transaction_tbl` (`transaction_id`, `employee_id`, `customer_id`, `
 -- Indexes for table `appointments_tbl`
 --
 ALTER TABLE `appointments_tbl`
-  ADD PRIMARY KEY (`appt_id`),
+  ADD PRIMARY KEY (`app_id`),
   ADD KEY `customer_id` (`customer_id`),
   ADD KEY `service_id` (`service_id`),
   ADD KEY `employee_id` (`employee_id`);
@@ -280,23 +244,29 @@ ALTER TABLE `transaction_tbl`
   ADD PRIMARY KEY (`transaction_id`),
   ADD KEY `employee_id` (`employee_id`),
   ADD KEY `customer_id` (`customer_id`),
-  ADD KEY `app_id` (`appt_id`);
+  ADD KEY `app_id` (`app_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
 --
 
 --
+-- AUTO_INCREMENT for table `appointments_tbl`
+--
+ALTER TABLE `appointments_tbl`
+  MODIFY `app_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `customer_tbl`
 --
 ALTER TABLE `customer_tbl`
-  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `employee_tbl`
 --
 ALTER TABLE `employee_tbl`
-  MODIFY `employee_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `employee_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `product_tbl`
@@ -308,7 +278,7 @@ ALTER TABLE `product_tbl`
 -- AUTO_INCREMENT for table `service_tbl`
 --
 ALTER TABLE `service_tbl`
-  MODIFY `service_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `service_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `stockbatch_tbl`
@@ -332,7 +302,7 @@ ALTER TABLE `transaction_items_tbl`
 -- AUTO_INCREMENT for table `transaction_tbl`
 --
 ALTER TABLE `transaction_tbl`
-  MODIFY `transaction_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `transaction_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -373,7 +343,7 @@ ALTER TABLE `transaction_items_tbl`
 ALTER TABLE `transaction_tbl`
   ADD CONSTRAINT `transaction_tbl_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee_tbl` (`employee_id`),
   ADD CONSTRAINT `transaction_tbl_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customer_tbl` (`customer_id`),
-  ADD CONSTRAINT `transaction_tbl_ibfk_3` FOREIGN KEY (`appt_id`) REFERENCES `appointments_tbl` (`appt_id`);
+  ADD CONSTRAINT `transaction_tbl_ibfk_3` FOREIGN KEY (`app_id`) REFERENCES `appointments_tbl` (`app_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -1,6 +1,7 @@
 <?php
 session_start();
 include 'db_connect.php';
+include 'appointment_guard.php';
 
 if (!isset($_SESSION['customer_id'])) {
     header("Location: customer_login.php");
@@ -130,7 +131,12 @@ $stmt->close();
                 <span>Homepage</span>
             </a>
 
-            <a href="appointment_customer.php" class="nav-item">
+            <a
+                href="appointment_customer.php"
+                class="nav-item guard-appointment-link"
+                data-has-existing-appointment="<?php echo $hasExistingAppointment ? '1' : '0'; ?>"
+                data-allow-upcoming-view="0"
+            >
                 <i class="fa-regular fa-calendar-check"></i>
                 <span>Appointment</span>
             </a>
@@ -270,5 +276,6 @@ $stmt->close();
 </div>
 
 <script src="../js/transaction_history.js"></script>
+<script src="../js/appointment_guard.js"></script>
 </body>
 </html>

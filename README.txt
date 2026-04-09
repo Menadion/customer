@@ -6,10 +6,8 @@ to do:
 account authentication
 
 
-DB related:
-1) Added columns to customer_tbl (created_at)
-
-ALTER TABLE customer_tbl
-MODIFY created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
+changes:
+cant make more that 1 appointment.
+automatically reset upcoming appointment page when transaction inserted in customer account marking as appointment completed.
 
 

@@ -14,6 +14,27 @@ if (!isset($_SESSION['customer_id'])) {
 
 $customerId = $_SESSION['customer_id'];
 
+$existingStmt = $conn->prepare("
+    SELECT appt_id
+    FROM appointments_tbl
+    WHERE customer_id = ?
+      AND appt_status IN ('waiting for approval', 'approved')
+    LIMIT 1
+");
+$existingStmt->bind_param("i", $customerId);
+$existingStmt->execute();
+$existingResult = $existingStmt->get_result();
+
+if ($existingResult && $existingResult->num_rows > 0) {
+    $existingStmt->close();
+    echo json_encode([
+        "success" => false,
+        "message" => "You can't create more appointments because you already have an existing appointment."
+    ]);
+    exit();
+}
+$existingStmt->close();
+
 $apptDate = $_POST['appt_date'] ?? '';
 $apptTimeRaw = $_POST['appt_time'] ?? '';
 $purpose = trim($_POST['purpose'] ?? '');
@@ -45,9 +66,6 @@ if (!$timeObj) {
 }
 $apptTime = $timeObj->format('H:i:s');
 
-/*
-    Compute total cost based on selected products
-*/
 $totalCost = 0;
 
 if ($tiresProductId) {
