@@ -1,7 +1,28 @@
 <?php
 include 'db_connect.php';
+require_once 'mailer.php';
 
 $message = "";
+$maxBirthday = (new DateTime('today'))->modify('-17 years')->format('Y-m-d');
+
+function getBaseUrl() {
+    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443);
+    $scheme = $isHttps ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+    $scriptDir = str_replace('\\', '/', dirname($_SERVER['PHP_SELF'] ?? '/'));
+    $segments = array_filter(explode('/', trim($scriptDir, '/')), function ($segment) {
+        return $segment !== '';
+    });
+    $encodedPath = '';
+
+    if (!empty($segments)) {
+        $encodedPath = '/' . implode('/', array_map('rawurlencode', $segments));
+    }
+
+    return $scheme . '://' . $host . $encodedPath;
+}
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $fname = trim($_POST['first_name']);
@@ -13,7 +34,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
-    if ($password !== $confirm_password) {
+    $birthdayDate = DateTime::createFromFormat('!Y-m-d', $birthday);
+    $isValidBirthday = $birthdayDate && $birthdayDate->format('Y-m-d') === $birthday;
+    $maxBirthdayDate = DateTime::createFromFormat('!Y-m-d', $maxBirthday);
+    $isAtLeast17 = $isValidBirthday && $maxBirthdayDate && $birthdayDate <= $maxBirthdayDate;
+
+    $hasMinLength = strlen($password) >= 8;
+    $hasUppercase = preg_match('/[A-Z]/', $password);
+    $hasNumber = preg_match('/[0-9]/', $password);
+    $hasSpecial = preg_match('/[^a-zA-Z0-9]/', $password);
+
+    if (!$isValidBirthday) {
+        $message = "Please enter a valid birthday.";
+    } elseif (!$isAtLeast17) {
+        $message = "You must be at least 17 years old to create an account.";
+    } elseif (!$hasMinLength || !$hasUppercase || !$hasNumber || !$hasSpecial) {
+        $message = "Password must be at least 8 characters and include at least 1 uppercase letter, 1 number, and 1 special character.";
+    } elseif ($password !== $confirm_password) {
         $message = "Passwords do not match.";
     } else {
         $checkStmt = $conn->prepare("SELECT customer_id FROM customer_tbl WHERE email = ? OR mobile_number = ?");
@@ -52,16 +89,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $message = "Mobile number is already registered.";
         } else {
             $password_hash = password_hash($password, PASSWORD_DEFAULT);
-            $status = "active";
+            $status = "inactive";
+            $verificationToken = bin2hex(random_bytes(32));
+            $verificationLink = getBaseUrl() . "/verify_customer.php?token=" . urlencode($verificationToken);
 
             $stmt = $conn->prepare("
                 INSERT INTO customer_tbl
-                (email, password_hash, fname, mname, lname, birthday, mobile_number, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                (email, password_hash, fname, mname, lname, birthday, mobile_number, status, email_verification_token, email_verified_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
             ");
 
             $stmt->bind_param(
-                "ssssssss",
+                "sssssssss",
                 $email,
                 $password_hash,
                 $fname,
@@ -69,11 +108,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $lname,
                 $birthday,
                 $mobile_number,
-                $status
+                $status,
+                $verificationToken
             );
 
             if ($stmt->execute()) {
-                $message = "Account created successfully. You may now log in.";
+                $mailError = '';
+                $mailSent = sendVerificationEmail($email, $verificationLink, $mailError);
+                if ($mailSent) {
+                    $message = "Account created. Please check your email and click the verification link before logging in.";
+                } else {
+                    $message = "Account created, but verification email could not be sent. Use this link to verify: " . $verificationLink;
+                    if ($mailError !== '') {
+                        $message .= " (" . $mailError . ")";
+                    }
+                }
             } else {
                 $message = "Error creating account.";
             }
@@ -125,6 +174,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         id="birthday"
                         name="birthday"
                         placeholder="Enter your birthday"
+                        max="<?php echo htmlspecialchars($maxBirthday); ?>"
+                        title="You must be at least 17 years old to create an account."
                         onfocus="activateBirthday(this)"
                         onblur="restoreBirthday(this)"
                         required
@@ -135,14 +186,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <input type="email" name="email" placeholder="Enter your email" required>
 
                 <div class="password-group">
-                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        pattern="^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$"
+                        title="Password must be at least 8 characters and include at least 1 uppercase letter, 1 number, and 1 special character."
+                        required
+                    >
                     <span class="toggle-eye" onclick="togglePassword('password', this)">
                         <i class="fa-solid fa-eye-slash"></i>
                     </span>
                 </div>
 
                 <div class="password-group">
-                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm your password" required>
+                    <input
+                        type="password"
+                        id="confirm_password"
+                        name="confirm_password"
+                        placeholder="Confirm your password"
+                        pattern="^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$"
+                        title="Password must be at least 8 characters and include at least 1 uppercase letter, 1 number, and 1 special character."
+                        required
+                    >
                     <span class="toggle-eye" onclick="togglePassword('confirm_password', this)">
                         <i class="fa-solid fa-eye-slash"></i>
                     </span>

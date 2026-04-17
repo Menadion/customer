@@ -56,7 +56,9 @@ CREATE TABLE `customer_tbl` (
   `mobile_number` varchar(15) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `last_login` datetime DEFAULT NULL,
-  `status` enum('active','inactive') DEFAULT NULL
+  `status` enum('active','inactive') DEFAULT NULL,
+  `email_verification_token` varchar(64) DEFAULT NULL,
+  `email_verified_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
