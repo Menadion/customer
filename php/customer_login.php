@@ -3,6 +3,14 @@ session_start();
 include 'db_connect.php';
 
 $message = "";
+$messageColor = "red";
+
+if (isset($_GET['verified']) && $_GET['verified'] === '1') {
+    $message = "Account verified. You may now log in.";
+    $messageColor = "#1f4037";
+} elseif (isset($_GET['verified']) && $_GET['verified'] === 'invalid') {
+    $message = "Verification link is invalid or expired.";
+}
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $email = trim($_POST['email']);
@@ -21,7 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         if (!password_verify($password, $user['password_hash'])) {
             $message = "Wrong email or password.";
         } elseif ($user['status'] !== 'active') {
-            $message = "This account is not active.";
+            $message = "Please verify your email before logging in.";
         } else {
             $_SESSION['customer_id'] = $user['customer_id'];
             $_SESSION['customer_email'] = $user['email'];
@@ -69,7 +77,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <p>D.H Azada Tire Supply Customer Portal</p>
 
                 <?php if (!empty($message)): ?>
-                    <p style="color:red; font-weight:bold; margin-bottom:15px;">
+                    <p style="color:<?php echo htmlspecialchars($messageColor); ?>; font-weight:bold; margin-bottom:15px;">
                         <?php echo htmlspecialchars($message); ?>
                     </p>
                 <?php endif; ?>

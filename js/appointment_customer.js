@@ -6,14 +6,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const profileToggle = document.getElementById("profileToggle");
     const profileMenu = document.getElementById("profileMenu");
 
-    const categoryMap = {
-    tire: "tires",
-    battery: "batteries",
-    magwheel: "magwheels",
-    underchassis: null,
-    vulcanize: null
-    };
-
     if (notificationBtn && notificationBox) {
         notificationBtn.addEventListener("click", function (e) {
             e.stopPropagation();
@@ -55,8 +47,97 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const step1NextBtn = document.getElementById("step1NextBtn");
+   if (step1NextBtn) {
+    step1NextBtn.addEventListener("click", function () {
+
+        const selectedDate = document.getElementById("selectedDate")?.value.trim();
+        const selectedTime = document.getElementById("selectedTime")?.value.trim();
+
+        const firstName = document.getElementById("firstName")?.value.trim();
+        const lastName = document.getElementById("lastName")?.value.trim();
+        const mobile = document.getElementById("mobileNumber")?.value.trim();
+        const email = document.getElementById("emailAddress")?.value.trim();
+        const vehicle = document.getElementById("vehicleModel")?.value.trim();
+
+        if (!selectedDate) {
+            alert("Please select a calendar date.");
+            return;
+        }
+
+        if (!selectedTime) {
+            alert("Please select a time.");
+            return;
+        }
+
+        if (!firstName) {
+            alert("Please enter your first name.");
+            return;
+        }
+
+        if (!lastName) {
+            alert("Please enter your last name.");
+            return;
+        }
+
+        if (!mobile) {
+            alert("Please enter your mobile number.");
+            return;
+        }
+
+        if (!email) {
+            alert("Please enter your email address.");
+            return;
+        }
+
+        if (step1) step1.classList.add("hidden-step");
+        if (step2) step2.classList.remove("hidden-step");
+    });
+}
     const step2BackBtn = document.getElementById("step2BackBtn");
-    const step2NextBtn = document.getElementById("step2NextBtn");
+    if (step2NextBtn) {
+    step2NextBtn.addEventListener("click", function () {
+        const tireService = document.querySelector('.service-item[data-enables="tires"]')?.classList.contains("active");
+        const batteryService = document.querySelector('.service-item[data-enables="batteries"]')?.classList.contains("active");
+        const magwheelService = document.querySelector('.service-item[data-enables="magwheels"]')?.classList.contains("active");
+
+        const tireProduct = document.getElementById("tiresProductId")?.value.trim();
+        const batteryProduct = document.getElementById("batteriesProductId")?.value.trim();
+        const magProduct = document.getElementById("magwheelsProductId")?.value.trim();
+
+        const selectedServices = document.querySelectorAll(".service-item.active");
+
+        if (selectedServices.length === 0) {
+            alert("Please select a service.");
+            return;
+        }
+
+        if (tireService && !tireProduct) {
+            alert("Please select a tire product and size.");
+            return;
+        }
+
+        if (batteryService && !batteryProduct) {
+            alert("Please select a battery product and size.");
+            return;
+        }
+
+        if (magwheelService && !magProduct) {
+            alert("Please select a magwheel product and size.");
+            return;
+        }
+
+        updateConfirmation();
+
+        if (editFirstName && firstName) editFirstName.value = firstName.value;
+        if (editMiddleName && middleName) editMiddleName.value = middleName.value;
+        if (editLastName && lastName) editLastName.value = lastName.value;
+        if (editMobileNumber && mobileNumber) editMobileNumber.value = mobileNumber.value;
+        if (editEmailAddress && emailAddress) editEmailAddress.value = emailAddress.value;
+
+        if (step2) step2.classList.add("hidden-step");
+        if (step3) step3.classList.remove("hidden-step");
+    });
+}
     const step3BackBtn = document.getElementById("step3BackBtn");
     const appointmentDetailsEditBtn = document.getElementById("appointmentDetailsEditBtn");
     const finishBtn = document.getElementById("finishBtn");
@@ -231,7 +312,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    function buildServiceText() {
+    function buildPurposeText() {
         const activeServices = [...document.querySelectorAll(".service-item.active")]
             .map(item => item.textContent.trim());
 
@@ -473,7 +554,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (confirmVehicleText) confirmVehicleText.textContent = vehicleModel?.value.trim() || "-";
         if (confirmDateText) confirmDateText.textContent = formatDate(selectedDateInput?.value);
         if (confirmTimeText) confirmTimeText.textContent = selectedTimeInput?.value || "-";
-        if (confirmPurposeText) confirmPurposeText.textContent = buildServiceText();
+        if (confirmPurposeText) confirmPurposeText.textContent = buildPurposeText();
         if (confirmProductText) confirmProductText.textContent = buildProductText();
         if (confirmNotesText) confirmNotesText.textContent = notes?.value.trim() ? `Notes: ${notes.value.trim()}` : "";
 
@@ -537,22 +618,40 @@ document.addEventListener("DOMContentLoaded", function () {
             group.classList.add("product-group-disabled");
         });
 
-        const activeServices = document.querySelectorAll(".service-item.active");
+        const activeServices = document.querySelectorAll(".service-item.active[data-enables]");
 
         activeServices.forEach(service => {
-            const category = service.getAttribute("data-category");
-
-            const mapped = categoryMap[category];
-
-            if (!mapped) return;
-
-            const matchingGroup = document.querySelector(
-                `.product-group[data-product-group="${mapped}"]`
-            );
+            const targetGroup = service.getAttribute("data-enables");
+            const matchingGroup = document.querySelector(`.product-group[data-product-group="${targetGroup}"]`);
 
             if (matchingGroup) {
                 matchingGroup.classList.remove("product-group-disabled");
                 matchingGroup.classList.add("product-group-enabled");
+            }
+        });
+
+        ["tires", "batteries", "magwheels"].forEach(productType => {
+            const group = document.querySelector(`.product-group[data-product-group="${productType}"]`);
+            const enabled = group?.classList.contains("product-group-enabled");
+
+            if (!enabled) {
+                selectedProductState[productType] = null;
+
+                const button = document.querySelector(`.select-product-btn[data-product-type="${productType}"]`);
+                const selectedText = document.getElementById(`${productType}SelectedText`);
+                const priceText = document.getElementById(`${productType}PriceText`);
+                const productIdInput = document.getElementById(`${productType}ProductId`);
+                const qtyInput = document.getElementById(`${productType}QtyInput`);
+
+                if (button) button.textContent = "Select Brand and Size";
+                if (selectedText) selectedText.textContent = "None";
+                if (priceText) priceText.textContent = "-";
+                if (productIdInput) productIdInput.value = "";
+                if (qtyInput) {
+                    qtyInput.value = 1;
+                    qtyInput.min = 1;
+                    qtyInput.max = 1;
+                }
             }
         });
 
@@ -639,32 +738,10 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    if (step1NextBtn) {
-        step1NextBtn.addEventListener("click", function () {
-            if (step1) step1.classList.add("hidden-step");
-            if (step2) step2.classList.remove("hidden-step");
-        });
-    }
-
     if (step2BackBtn) {
         step2BackBtn.addEventListener("click", function () {
             if (step2) step2.classList.add("hidden-step");
             if (step1) step1.classList.remove("hidden-step");
-        });
-    }
-
-    if (step2NextBtn) {
-        step2NextBtn.addEventListener("click", function () {
-            updateConfirmation();
-
-            if (editFirstName && firstName) editFirstName.value = firstName.value;
-            if (editMiddleName && middleName) editMiddleName.value = middleName.value;
-            if (editLastName && lastName) editLastName.value = lastName.value;
-            if (editMobileNumber && mobileNumber) editMobileNumber.value = mobileNumber.value;
-            if (editEmailAddress && emailAddress) editEmailAddress.value = emailAddress.value;
-
-            if (step2) step2.classList.add("hidden-step");
-            if (step3) step3.classList.remove("hidden-step");
         });
     }
 
@@ -750,63 +827,33 @@ document.addEventListener("DOMContentLoaded", function () {
     if (closeSuccessBtn) {
         closeSuccessBtn.addEventListener("click", function () {
             const formData = new FormData();
-            const selectedServices = document.querySelectorAll(".service-item.active");
-
-            if (!selectedDateInput?.value || !selectedTimeInput?.value) {
-                alert("Please select date and time.");
-                return;
-            }
-
-            if (selectedServices.length === 0) {
-                alert("Please select at least one service.");
-                return;
-            }
-
-            closeSuccessBtn.disabled = true;
-            formData.append("appt_date", selectedDateInput.value);
-            formData.append("appt_time", selectedTimeInput.value);
-
-            selectedServices.forEach(service => {
-                const id = service.dataset.serviceId;
-                if (id) {
-                    formData.append("services[]", id);
-                }
-            });
-
+            formData.append("appt_date", selectedDateInput?.value || "");
+            formData.append("appt_time", selectedTimeInput?.value || "");
+            formData.append("purpose", buildPurposeText());
             formData.append("notes", notes?.value || "");
 
-            console.log("Submitting:", {
-                date: selectedDateInput.value,
-                time: selectedTimeInput.value,
-                services: [...selectedServices]
-                    .map(s => s.dataset.serviceId)
-                    .filter(Boolean),
-                notes: notes?.value
-            });
+            formData.append("tires_product_id", document.getElementById("tiresProductId")?.value || "");
+            formData.append("tires_qty", document.getElementById("tiresQtyInput")?.value || "1");
+
+            formData.append("batteries_product_id", document.getElementById("batteriesProductId")?.value || "");
+
+            formData.append("magwheels_product_id", document.getElementById("magwheelsProductId")?.value || "");
+            formData.append("magwheels_qty", document.getElementById("magwheelsQtyInput")?.value || "1");
 
             fetch("save_appointment.php", {
                 method: "POST",
                 body: formData
             })
-
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     window.location.href = "homepage_customer.php";
                 } else {
                     alert(data.message || "Failed to save appointment.");
-                    closeSuccessBtn.disabled = false;
                 }
             })
-            .catch((err) => {
-                console.error(err);
+            .catch(() => {
                 alert("Something went wrong while saving the appointment.");
-                closeSuccessBtn.disabled = false;
             });
         });
     }

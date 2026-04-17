@@ -1,6 +1,7 @@
 <?php
 session_start();
 include 'db_connect.php';
+include 'appointment_guard.php';
 
 if (!isset($_SESSION['customer_id'])) {
     header("Location: customer_login.php");
@@ -35,11 +36,14 @@ $sql = "
         t.total_amount,
         t.payment_method,
         t.created_at,
-        GROUP_CONCAT(s.service_name SEPARATOR ', ') AS services
+        a.purpose,
+        a.tires_product_id,
+        a.tires_qty,
+        a.batteries_product_id,
+        a.magwheels_product_id,
+        a.magwheels_qty
     FROM transaction_tbl t
     LEFT JOIN appointments_tbl a ON t.appt_id = a.appt_id
-    LEFT JOIN appointment_services_tbl aps ON a.appt_id = aps.appt_id
-    LEFT JOIN service_tbl s ON aps.service_id = s.service_id
     WHERE t.customer_id = ?
 ";
 
@@ -58,7 +62,6 @@ if (!empty($toDate)) {
     $types .= "s";
 }
 
-$sql .= " GROUP BY t.transaction_id";
 $sql .= " ORDER BY t.created_at DESC";
 
 $stmt = $conn->prepare($sql);
@@ -67,7 +70,43 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 while ($row = $result->fetch_assoc()) {
-    $row['items_used'] = ['-'];
+    $row['items_used'] = [];
+
+    if (!empty($row['tires_product_id'])) {
+        $productStmt = $conn->prepare("SELECT brand, size FROM product_tbl WHERE product_id = ?");
+        $productStmt->bind_param("i", $row['tires_product_id']);
+        $productStmt->execute();
+        $productResult = $productStmt->get_result();
+        if ($product = $productResult->fetch_assoc()) {
+            $qty = (int)($row['tires_qty'] ?? 1);
+            $row['items_used'][] = $qty . "x Tire - " . $product['brand'] . " " . $product['size'];
+        }
+        $productStmt->close();
+    }
+
+    if (!empty($row['batteries_product_id'])) {
+        $productStmt = $conn->prepare("SELECT brand, size FROM product_tbl WHERE product_id = ?");
+        $productStmt->bind_param("i", $row['batteries_product_id']);
+        $productStmt->execute();
+        $productResult = $productStmt->get_result();
+        if ($product = $productResult->fetch_assoc()) {
+            $row['items_used'][] = "Battery - " . $product['brand'] . " " . $product['size'];
+        }
+        $productStmt->close();
+    }
+
+    if (!empty($row['magwheels_product_id'])) {
+        $productStmt = $conn->prepare("SELECT brand, size FROM product_tbl WHERE product_id = ?");
+        $productStmt->bind_param("i", $row['magwheels_product_id']);
+        $productStmt->execute();
+        $productResult = $productStmt->get_result();
+        if ($product = $productResult->fetch_assoc()) {
+            $qty = (int)($row['magwheels_qty'] ?? 1);
+            $row['items_used'][] = $qty . "x Magwheel - " . $product['brand'] . " " . $product['size'];
+        }
+        $productStmt->close();
+    }
+
     $historyRows[] = $row;
 }
 
@@ -92,7 +131,12 @@ $stmt->close();
                 <span>Homepage</span>
             </a>
 
-            <a href="appointment_customer.php" class="nav-item">
+            <a
+                href="appointment_customer.php"
+                class="nav-item guard-appointment-link"
+                data-has-existing-appointment="<?php echo $hasExistingAppointment ? '1' : '0'; ?>"
+                data-allow-upcoming-view="0"
+            >
                 <i class="fa-regular fa-calendar-check"></i>
                 <span>Appointment</span>
             </a>
@@ -198,7 +242,7 @@ $stmt->close();
                                 data-date="<?php echo date('F j, Y g:i A', strtotime($row['created_at'])); ?>"
                                 data-price="<?php echo number_format((float)$row['total_amount'],2); ?>"
                                 data-payment="<?php echo $row['payment_method']; ?>"
-                                data-services="<?php echo htmlspecialchars($row['services'] ?? '-'); ?>"
+                                data-services="<?php echo $row['purpose']; ?>"
                                 data-items="<?php echo implode(' | ', $row['items_used']); ?>"
                             >
                                 View
@@ -232,5 +276,6 @@ $stmt->close();
 </div>
 
 <script src="../js/transaction_history.js"></script>
+<script src="../js/appointment_guard.js"></script>
 </body>
 </html>

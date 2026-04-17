@@ -11,21 +11,6 @@ $customerMobile = "";
 $customerEmail = "";
 $customerVehicleModel = "";
 
-$services = [];
-
-$result = $conn->query("
-    SELECT service_id, service_name, service_category 
-    FROM service_tbl 
-    WHERE status = 'active'
-    ORDER BY service_id ASC
-");
-
-if ($result) {
-    while ($row = $result->fetch_assoc()) {
-        $services[] = $row;
-    }
-}
-
 if (isset($_SESSION['customer_id'])) {
     $stmt = $conn->prepare("
         SELECT 
@@ -61,34 +46,49 @@ if (isset($_SESSION['customer_id'])) {
 
 $viewMode = $_GET['view'] ?? 'book';
 $isUpcomingView = ($viewMode === 'upcoming');
+$showBlockedMessage = false;
 
 $appointmentFound = false;
+$appointmentRow = null;
+
+if (!$isUpcomingView && $appointmentFound) {
+    $showBlockedMessage = true;
+}
 
 if (isset($_SESSION['customer_id'])) {
     $customerId = $_SESSION['customer_id'];
 
     $apptStmt = $conn->prepare("
-        SELECT 
-            a.appt_date,
-            a.appt_time,
-            a.appt_status,
-            a.created_at,
-            a.notes,
-            GROUP_CONCAT(s.service_name SEPARATOR ', ') AS services
-        FROM appointments_tbl a
-        LEFT JOIN appointment_services_tbl aps ON a.appt_id = aps.appt_id
-        LEFT JOIN service_tbl s ON aps.service_id = s.service_id
-        WHERE a.customer_id = ?
-        AND a.appt_status IN ('pending','approved','waiting for approval')
-        GROUP BY a.appt_id
-        ORDER BY a.appt_date ASC, a.appt_time ASC
-        LIMIT 1
-    ");
-
-    if (!$apptStmt) {
-        die("Prepare failed: " . $conn->error);
-    }
-
+    SELECT 
+        a.appt_id,
+        a.appt_date,
+        a.appt_time,
+        a.appt_status,
+        a.created_at,
+        a.purpose,
+        a.notes,
+        a.tires_product_id,
+        a.tires_qty,
+        a.batteries_product_id,
+        a.magwheels_product_id,
+        a.magwheels_qty,
+        a.total_cost
+    FROM appointments_tbl a
+    WHERE a.customer_id = ?
+      AND (
+            a.appt_status = 'waiting for approval'
+            OR (
+                a.appt_status = 'approved'
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM transaction_tbl t
+                    WHERE t.appt_id = a.appt_id
+                )
+            )
+          )
+    ORDER BY a.appt_date ASC, a.appt_time ASC
+    LIMIT 1
+");
     $apptStmt->bind_param("i", $customerId);
     $apptStmt->execute();
     $apptResult = $apptStmt->get_result();
@@ -99,7 +99,47 @@ if (isset($_SESSION['customer_id'])) {
     }
 
     $apptStmt->close();
-    $appointmentNotes = $appointmentRow['notes'] ?? "-";
+
+    $upcomingTireText = "-";
+    $upcomingBatteryText = "-";
+    $upcomingMagwheelText = "-";
+
+    if ($appointmentFound && $appointmentRow) {
+        if (!empty($appointmentRow['tires_product_id'])) {
+            $stmt = $conn->prepare("SELECT brand, size, price FROM product_tbl WHERE product_id = ? LIMIT 1");
+            $stmt->bind_param("i", $appointmentRow['tires_product_id']);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($row = $result->fetch_assoc()) {
+                $qty = (int)($appointmentRow['tires_qty'] ?? 1);
+                $upcomingTireText = $qty . "x " . $row['brand'] . " " . $row['size'] . " - PHP " . number_format($row['price'], 2);
+            }
+            $stmt->close();
+        }
+
+        if (!empty($appointmentRow['batteries_product_id'])) {
+            $stmt = $conn->prepare("SELECT brand, size, price FROM product_tbl WHERE product_id = ? LIMIT 1");
+            $stmt->bind_param("i", $appointmentRow['batteries_product_id']);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($row = $result->fetch_assoc()) {
+                $upcomingBatteryText = $row['brand'] . " " . $row['size'] . " - PHP " . number_format($row['price'], 2);
+            }
+            $stmt->close();
+        }
+
+        if (!empty($appointmentRow['magwheels_product_id'])) {
+            $stmt = $conn->prepare("SELECT brand, size, price FROM product_tbl WHERE product_id = ? LIMIT 1");
+            $stmt->bind_param("i", $appointmentRow['magwheels_product_id']);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($row = $result->fetch_assoc()) {
+                $qty = (int)($appointmentRow['magwheels_qty'] ?? 1);
+                $upcomingMagwheelText = $qty . "x " . $row['brand'] . " " . $row['size'] . " - PHP " . number_format($row['price'], 2);
+            }
+            $stmt->close();
+        }
+    }
 }
 
 $appointmentProducts = [
@@ -226,6 +266,30 @@ if ($productQuery) {
                 </button>
             </div>
         <?php else: ?>
+
+    <?php if ($showBlockedMessage): ?>
+        <div class="upcoming-page-card">
+            <div class="empty-upcoming-box">
+                <i class="fa-solid fa-circle-exclamation empty-upcoming-icon"></i>
+                <h1>Existing appointment found</h1>
+                <p>
+                    You can't create more appointments because you already have an existing appointment
+                    that is waiting for approval or already approved.
+                </p>
+
+                <div class="button-row" style="justify-content:center; gap:12px;">
+                    <button type="button" class="back-btn" onclick="window.location.href='homepage_customer.php'">
+                        Back
+                    </button>
+
+                    <button type="button" class="next-btn" onclick="window.location.href='appointment_customer.php?view=upcoming'">
+                        View Appointment
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    <?php else: ?>
             <div class="upcoming-details-card">
                 <h1>Your Upcoming Appointment</h1>
 
@@ -252,21 +316,42 @@ if ($productQuery) {
                 </div>
 
                 <div class="confirm-detail-line">
-                    <strong>Service:</strong>
-                    <?php echo !empty($appointmentRow['services']) ? htmlspecialchars($appointmentRow['services']) : '-'; ?>
+                    <strong>Purpose:</strong>
+                    <?php echo !empty($appointmentRow['purpose']) ? htmlspecialchars($appointmentRow['purpose']) : '-'; ?>
+                </div>
+
+                <div class="confirm-detail-line">
+                    <strong>Tires:</strong>
+                    <?php echo htmlspecialchars($upcomingTireText); ?>
+                </div>
+
+                <div class="confirm-detail-line">
+                    <strong>Battery:</strong>
+                    <?php echo htmlspecialchars($upcomingBatteryText); ?>
+                </div>
+
+                <div class="confirm-detail-line">
+                    <strong>Magwheels:</strong>
+                    <?php echo htmlspecialchars($upcomingMagwheelText); ?>
+                </div>
 
                 <div class="confirm-detail-line">
                     <strong>Notes:</strong>
                     <?php echo !empty($appointmentRow['notes']) ? htmlspecialchars($appointmentRow['notes']) : '-'; ?>
                 </div>
 
+                <div class="confirm-detail-line">
+                    <strong>Total Cost:</strong>
+                    <?php echo "PHP " . number_format((float)($appointmentRow['total_cost'] ?? 0), 2); ?>
+                </div>
                 <div class="button-row">
                     <button type="button" class="back-btn" onclick="window.location.href='homepage_customer.php'">
                         Back
                     </button>
                 </div>
             </div>
-        <?php endif; ?>
+            <?php endif; ?>
+<?php endif; ?>
     </div>
 
 <?php else: ?>
@@ -319,13 +404,13 @@ if ($productQuery) {
 
                         <div class="name-row">
                             <input type="text" id="firstName" placeholder="First Name" value="<?php echo htmlspecialchars($customerFirstName); ?>">
-                            <input type="text" id="middleName" placeholder="Middle Name" value="<?php echo htmlspecialchars($customerMiddleName); ?>">
+                            <input type="text" id="middleName" placeholder="Middle Name(optional)" value="<?php echo htmlspecialchars($customerMiddleName); ?>">
                         </div>
 
                         <input type="text" id="lastName" placeholder="Last Name" value="<?php echo htmlspecialchars($customerLastName); ?>">
                         <input type="text" id="mobileNumber" placeholder="Mobile Number" value="<?php echo htmlspecialchars($customerMobile); ?>">
                         <input type="email" id="emailAddress" placeholder="Email Address" value="<?php echo htmlspecialchars($customerEmail); ?>">
-                        <textarea id="vehicleModel" placeholder="Vehicle Name/Model"><?php echo htmlspecialchars($customerVehicleModel); ?></textarea>
+                        <textarea id="vehicleModel" placeholder="Vehicle Name/Model(optional)"><?php echo htmlspecialchars($customerVehicleModel); ?></textarea>
                     </div>
                 </div>
             </div>
@@ -345,16 +430,11 @@ if ($productQuery) {
                     <h2>SERVICES</h2>
 
                     <div class="service-list">
-                    <?php foreach ($services as $service): ?>
-                        <button 
-                            type="button"
-                            class="service-item"
-                            data-service-id="<?php echo $service['service_id']; ?>"
-                            data-category="<?php echo $service['service_category']; ?>"
-                        >
-                            <?php echo strtoupper(htmlspecialchars($service['service_name'])); ?>
-                        </button>
-                    <?php endforeach; ?>
+                        <button type="button" class="service-item" data-enables="tires">TIRE AND WHEEL CHANGE</button>
+                        <button type="button" class="service-item" data-enables="batteries">BATTERY CHANGE</button>
+                        <button type="button" class="service-item" data-enables="magwheels">MAGWHEEL CHANGE</button>
+                        <button type="button" class="service-item">UNDERCHASSIS</button>
+                        <button type="button" class="service-item">VULCANIZE</button>
                     </div>
 
                     <textarea id="notes" class="notes-box" placeholder="Notes:"></textarea>
@@ -542,13 +622,13 @@ if ($productQuery) {
                 <div class="payment-box">
                     <h4>QR PH / GCash / Maya</h4>
 
-                    <img src="../pictures/fake_qr.png" alt="QR Payment" class="payment-qr">
+                    <img src="../pictures/qrcode.jpg" alt="QR Payment" class="payment-qr">
                 </div>
 
                 <div class="payment-box">
                     <h4>Mobile Number</h4>
 
-                    <p class="payment-number">09XX-XXX-XXXX</p>
+                    <p class="payment-number">0916-889-391</p>
 
                     <p class="payment-note">
                         Please send exactly the reservation fee amount shown above.
@@ -599,7 +679,7 @@ if ($productQuery) {
 
 <script src="../js/appointment_customer.js"></script>
 <script>
-    const appointmentProductData = <?php echo json_encode($appointmentProducts, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
+const appointmentProductData = <?php echo json_encode($appointmentProducts, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
 </script>
 </body>
 </html>

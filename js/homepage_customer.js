@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const notificationPopup = document.getElementById("notificationPopup");
     const bookAppointmentBtn = document.getElementById("bookAppointmentBtn");
     const appointmentCard = document.getElementById("upcomingAppointmentCard");
+    const sidebarAppointmentLink = document.getElementById("sidebarAppointmentLink");
     const profileToggle = document.getElementById("profileToggle");
     const profileMenu = document.getElementById("profileMenu");
 
@@ -11,6 +12,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let currentSlide = 0;
     let slideInterval;
+
+    function showExistingAppointmentMessage() {
+        alert("You can't create more appointments because you already have an existing appointment.");
+    }
+
+    function hasExistingAppointment(element) {
+        return element && element.dataset.hasExistingAppointment === "1";
+    }
 
     if (notificationBtn && notificationPopup) {
         notificationBtn.addEventListener("click", function (e) {
@@ -37,7 +46,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (bookAppointmentBtn) {
         bookAppointmentBtn.addEventListener("click", function () {
+            if (hasExistingAppointment(bookAppointmentBtn)) {
+                showExistingAppointmentMessage();
+                return;
+            }
+
             window.location.href = "appointment_customer.php";
+        });
+    }
+
+    if (sidebarAppointmentLink) {
+        sidebarAppointmentLink.addEventListener("click", function (e) {
+            if (hasExistingAppointment(sidebarAppointmentLink)) {
+                e.preventDefault();
+                showExistingAppointmentMessage();
+            }
         });
     }
 

@@ -3,23 +3,18 @@ to enter website use this link
 http://localhost/D.H-Azada%20-customer/php/customer_login.php
 
 to do:
-account authentication
+appointment side ( reference number textbox + screenshot drop box, redesign service since may function na mag dagdag ng bagong service,rescheule function, terms and condition, multiple slots per day depending on service type ( 2 slots for under chasis and 3 slots for wheel, battery adn rim change))
+UI design
 
 
-DB related:
-1) Added columns to appointments_tbl
+changes:
+account authentication implemented
+birthday ( only 17 years old above can only create account)
+password ( implemented strong combination, 8 characetrs, at least 1 capital, special character and number.
 
-ALTER TABLE appointments_tbl
-ADD COLUMN purpose TEXT AFTER appt_time,
-ADD COLUMN notes TEXT AFTER purpose,
-ADD COLUMN tires_product_id INT NULL,
-ADD COLUMN tires_qty INT NULL,
-ADD COLUMN batteries_product_id INT NULL,
-ADD COLUMN magwheels_product_id INT NULL,
-ADD COLUMN magwheels_qty INT NULL,
-ADD COLUMN total_cost DECIMAL(10,2) NULL;
 
-2)fix for appt_id auto increment
+new SQL codes:
 
-ALTER TABLE appointments_tbl
-MODIFY appt_id INT NOT NULL AUTO_INCREMENT;
+ALTER TABLE customer_tbl
+ADD COLUMN IF NOT EXISTS email_verification_token VARCHAR(64) DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS email_verified_at DATETIME DEFAULT NULL;

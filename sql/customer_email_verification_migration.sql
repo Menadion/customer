@@ -1,0 +1,3 @@
+ALTER TABLE customer_tbl
+ADD COLUMN IF NOT EXISTS email_verification_token VARCHAR(64) DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS email_verified_at DATETIME DEFAULT NULL;

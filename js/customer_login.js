@@ -23,10 +23,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 const email = document.getElementById("email");
 
-email.addEventListener("input", function () {
-    if (!email.validity.valid) {
-        email.setCustomValidity("Please enter a valid email address.");
-    } else {
-        email.setCustomValidity("");
-    }
-});
+if(email){
+    email.addEventListener("input", function () {
+        this.setCustomValidity("");
+    });
+}
