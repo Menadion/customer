@@ -34,6 +34,11 @@ CREATE TABLE `appointments_tbl` (
   `employee_id` int(11) DEFAULT NULL,
   `appt_date` date DEFAULT NULL,
   `appt_time` time DEFAULT NULL,
+  `appt_end_time` time DEFAULT NULL,
+  `estimated_duration_minutes` int(11) DEFAULT NULL,
+  `reservation_reference` varchar(120) DEFAULT NULL,
+  `reservation_fee` decimal(10,2) DEFAULT NULL,
+  `payment_proof_path` varchar(500) DEFAULT NULL,
   `appt_status` enum('pending','completed','cancelled') DEFAULT NULL,
   `created_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -58,7 +63,9 @@ CREATE TABLE `customer_tbl` (
   `last_login` datetime DEFAULT NULL,
   `status` enum('active','inactive') DEFAULT NULL,
   `email_verification_token` varchar(64) DEFAULT NULL,
-  `email_verified_at` datetime DEFAULT NULL
+  `email_verified_at` datetime DEFAULT NULL,
+  `password_reset_token` varchar(64) DEFAULT NULL,
+  `password_reset_expires_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------

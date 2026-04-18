@@ -54,7 +54,7 @@ function smtpSendCommand($socket, $command) {
     return fwrite($socket, $command . "\r\n") !== false;
 }
 
-function sendVerificationEmail($recipientEmail, $verificationLink, &$error = '') {
+function sendSmtpEmail($recipientEmail, $subject, $body, &$error = '') {
     $error = '';
     $configPath = __DIR__ . '/mail_config.php';
 
@@ -166,11 +166,6 @@ function sendVerificationEmail($recipientEmail, $verificationLink, &$error = '')
         return false;
     }
 
-    $subject = 'Verify your D.H Azada Tire Supply account';
-    $body = "Hello,\r\n\r\nPlease verify your account by clicking the link below:\r\n" .
-        $verificationLink .
-        "\r\n\r\nIf you did not create this account, you can ignore this email.";
-
     $headers = [];
     $headers[] = 'From: ' . $fromName . ' <' . $fromEmail . '>';
     $headers[] = 'To: <' . $recipientEmail . '>';
@@ -192,5 +187,25 @@ function sendVerificationEmail($recipientEmail, $verificationLink, &$error = '')
     fclose($socket);
 
     return true;
+}
+
+function sendVerificationEmail($recipientEmail, $verificationLink, &$error = '') {
+    $subject = 'Verify your D.H Azada Tire Supply account';
+    $body = "Hello,\r\n\r\nPlease verify your account by clicking the link below:\r\n" .
+        $verificationLink .
+        "\r\n\r\nIf you did not create this account, you can ignore this email.";
+
+    return sendSmtpEmail($recipientEmail, $subject, $body, $error);
+}
+
+function sendPasswordResetEmail($recipientEmail, $resetLink, &$error = '') {
+    $subject = 'Reset your D.H Azada Tire Supply password';
+    $body = "Hello,\r\n\r\nWe received a request to reset your password.\r\n" .
+        "Click this link to reset it:\r\n" .
+        $resetLink .
+        "\r\n\r\nThis link will expire in 1 hour.\r\n" .
+        "If you did not request this, you can ignore this email.";
+
+    return sendSmtpEmail($recipientEmail, $subject, $body, $error);
 }
 ?>

@@ -1,15 +1,22 @@
 <?php
-session_start();
 include 'db_connect.php';
+require_once 'flash.php';
 
 $message = "";
 $messageColor = "red";
 
 if (isset($_GET['verified']) && $_GET['verified'] === '1') {
-    $message = "Account verified. You may now log in.";
-    $messageColor = "#1f4037";
+    setFlashMessage("Account verified. You may now log in.", "#1f4037");
+    header("Location: customer_login.php");
+    exit();
 } elseif (isset($_GET['verified']) && $_GET['verified'] === 'invalid') {
-    $message = "Verification link is invalid or expired.";
+    setFlashMessage("Verification link is invalid or expired.");
+    header("Location: customer_login.php");
+    exit();
+} elseif (isset($_GET['reset']) && $_GET['reset'] === 'success') {
+    setFlashMessage("Password updated successfully. You may now log in.", "#1f4037");
+    header("Location: customer_login.php");
+    exit();
 }
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -22,14 +29,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $result = $stmt->get_result();
 
     if ($result->num_rows === 0) {
-        $message = "Wrong email or password.";
+        setFlashMessage("Wrong email or password.");
     } else {
         $user = $result->fetch_assoc();
 
         if (!password_verify($password, $user['password_hash'])) {
-            $message = "Wrong email or password.";
+            setFlashMessage("Wrong email or password.");
         } elseif ($user['status'] !== 'active') {
-            $message = "Please verify your email before logging in.";
+            setFlashMessage("Please verify your email before logging in.");
         } else {
             $_SESSION['customer_id'] = $user['customer_id'];
             $_SESSION['customer_email'] = $user['email'];
@@ -46,6 +53,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     $stmt->close();
+    header("Location: customer_login.php");
+    exit();
+}
+
+$flash = popFlashMessage();
+if ($flash !== null) {
+    $message = $flash['message'];
+    $messageColor = $flash['color'];
 }
 ?>
 <!DOCTYPE html>
@@ -109,6 +124,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             <button type="button" class="toggle-password" id="togglePassword">
                                 <i class="fas fa-eye-slash"></i>
                             </button>
+                        </div>
+                        <div class="forgot-row">
+                            <a class="forgot-link" href="forgot_password.php">Forgot password?</a>
                         </div>
                     </div>
 

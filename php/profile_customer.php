@@ -266,6 +266,7 @@ if (!empty($createdAt)) {
 
                     <div class="profile-menu hidden" id="profileMenu">
                         <a href="profile_customer.php">Profile</a>
+                        <a href="policies_customer.php">Policies</a>
                         <a href="logout.php">Logout</a>
                     </div>
                 </div>

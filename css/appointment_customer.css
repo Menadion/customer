@@ -262,6 +262,12 @@ hr {
     cursor: not-allowed;
 }
 
+.day-cell.fully-booked-day {
+    background: #d7d7d7;
+    color: #7b7b7b;
+    cursor: not-allowed;
+}
+
 .day-cell.today {
     background: #0b5a4f;
     color: #fff;
@@ -662,12 +668,42 @@ hr {
     padding: 10px 8px;
     cursor: pointer;
     font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    line-height: 1.2;
+}
+
+.time-option-main {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.time-option-meta {
+    font-size: 11px;
+    color: #6f6f6f;
 }
 
 .time-option.selected {
     background: #0b5a4f;
     color: #fff;
     border-color: #0b5a4f;
+}
+
+.time-option.selected .time-option-meta {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.time-option.time-option-taken {
+    background: #e3e3e3;
+    color: #8a8a8a;
+    cursor: not-allowed;
+    border-color: #d0d0d0;
+}
+
+.time-option.time-option-taken .time-option-meta {
+    color: #8a8a8a;
 }
 
 @media (max-width: 1000px) {
@@ -800,6 +836,40 @@ hr {
     margin-top: 8px;
 }
 
+.payment-input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.payment-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.payment-input-group label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0b5a4f;
+}
+
+.payment-input-group input[type="text"],
+.payment-input-group input[type="file"] {
+    width: 100%;
+    border: 1px solid #cfd7d8;
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: #fff;
+    font-size: 14px;
+}
+
+.payment-upload-note {
+    color: #666;
+    font-size: 12px;
+}
+
 .cancel-payment-btn,
 .done-payment-btn {
     min-width: 100px;
@@ -843,6 +913,10 @@ hr {
 
 @media (max-width: 700px) {
     .payment-methods {
+        grid-template-columns: 1fr;
+    }
+
+    .payment-input-grid {
         grid-template-columns: 1fr;
     }
 }

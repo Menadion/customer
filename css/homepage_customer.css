@@ -393,6 +393,7 @@ hr {
 .profile-dropdown {
     position: relative;
     cursor: pointer;
+    z-index: 1200;
 }
 
 .profile-menu {
@@ -402,9 +403,10 @@ hr {
     background: white;
     border-radius: 6px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    width: 140px;
+    width: 160px;
     display: flex;
     flex-direction: column;
+    z-index: 1300;
 }
 
 .profile-menu a {

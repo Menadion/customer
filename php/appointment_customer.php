@@ -63,6 +63,8 @@ if (isset($_SESSION['customer_id'])) {
         a.appt_id,
         a.appt_date,
         a.appt_time,
+        a.appt_end_time,
+        a.estimated_duration_minutes,
         a.appt_status,
         a.created_at,
         a.purpose,
@@ -72,7 +74,10 @@ if (isset($_SESSION['customer_id'])) {
         a.batteries_product_id,
         a.magwheels_product_id,
         a.magwheels_qty,
-        a.total_cost
+        a.total_cost,
+        a.reservation_reference,
+        a.reservation_fee,
+        a.payment_proof_path
     FROM appointments_tbl a
     WHERE a.customer_id = ?
       AND (
@@ -177,6 +182,27 @@ if ($productQuery) {
     }
 }
 
+$existingAppointmentSlots = [];
+$slotQuery = $conn->query("
+    SELECT appt_date, appt_time, purpose, COALESCE(estimated_duration_minutes, 60) AS estimated_duration_minutes
+    FROM appointments_tbl
+    WHERE appt_status IN ('waiting for approval', 'approved')
+");
+
+if (!$slotQuery) {
+    $slotQuery = $conn->query("
+        SELECT appt_date, appt_time, purpose, 60 AS estimated_duration_minutes
+        FROM appointments_tbl
+        WHERE appt_status IN ('waiting for approval', 'approved')
+    ");
+}
+
+if ($slotQuery) {
+    while ($slotRow = $slotQuery->fetch_assoc()) {
+        $existingAppointmentSlots[] = $slotRow;
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -243,6 +269,7 @@ if ($productQuery) {
 
                         <div class="profile-menu hidden" id="profileMenu">
                             <a href="profile_customer.php">Profile</a>
+                            <a href="policies_customer.php">Policies</a>
                             <a href="logout.php">Logout</a>
                         </div>
                     </div>
@@ -301,6 +328,29 @@ if ($productQuery) {
                 <div class="confirm-detail-line">
                     <strong>Time:</strong>
                     <?php echo htmlspecialchars(date("g:i A", strtotime($appointmentRow['appt_time']))); ?>
+                    <?php if (!empty($appointmentRow['appt_end_time'])): ?>
+                        <?php echo " - " . htmlspecialchars(date("g:i A", strtotime($appointmentRow['appt_end_time']))); ?>
+                    <?php endif; ?>
+                </div>
+
+                <div class="confirm-detail-line">
+                    <strong>Estimated Duration:</strong>
+                    <?php
+                        $durationMinutes = (int)($appointmentRow['estimated_duration_minutes'] ?? 0);
+                        if ($durationMinutes > 0) {
+                            $hours = intdiv($durationMinutes, 60);
+                            $minutes = $durationMinutes % 60;
+                            if ($hours > 0 && $minutes > 0) {
+                                echo htmlspecialchars($hours . "h " . $minutes . "m");
+                            } elseif ($hours > 0) {
+                                echo htmlspecialchars($hours . "h");
+                            } else {
+                                echo htmlspecialchars($minutes . "m");
+                            }
+                        } else {
+                            echo "-";
+                        }
+                    ?>
                 </div>
 
                 <div class="confirm-detail-line">
@@ -343,6 +393,25 @@ if ($productQuery) {
                 <div class="confirm-detail-line">
                     <strong>Total Cost:</strong>
                     <?php echo "PHP " . number_format((float)($appointmentRow['total_cost'] ?? 0), 2); ?>
+                </div>
+
+                <div class="confirm-detail-line">
+                    <strong>Reservation Fee:</strong>
+                    <?php echo "PHP " . number_format((float)($appointmentRow['reservation_fee'] ?? 0), 2); ?>
+                </div>
+
+                <div class="confirm-detail-line">
+                    <strong>Reference Number:</strong>
+                    <?php echo !empty($appointmentRow['reservation_reference']) ? htmlspecialchars($appointmentRow['reservation_reference']) : '-'; ?>
+                </div>
+
+                <div class="confirm-detail-line">
+                    <strong>Payment Proof:</strong>
+                    <?php if (!empty($appointmentRow['payment_proof_path'])): ?>
+                        <a href="<?php echo htmlspecialchars($appointmentRow['payment_proof_path']); ?>" target="_blank">View Screenshot</a>
+                    <?php else: ?>
+                        -
+                    <?php endif; ?>
                 </div>
                 <div class="button-row">
                     <button type="button" class="back-btn" onclick="window.location.href='homepage_customer.php'">
@@ -416,7 +485,7 @@ if ($productQuery) {
             </div>
 
             <div class="button-row">
-                <button type="button" class="back-btn" onclick="goHome()">Back</button>
+                <button type="button" class="back-btn" id="step1BackBtn">Back</button>
                 <button type="button" class="next-btn" id="step1NextBtn">Next</button>
             </div>
         </div>
@@ -531,6 +600,7 @@ if ($productQuery) {
                 <div class="confirm-detail-line"><strong>Vehicle Name/Model:</strong> <span id="confirmVehicleText">-</span></div>
                 <div class="confirm-detail-line"><strong>Date:</strong> <span id="confirmDateText">-</span></div>
                 <div class="confirm-detail-line"><strong>Time:</strong> <span id="confirmTimeText">-</span></div>
+                <div class="confirm-detail-line"><strong>Estimated Duration:</strong> <span id="confirmDurationText">-</span></div>
                 <div class="confirm-detail-line"><strong>Purpose of Visit:</strong> <span id="confirmPurposeText">-</span></div>
                 <div class="confirm-detail-line"><span id="confirmProductText"></span></div>
                 <div class="confirm-detail-line"><span id="confirmNotesText"></span></div>
@@ -636,6 +706,19 @@ if ($productQuery) {
                 </div>
             </div>
 
+            <div class="payment-input-grid">
+                <div class="payment-input-group">
+                    <label for="paymentReferenceInput">Reference Number</label>
+                    <input type="text" id="paymentReferenceInput" placeholder="Enter reference number">
+                </div>
+
+                <div class="payment-input-group">
+                    <label for="paymentProofInput">Upload Payment Proof</label>
+                    <input type="file" id="paymentProofInput" accept="image/*">
+                    <small class="payment-upload-note">Accepted: JPG, PNG, WEBP (max 5MB)</small>
+                </div>
+            </div>
+
             <div class="payment-buttons">
                 <button type="button" class="cancel-payment-btn" id="cancelPaymentBtn">Cancel</button>
                 <button type="button" class="done-payment-btn" id="donePaymentBtn">Done</button>
@@ -660,13 +743,8 @@ if ($productQuery) {
             </p>
 
             <p class="success-instruction">
-                Please screenshot your reservation payment and send it through Facebook Messenger for payment confirmation.
+                Your reservation payment details were submitted and are now waiting for approval.
             </p>
-
-            <!-- CHANGE THIS LINK WHEN YOU HAVE THE REAL FACEBOOK PAGE LINK -->
-            <a href="https://www.facebook.com/" target="_blank" class="facebook-link">
-                Open Facebook Messenger Page
-            </a>
 
             <div class="payment-buttons">
                 <button type="button" class="done-payment-btn" id="closeSuccessBtn">OK</button>
@@ -677,9 +755,10 @@ if ($productQuery) {
 
 <?php endif; ?>
 
-<script src="../js/appointment_customer.js"></script>
+<script src="../js/appointment_customer.js?v=<?php echo urlencode((string)@filemtime(__DIR__ . '/../js/appointment_customer.js')); ?>"></script>
 <script>
 const appointmentProductData = <?php echo json_encode($appointmentProducts, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
+const existingAppointmentSlots = <?php echo json_encode($existingAppointmentSlots, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
 </script>
 </body>
 </html>

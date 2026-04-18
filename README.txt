@@ -3,18 +3,82 @@ to enter website use this link
 http://localhost/D.H-Azada%20-customer/php/customer_login.php
 
 to do:
-appointment side ( reference number textbox + screenshot drop box, redesign service since may function na mag dagdag ng bagong service,rescheule function, terms and condition, multiple slots per day depending on service type ( 2 slots for under chasis and 3 slots for wheel, battery adn rim change))
 UI design
 
 
-changes:
-account authentication implemented
-birthday ( only 17 years old above can only create account)
-password ( implemented strong combination, 8 characetrs, at least 1 capital, special character and number.
+
+Changes:
+Forgot password flow
+Added Forgot password? in login.
+Added forgot password request page (email reset link).
+Added reset password page (new password + confirm + DB update).
+Added reset token + expiry logic.
+
+One-time flash messages (refresh-safe)
+Implemented session flash messaging so success/error messages disappear after refresh.
+
+Appointment flow overhaul
+Implemented flow behavior:
+Service/Product → Date/Time → Confirmation → Reservation Payment
+
+Added payment requirements in modal:
+Reference number textbox
+Upload payment proof image
+
+Backend now saves:
+duration, end time
+reservation reference
+reservation fee
+payment proof path
+
+Slot logic and scheduling
+Added duration rules:
+Battery 10 min
+Tire 15 min per tire
+Rim 15 min per rim
+Underchassis 60 min
+Vulcanize 30 min
+
+Added DB-based availability checks.
+
+Added slot capacity logic:
+Underchassis pool: 2 concurrent slots
+Other services pool: 3 concurrent slots
+
+Time buttons now show slot counters and grey out when full/unavailable.
+
+Dates grey out only when no valid times remain for selected services.
+
+Upcoming appointment details
+Updated upcoming view to show:
+time range
+estimated duration
+reservation fee
+reference number
+payment proof link
+
+Terms & policies
+Added Terms & Conditions and privacy agreement in signup.
+Added popup modal(s) for Terms and Privacy.
+Separated Terms and Privacy into separate popups.
+Added new Policies item in profile dropdown.
+
+
+
+
 
 
 new SQL codes:
 
+ALTER TABLE appointments_tbl
+ADD COLUMN IF NOT EXISTS appt_end_time TIME DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS estimated_duration_minutes INT DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS reservation_reference VARCHAR(120) DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS reservation_fee DECIMAL(10,2) DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS payment_proof_path VARCHAR(500) DEFAULT NULL;
+
 ALTER TABLE customer_tbl
 ADD COLUMN IF NOT EXISTS email_verification_token VARCHAR(64) DEFAULT NULL,
-ADD COLUMN IF NOT EXISTS email_verified_at DATETIME DEFAULT NULL;
+ADD COLUMN IF NOT EXISTS email_verified_at DATETIME DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS password_reset_token VARCHAR(64) DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS password_reset_expires_at DATETIME DEFAULT NULL;

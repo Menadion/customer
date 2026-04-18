@@ -36,10 +36,83 @@ document.addEventListener("DOMContentLoaded", function () {
     const birthdayInput = document.getElementById("birthday");
     const passwordInput = document.getElementById("password");
     const confirmPasswordInput = document.getElementById("confirm_password");
+    const openTermsModalBtn = document.getElementById("openTermsModal");
+    const closeTermsModalBtn = document.getElementById("closeTermsModal");
+    const termsModalOverlay = document.getElementById("termsModalOverlay");
+    const openPrivacyModalBtn = document.getElementById("openPrivacyModal");
+    const closePrivacyModalBtn = document.getElementById("closePrivacyModal");
+    const privacyModalOverlay = document.getElementById("privacyModalOverlay");
 
     if (!form || !birthdayInput || !passwordInput || !confirmPasswordInput) {
         return;
     }
+
+    function openTermsModal() {
+        if (!termsModalOverlay) return;
+        termsModalOverlay.classList.add("show");
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeTermsModal() {
+        if (!termsModalOverlay) return;
+        termsModalOverlay.classList.remove("show");
+        document.body.style.overflow = "";
+    }
+
+    function openPrivacyModal() {
+        if (!privacyModalOverlay) return;
+        privacyModalOverlay.classList.add("show");
+        document.body.style.overflow = "hidden";
+    }
+
+    function closePrivacyModal() {
+        if (!privacyModalOverlay) return;
+        privacyModalOverlay.classList.remove("show");
+        document.body.style.overflow = "";
+    }
+
+    if (openTermsModalBtn) {
+        openTermsModalBtn.addEventListener("click", openTermsModal);
+    }
+
+    if (closeTermsModalBtn) {
+        closeTermsModalBtn.addEventListener("click", closeTermsModal);
+    }
+
+    if (openPrivacyModalBtn) {
+        openPrivacyModalBtn.addEventListener("click", openPrivacyModal);
+    }
+
+    if (closePrivacyModalBtn) {
+        closePrivacyModalBtn.addEventListener("click", closePrivacyModal);
+    }
+
+    if (termsModalOverlay) {
+        termsModalOverlay.addEventListener("click", function (event) {
+            if (event.target === termsModalOverlay) {
+                closeTermsModal();
+            }
+        });
+    }
+
+    if (privacyModalOverlay) {
+        privacyModalOverlay.addEventListener("click", function (event) {
+            if (event.target === privacyModalOverlay) {
+                closePrivacyModal();
+            }
+        });
+    }
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+            if (termsModalOverlay?.classList.contains("show")) {
+                closeTermsModal();
+            }
+            if (privacyModalOverlay?.classList.contains("show")) {
+                closePrivacyModal();
+            }
+        }
+    });
 
     function formatDate(date) {
         const year = date.getFullYear();

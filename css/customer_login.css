@@ -161,6 +161,18 @@ body {
     font-size: 16px;
 }
 
+.forgot-row {
+    margin-top: 8px;
+    text-align: right;
+}
+
+.forgot-link {
+    font-size: 13px;
+    color: #214338;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
 .login-btn {
     width: 100%;
     height: 46px;

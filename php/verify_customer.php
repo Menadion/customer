@@ -1,10 +1,12 @@
 <?php
 include 'db_connect.php';
+require_once 'flash.php';
 
 $token = trim($_GET['token'] ?? '');
 
 if ($token === '') {
-    header("Location: customer_login.php?verified=invalid");
+    setFlashMessage("Verification link is invalid or expired.");
+    header("Location: customer_login.php");
     exit();
 }
 
@@ -20,7 +22,8 @@ $result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
     $stmt->close();
-    header("Location: customer_login.php?verified=invalid");
+    setFlashMessage("Verification link is invalid or expired.");
+    header("Location: customer_login.php");
     exit();
 }
 
@@ -38,6 +41,7 @@ $update->bind_param("i", $user['customer_id']);
 $update->execute();
 $update->close();
 
-header("Location: customer_login.php?verified=1");
+setFlashMessage("Account verified. You may now log in.", "#1f4037");
+header("Location: customer_login.php");
 exit();
 ?>

@@ -1,8 +1,10 @@
 <?php
 include 'db_connect.php';
 require_once 'mailer.php';
+require_once 'flash.php';
 
 $message = "";
+$messageColor = "#1f4037";
 $maxBirthday = (new DateTime('today'))->modify('-17 years')->format('Y-m-d');
 
 function getBaseUrl() {
@@ -33,6 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
+    $termsAgree = isset($_POST['terms_agree']) && $_POST['terms_agree'] === '1';
 
     $birthdayDate = DateTime::createFromFormat('!Y-m-d', $birthday);
     $isValidBirthday = $birthdayDate && $birthdayDate->format('Y-m-d') === $birthday;
@@ -44,14 +47,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $hasNumber = preg_match('/[0-9]/', $password);
     $hasSpecial = preg_match('/[^a-zA-Z0-9]/', $password);
 
-    if (!$isValidBirthday) {
+    if (!$termsAgree) {
+        $message = "Please read and agree to the Terms and Conditions.";
+        $messageColor = "red";
+    } elseif (!$isValidBirthday) {
         $message = "Please enter a valid birthday.";
+        $messageColor = "red";
     } elseif (!$isAtLeast17) {
         $message = "You must be at least 17 years old to create an account.";
+        $messageColor = "red";
     } elseif (!$hasMinLength || !$hasUppercase || !$hasNumber || !$hasSpecial) {
         $message = "Password must be at least 8 characters and include at least 1 uppercase letter, 1 number, and 1 special character.";
+        $messageColor = "red";
     } elseif ($password !== $confirm_password) {
         $message = "Passwords do not match.";
+        $messageColor = "red";
     } else {
         $checkStmt = $conn->prepare("SELECT customer_id FROM customer_tbl WHERE email = ? OR mobile_number = ?");
         $checkStmt->bind_param("ss", $email, $mobile_number);
@@ -85,8 +95,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         if ($emailExists) {
             $message = "Email is already registered.";
+            $messageColor = "red";
         } elseif ($mobileExists) {
             $message = "Mobile number is already registered.";
+            $messageColor = "red";
         } else {
             $password_hash = password_hash($password, PASSWORD_DEFAULT);
             $status = "inactive";
@@ -125,6 +137,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 }
             } else {
                 $message = "Error creating account.";
+                $messageColor = "red";
             }
 
             $stmt->close();
@@ -132,6 +145,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         $checkStmt->close();
     }
+
+    setFlashMessage($message, $messageColor);
+    header("Location: customer_signup.php");
+    exit();
+}
+
+$flash = popFlashMessage();
+if ($flash !== null) {
+    $message = $flash['message'];
+    $messageColor = $flash['color'];
 }
 ?>
 <!DOCTYPE html>
@@ -158,7 +181,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <p>D.H Azada Tire Supply Customer Portal</p>
 
             <?php if (!empty($message)): ?>
-                <p style="color:#1f4037; font-weight:bold; margin-bottom:15px;">
+                <p style="color:<?php echo htmlspecialchars($messageColor); ?>; font-weight:bold; margin-bottom:15px;">
                     <?php echo htmlspecialchars($message); ?>
                 </p>
             <?php endif; ?>
@@ -215,6 +238,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     </span>
                 </div>
 
+                <div class="terms-row">
+                    <label class="terms-label">
+                        <input type="checkbox" id="termsAgree" name="terms_agree" value="1" required>
+                        <span>
+                            I agree to the
+                            <button type="button" class="terms-link-btn" id="openTermsModal">Terms and Conditions</button>
+                            and
+                            <button type="button" class="terms-link-btn" id="openPrivacyModal">Privacy Policy</button>
+                        </span>
+                    </label>
+                </div>
+
                 <button type="submit" class="signup-btn">Sign Up</button>
 
                 <p class="login-link">
@@ -223,6 +258,79 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </p>
             </form>
 
+        </div>
+    </div>
+
+    <div class="terms-modal-overlay" id="termsModalOverlay">
+        <div class="terms-modal">
+            <div class="terms-modal-header">
+                <h2>Terms and Conditions</h2>
+                <button type="button" id="closeTermsModal" class="terms-close-btn" aria-label="Close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="terms-modal-content">
+                <h3>Account Terms and Conditions</h3>
+                <p>By creating an account, you agree to the following:</p>
+                <ol>
+                    <li>You must provide true, complete, and accurate personal and contact information.</li>
+                    <li>You are responsible for keeping your account credentials and password secure.</li>
+                    <li>The company may suspend or remove accounts that contain false information or are used for abusive, fraudulent, or unauthorized activity.</li>
+                    <li>All appointment and transaction notifications will be sent through the Customer Portal and email.</li>
+                    <li>Your personal information is collected and used only for payment, appointment, and related business processing.</li>
+                    <li>You may update and correct your account details directly in your account settings.</li>
+                    <li>The company may update these Terms and Conditions from time to time. Continued use of the platform means you accept the updated terms.</li>
+                </ol>
+
+                <h3>Appointment, Reservation Fee, and Refund Terms</h3>
+                <p>By booking an appointment and paying the reservation fee, you agree to the following:</p>
+                <ol>
+                    <li>An appointment is considered confirmed only after reservation payment proof is submitted and approved.</li>
+                    <li>Reservation payments are non-transferable to another person or account.</li>
+                    <li>The reservation fee is deductible from the total service cost.</li>
+                    <li>No-show appointments will be handled through reschedule policy.</li>
+                    <li>Late arrival beyond 15 minutes from the scheduled time may result in rescheduling.</li>
+                    <li>Rescheduling is allowed only if requested at least 4 hours before the appointment time.</li>
+                    <li>Each appointment is allowed a maximum of one (1) reschedule.</li>
+                    <li>Uploaded payment proof must match the declared reference number, amount, and payment details. Invalid or fraudulent proof may result in rejection or cancellation.</li>
+                    <li>Refund Policy:
+                        <ul>
+                            <li>Reservation fee is generally non-refundable once payment is approved.</li>
+                            <li>If cancellation is requested at least 4 hours before the appointment and no service has started, the company may approve either reschedule or refund, subject to verification.</li>
+                            <li>If the company cancels the appointment and cannot provide a replacement schedule, the customer may request a full refund of the reservation fee.</li>
+                            <li>Approved refunds (if any) are processed within 7 business days using the available payment channel.</li>
+                        </ul>
+                    </li>
+                    <li>Any concerns or disputes must be reported within seven (7) days from the transaction or appointment date, with the receipt or reference number as proof.</li>
+                    <li>The company is not responsible for indirect or consequential losses, including loss of income, business interruption, or personal inconvenience, unless required by law.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div class="terms-modal-overlay" id="privacyModalOverlay">
+        <div class="terms-modal">
+            <div class="terms-modal-header">
+                <h2>Privacy Policy</h2>
+                <button type="button" id="closePrivacyModal" class="terms-close-btn" aria-label="Close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="terms-modal-content">
+                <h3>Privacy and Data Use Consent</h3>
+                <p>By creating an account and using the Customer Portal, you agree to this Privacy Policy.</p>
+
+                <ol>
+                    <li>Your personal information is collected and used only for payment, appointment, and related business processing.</li>
+                    <li>Appointment and transaction notifications are sent through the Customer Portal and email.</li>
+                    <li>You may update and correct your account details directly in your account settings.</li>
+                    <li>Payment references and proof uploads are stored for verification and dispute handling.</li>
+                    <li>Any concerns or disputes must be reported within seven (7) days from the transaction or appointment date, with the receipt or reference number as proof.</li>
+                    <li>Your data is processed in accordance with applicable privacy and data protection laws.</li>
+                </ol>
+            </div>
         </div>
     </div>
 
