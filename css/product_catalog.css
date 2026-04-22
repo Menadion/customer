@@ -68,6 +68,8 @@ body {
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    position: relative;
+    z-index: 1200;
 }
 
 .topbar h2 {
@@ -123,6 +125,8 @@ hr {
     box-shadow: 4px 6px 12px rgba(0, 0, 0, 0.18);
     overflow: hidden;
     min-height: 510px;
+    position: relative;
+    z-index: 1;
 }
 
 .products-header {
@@ -302,6 +306,7 @@ hr {
 .profile-dropdown {
     position: relative;
     cursor: pointer;
+    z-index: 1300;
 }
 
 .profile-menu {
@@ -314,6 +319,7 @@ hr {
     width: 140px;
     display: flex;
     flex-direction: column;
+    z-index: 1301;
 }
 
 .profile-menu a {

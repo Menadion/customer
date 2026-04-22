@@ -1,10 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     const toggleFilterBtn = document.getElementById("toggleFilterBtn");
     const dateFilterBox = document.getElementById("dateFilterBox");
-    const notificationBtn = document.getElementById("notificationBtn");
-    const notificationBox = document.getElementById("notificationBox");
-    const profileToggle = document.getElementById("profileToggle");
-    const profileMenu = document.getElementById("profileMenu");
 
     const receiptModal = document.getElementById("receiptModal");
     const closeReceiptBtn = document.getElementById("closeReceiptBtn");
@@ -17,35 +13,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const receiptItems = document.getElementById("receiptItems");
     const receiptPrice = document.getElementById("receiptPrice");
 
-    if (notificationBtn && notificationBox) {
-        notificationBtn.addEventListener("click", function (event) {
-            event.stopPropagation();
-            notificationBox.classList.toggle("hidden");
-        });
-
-        document.addEventListener("click", function (event) {
-            if (!notificationBtn.contains(event.target) && !notificationBox.contains(event.target)) {
-                notificationBox.classList.add("hidden");
-            }
-        });
-    }
-
     if (toggleFilterBtn && dateFilterBox) {
         toggleFilterBtn.addEventListener("click", function () {
             dateFilterBox.classList.toggle("hidden");
-        });
-    }
-
-    if (profileToggle && profileMenu) {
-        profileToggle.addEventListener("click", function (e) {
-            e.stopPropagation();
-            profileMenu.classList.toggle("hidden");
-        });
-
-        document.addEventListener("click", function (e) {
-            if (!profileToggle.contains(e.target) && !profileMenu.contains(e.target)) {
-                profileMenu.classList.add("hidden");
-            }
         });
     }
 

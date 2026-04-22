@@ -1,6 +1,7 @@
 <?php
 session_start();
 include 'db_connect.php';
+include 'customer_ui.php';
 
 $upcomingTitle = "UPCOMING APPOINTMENT";
 $upcomingText = "No upcoming appointment";
@@ -50,20 +51,7 @@ if (isset($_SESSION['customer_id'])) {
     $apptStmt->close();
 }
 
-$topProfileImage = "../pictures/default_profile.png";
-
-if (isset($_SESSION['customer_id'])) {
-    $stmt = $conn->prepare("SELECT profile_image FROM customer_tbl WHERE customer_id = ?");
-    $stmt->bind_param("i", $_SESSION['customer_id']);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $user = $result->fetch_assoc();
-    $stmt->close();
-
-    if (!empty($user['profile_image'])) {
-        $topProfileImage = $user['profile_image'];
-    }
-}
+$topProfileImage = dh_get_customer_profile_image($conn, $_SESSION['customer_id'] ?? null);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -79,69 +67,14 @@ if (isset($_SESSION['customer_id'])) {
 
     <div class="main-layout">
 
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-menu">
-                <a href="homepage_customer.php" class="nav-item active">
-                    <i class="fa-solid fa-table-cells-large"></i>
-                    <span>Homepage</span>
-                </a>
-
-                <a
-                    href="appointment_customer.php"
-                    class="nav-item"
-                    id="sidebarAppointmentLink"
-                    data-has-existing-appointment="<?php echo $hasExistingAppointment ? '1' : '0'; ?>"
-                >
-                    <i class="fa-regular fa-calendar-check"></i>
-                    <span>Appointment</span>
-                </a>
-
-                <a href="product_catalog.php" class="nav-item">
-                    <i class="fa-solid fa-circle-notch"></i>
-                    <span>Products</span>
-                </a>
-
-                <a href="services_customer.php" class="nav-item">
-                    <i class="fa-solid fa-gears"></i>
-                    <span>Services</span>
-                </a>
-
-                <a href="transaction_history.php" class="nav-item">
-                    <i class="fa-regular fa-clock"></i>
-                    <span>History</span>
-                </a>
-            </div>
-        </aside>
+        <?php dh_render_customer_sidebar('home', $hasExistingAppointment, 'sidebar-menu'); ?>
 
         <!-- Main Content -->
         <main class="content-area">
             <div class="top-bar">
                 <h2>Homepage</h2>
 
-                <div class="top-actions">
-                    <div class="notification-wrapper">
-                        <button class="icon-btn" id="notificationBtn">
-                            <i class="fa-solid fa-bell"></i>
-                        </button>
-
-                        <div class="notification-popup" id="notificationPopup">
-                            <p>No notification yet</p>
-                        </div>
-                    </div>
-
-                    <div class="profile-dropdown">
-                        <button type="button" class="profile-btn" id="profileToggle">
-                            <img src="<?php echo htmlspecialchars($topProfileImage); ?>" class="top-profile-img" alt="Profile">
-                        </button>
-
-                        <div class="profile-menu hidden" id="profileMenu">
-                            <a href="profile_customer.php">Profile</a>
-                            <a href="policies_customer.php">Policies</a>
-                            <a href="logout.php">Logout</a>
-                        </div>
-                    </div>
-                </div>
+                <?php dh_render_top_actions($topProfileImage, 'popup', 'top-actions'); ?>
             </div>
 
             <hr>
@@ -216,6 +149,7 @@ if (isset($_SESSION['customer_id'])) {
         </main>
     </div>
 
+    <script src="../js/customer_ui_shared.js"></script>
     <script src="../js/homepage_customer.js"></script>
 </body>
 </html>

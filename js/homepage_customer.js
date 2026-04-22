@@ -1,11 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const notificationBtn = document.getElementById("notificationBtn");
-    const notificationPopup = document.getElementById("notificationPopup");
     const bookAppointmentBtn = document.getElementById("bookAppointmentBtn");
     const appointmentCard = document.getElementById("upcomingAppointmentCard");
     const sidebarAppointmentLink = document.getElementById("sidebarAppointmentLink");
-    const profileToggle = document.getElementById("profileToggle");
-    const profileMenu = document.getElementById("profileMenu");
 
     const slides = document.querySelectorAll(".slide");
     const dots = document.querySelectorAll(".dot");
@@ -19,20 +15,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function hasExistingAppointment(element) {
         return element && element.dataset.hasExistingAppointment === "1";
-    }
-
-    if (notificationBtn && notificationPopup) {
-        notificationBtn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            notificationPopup.style.display =
-                notificationPopup.style.display === "block" ? "none" : "block";
-        });
-
-        document.addEventListener("click", function (e) {
-            if (!notificationBtn.contains(e.target) && !notificationPopup.contains(e.target)) {
-                notificationPopup.style.display = "none";
-            }
-        });
     }
 
     if (appointmentCard) {
@@ -60,19 +42,6 @@ document.addEventListener("DOMContentLoaded", function () {
             if (hasExistingAppointment(sidebarAppointmentLink)) {
                 e.preventDefault();
                 showExistingAppointmentMessage();
-            }
-        });
-    }
-
-    if (profileToggle && profileMenu) {
-        profileToggle.addEventListener("click", function (e) {
-            e.stopPropagation();
-            profileMenu.classList.toggle("hidden");
-        });
-
-        document.addEventListener("click", function (e) {
-            if (!profileToggle.contains(e.target) && !profileMenu.contains(e.target)) {
-                profileMenu.classList.add("hidden");
             }
         });
     }

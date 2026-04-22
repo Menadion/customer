@@ -5,11 +5,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const searchInput = document.getElementById("searchInput");
     const sortSelect = document.getElementById("sortSelect");
 
-    const notificationBtn = document.getElementById("notificationBtn");
-    const notificationBox = document.getElementById("notificationBox");
-
-    const profileToggle = document.getElementById("profileToggle");
-    const profileMenu = document.getElementById("profileMenu");
 
     function getActiveTab() {
         return document.querySelector(".tab-content.active");
@@ -113,32 +108,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (sortSelect) {
         sortSelect.addEventListener("change", applyFiltersAndSort);
-    }
-
-    if (profileToggle && profileMenu) {
-        profileToggle.addEventListener("click", function (e) {
-            e.stopPropagation();
-            profileMenu.classList.toggle("hidden");
-        });
-
-        document.addEventListener("click", function (e) {
-            if (!profileToggle.contains(e.target) && !profileMenu.contains(e.target)) {
-                profileMenu.classList.add("hidden");
-            }
-        });
-    }
-
-    if (notificationBtn && notificationBox) {
-        notificationBtn.addEventListener("click", function (event) {
-            event.stopPropagation();
-            notificationBox.classList.toggle("hidden");
-        });
-
-        document.addEventListener("click", function (event) {
-            if (!notificationBtn.contains(event.target) && !notificationBox.contains(event.target)) {
-                notificationBox.classList.add("hidden");
-            }
-        });
     }
 
     applyFiltersAndSort();

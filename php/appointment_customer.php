@@ -1,6 +1,7 @@
 <?php
 session_start();
 include 'db_connect.php';
+include 'customer_ui.php';
 
 $topProfileImage = "../pictures/default_profile.png";
 
@@ -216,65 +217,13 @@ if ($slotQuery) {
 <body>
 
 <div class="container">
-    <aside class="sidebar">
-        <div class="menu">
-            <a href="homepage_customer.php">
-                <i class="fa-solid fa-table-cells-large"></i>
-                <span>Homepage</span>
-            </a>
-
-            <a href="appointment_customer.php" class="active">
-                <i class="fa-solid fa-calendar-check"></i>
-                <span>Appointment</span>
-            </a>
-
-            <a href="product_catalog.php" class="nav-item">
-                <i class="fa-solid fa-circle-notch"></i>
-                <span>Products</span>
-            </a>
-
-            <a href="services_customer.php" class="nav-item">
-                <i class="fa-solid fa-gears"></i>
-                <span>Services</span>
-            </a>
-
-            <a href="transaction_history.php" class="nav-item">
-                <i class="fa-regular fa-clock"></i>
-                <span>History</span>
-            </a>
-        </div>
-    </aside>
+    <?php dh_render_customer_sidebar('appointment', $appointmentFound); ?>
 
     <main class="main-content">
         <div class="topbar">
         <h2><?php echo $isUpcomingView ? 'Upcoming Appointment' : 'Book an Appointment'; ?></h2>
 
-        <div class="top-icons">
-
-            <div class="notification-wrapper">
-                <button class="icon-btn" type="button" id="notificationBtn">
-                    <i class="fa-solid fa-bell"></i>
-                </button>
-
-                <div class="notification-box hidden" id="notificationBox">
-                    <h4>Notifications</h4>
-                    <div class="notification-empty">No notification yet</div>
-                </div>
-            </div>
-
-            <div class="profile-dropdown">
-                        <button type="button" class="profile-btn" id="profileToggle">
-                            <img src="<?php echo htmlspecialchars($topProfileImage); ?>" class="top-profile-img" alt="Profile">
-                        </button>
-
-                        <div class="profile-menu hidden" id="profileMenu">
-                            <a href="profile_customer.php">Profile</a>
-                            <a href="policies_customer.php">Policies</a>
-                            <a href="logout.php">Logout</a>
-                        </div>
-                    </div>
-
-        </div>
+        <?php dh_render_top_actions($topProfileImage); ?>
     </div>
 
         <hr>
@@ -756,6 +705,7 @@ if ($slotQuery) {
 <?php endif; ?>
 
 <script src="../js/appointment_customer.js?v=<?php echo urlencode((string)@filemtime(__DIR__ . '/../js/appointment_customer.js')); ?>"></script>
+<script src="../js/customer_ui_shared.js"></script>
 <script>
 const appointmentProductData = <?php echo json_encode($appointmentProducts, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
 const existingAppointmentSlots = <?php echo json_encode($existingAppointmentSlots, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;

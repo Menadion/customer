@@ -2,6 +2,7 @@
 session_start();
 include 'db_connect.php';
 include 'appointment_guard.php';
+include 'customer_ui.php';
 
 if (!isset($_SESSION['customer_id'])) {
     header("Location: customer_login.php");
@@ -209,68 +210,13 @@ if (!empty($createdAt)) {
 <body>
 
 <div class="container">
-    <aside class="sidebar">
-        <div class="menu">
-            <a href="homepage_customer.php" class="nav-item">
-                <i class="fa-solid fa-table-cells-large"></i>
-                <span>Homepage</span>
-            </a>
-
-            <a
-                href="appointment_customer.php"
-                class="nav-item guard-appointment-link"
-                data-has-existing-appointment="<?php echo $hasExistingAppointment ? '1' : '0'; ?>"
-                data-allow-upcoming-view="0"
-            >
-                <i class="fa-regular fa-calendar-check"></i>
-                <span>Appointment</span>
-            </a>
-
-            <a href="product_catalog.php" class="nav-item">
-                <i class="fa-solid fa-circle-notch"></i>
-                <span>Products</span>
-            </a>
-
-            <a href="services_customer.php" class="nav-item">
-                <i class="fa-solid fa-gears"></i>
-                <span>Services</span>
-            </a>
-
-            <a href="transaction_history.php" class="nav-item">
-                <i class="fa-regular fa-clock"></i>
-                <span>History</span>
-            </a>
-        </div>
-    </aside>
+    <?php dh_render_customer_sidebar('profile', $hasExistingAppointment); ?>
 
     <main class="main-content">
         <div class="topbar">
             <h2>Profile</h2>
 
-            <div class="top-icons">
-                <div class="notification-wrapper">
-                    <button class="icon-btn" type="button" id="notificationBtn">
-                        <i class="fa-solid fa-bell"></i>
-                    </button>
-
-                    <div class="notification-box hidden" id="notificationBox">
-                        <h4>Notifications</h4>
-                        <div class="notification-empty">No notification yet</div>
-                    </div>
-                </div>
-
-                <div class="profile-dropdown">
-                    <button type="button" class="profile-btn" id="profileToggle">
-                        <img src="<?php echo htmlspecialchars($profileImage); ?>" class="top-profile-img" alt="Profile">
-                    </button>
-
-                    <div class="profile-menu hidden" id="profileMenu">
-                        <a href="profile_customer.php">Profile</a>
-                        <a href="policies_customer.php">Policies</a>
-                        <a href="logout.php">Logout</a>
-                    </div>
-                </div>
-            </div>
+            <?php dh_render_top_actions($profileImage); ?>
         </div>
 
         <hr>
@@ -433,6 +379,7 @@ if (!empty($createdAt)) {
     </div>
 </div>
 
+<script src="../js/customer_ui_shared.js"></script>
 <script src="../js/profile_customer.js"></script>
 <script src="../js/appointment_guard.js"></script>
 </body>

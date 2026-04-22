@@ -1,35 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     const isUpcomingView = window.location.search.includes("view=upcoming");
 
-    const notificationBtn = document.getElementById("notificationBtn");
-    const notificationBox = document.getElementById("notificationBox");
-    const profileToggle = document.getElementById("profileToggle");
-    const profileMenu = document.getElementById("profileMenu");
-
-    if (notificationBtn && notificationBox) {
-        notificationBtn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            notificationBox.classList.toggle("hidden");
-        });
-    }
-
-    if (profileToggle && profileMenu) {
-        profileToggle.addEventListener("click", function (e) {
-            e.stopPropagation();
-            profileMenu.classList.toggle("hidden");
-        });
-    }
-
-    document.addEventListener("click", function (e) {
-        if (notificationBtn && notificationBox && !notificationBtn.contains(e.target) && !notificationBox.contains(e.target)) {
-            notificationBox.classList.add("hidden");
-        }
-
-        if (profileToggle && profileMenu && !profileToggle.contains(e.target) && !profileMenu.contains(e.target)) {
-            profileMenu.classList.add("hidden");
-        }
-    });
-
     if (isUpcomingView) {
         return;
     }

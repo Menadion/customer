@@ -1,6 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const notificationBtn = document.getElementById("notificationBtn");
-    const notificationBox = document.getElementById("notificationBox");
 
     const editProfileBtn = document.getElementById("editProfileBtn");
     const cancelEditBtn = document.getElementById("cancelEditBtn");
@@ -15,19 +13,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const largeProfileImage = document.getElementById("largeProfileImage");
     const uploadBox = document.getElementById("uploadBox");
     const selectedFileName = document.getElementById("selectedFileName");
-
-    if (notificationBtn && notificationBox) {
-        notificationBtn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            notificationBox.classList.toggle("hidden");
-        });
-
-        document.addEventListener("click", function (e) {
-            if (!notificationBtn.contains(e.target) && !notificationBox.contains(e.target)) {
-                notificationBox.classList.add("hidden");
-            }
-        });
-    }
 
     if (editProfileBtn && viewMode && editMode) {
         editProfileBtn.addEventListener("click", function () {
@@ -62,21 +47,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
-
-    const profileToggle = document.getElementById("profileToggle");
-const profileMenu = document.getElementById("profileMenu");
-
-if (profileToggle) {
-    profileToggle.addEventListener("click", function () {
-        profileMenu.classList.toggle("hidden");
-    });
-}
-
-document.addEventListener("click", function (e) {
-    if (!profileToggle.contains(e.target)) {
-        profileMenu.classList.add("hidden");
-    }
-});
 
     function handleSelectedFile(file) {
         if (!file) return false;
