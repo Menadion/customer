@@ -7,7 +7,7 @@ UI design ( login, sign up, appointment, product, service, history, profile, pol
 appointment map progress
 product ( more filter, pictures of product)
 scroll function ( experemental)
-
+fix drop down button in profile if your in policies
 
 
 Changes:
