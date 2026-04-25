@@ -4,10 +4,12 @@ http://localhost/D.H-Azada%20-customer/php/customer_login.php
 
 to do:
 UI design ( login, sign up, appointment, product, service, history, profile, policies)
-appointment map progress
+appointment (map progress)
 product ( more filter, pictures of product)
 scroll function ( experemental)
-fix drop down button in profile if your in policies
+fix drop down button in profile if your in policies and profile
+add green little circle in notification indicated new notification
+
 
 
 Changes:
