@@ -1,0 +1,2 @@
+ALTER TABLE appointments_tbl
+ADD COLUMN IF NOT EXISTS decline_reason VARCHAR(255) DEFAULT NULL;

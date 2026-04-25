@@ -5,6 +5,23 @@ document.addEventListener("DOMContentLoaded", function () {
     const profileToggle = document.getElementById("profileToggle");
     const profileMenu = document.getElementById("profileMenu");
 
+    function bindNotificationItemToggles() {
+        if (!notificationPanel) return;
+
+        const toggleButtons = notificationPanel.querySelectorAll(".notification-toggle-btn");
+        toggleButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                const item = button.closest(".notification-item");
+                if (!item) return;
+
+                const isExpanded = item.classList.toggle("expanded");
+                button.setAttribute("aria-expanded", isExpanded ? "true" : "false");
+            });
+        });
+    }
+
+    bindNotificationItemToggles();
+
     if (notificationBtn && notificationPanel) {
         notificationBtn.addEventListener("click", function (event) {
             event.stopPropagation();

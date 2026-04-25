@@ -11,6 +11,7 @@ if (!isset($_SESSION['customer_id'])) {
 
 $customerId = $_SESSION['customer_id'];
 $topProfileImage = dh_get_customer_profile_image($conn, $_SESSION['customer_id'] ?? null);
+$customerNotifications = dh_get_customer_notifications($conn, $_SESSION['customer_id'] ?? null);
 
 $fromDate = $_GET['from'] ?? '';
 $toDate = $_GET['to'] ?? '';
@@ -107,18 +108,17 @@ $stmt->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transaction History</title>
     <link rel="stylesheet" href="../css/transaction_history.css">
+    <link rel="stylesheet" href="../css/customer_ui_shared.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
 <div class="container">
-    <?php dh_render_customer_sidebar('history', $hasExistingAppointment); ?>
+    <?php dh_render_customer_sidebar('history', $hasExistingAppointment, 'menu', $topProfileImage, $customerNotifications); ?>
 
     <main class="main-content">
         <div class="topbar">
             <h2>Transaction History</h2>
-
-            <?php dh_render_top_actions($topProfileImage); ?>
         </div>
 
         <hr>

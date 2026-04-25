@@ -181,6 +181,7 @@ $birthday = $user['birthday'] ?? '';
 $mobile = $user['mobile_number'] ?? '';
 $createdAt = $user['created_at'] ?? '';
 $profileImage = !empty($user['profile_image']) ? $user['profile_image'] : $defaultProfileImage;
+$customerNotifications = dh_get_customer_notifications($conn, $_SESSION['customer_id'] ?? null);
 
 /*
     COMPUTE AGE FROM BIRTHDAY
@@ -205,18 +206,17 @@ if (!empty($createdAt)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile</title>
     <link rel="stylesheet" href="../css/profile_customer.css">
+    <link rel="stylesheet" href="../css/customer_ui_shared.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
 <div class="container">
-    <?php dh_render_customer_sidebar('profile', $hasExistingAppointment); ?>
+    <?php dh_render_customer_sidebar('profile', $hasExistingAppointment, 'menu', $profileImage, $customerNotifications); ?>
 
     <main class="main-content">
         <div class="topbar">
             <h2>Profile</h2>
-
-            <?php dh_render_top_actions($profileImage); ?>
         </div>
 
         <hr>

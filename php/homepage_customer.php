@@ -52,6 +52,7 @@ if (isset($_SESSION['customer_id'])) {
 }
 
 $topProfileImage = dh_get_customer_profile_image($conn, $_SESSION['customer_id'] ?? null);
+$customerNotifications = dh_get_customer_notifications($conn, $_SESSION['customer_id'] ?? null);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -61,92 +62,106 @@ $topProfileImage = dh_get_customer_profile_image($conn, $_SESSION['customer_id']
     <title>Customer Homepage</title>
 
     <link rel="stylesheet" href="../css/homepage_customer.css">
+    <link rel="stylesheet" href="../css/customer_ui_shared.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
-    <div class="main-layout">
+    <div class="home-shell">
+        <?php dh_render_customer_sidebar('home', $hasExistingAppointment, 'menu', $topProfileImage, $customerNotifications); ?>
 
-        <?php dh_render_customer_sidebar('home', $hasExistingAppointment, 'sidebar-menu'); ?>
-
-        <!-- Main Content -->
-        <main class="content-area">
-            <div class="top-bar">
-                <h2>Homepage</h2>
-
-                <?php dh_render_top_actions($topProfileImage, 'popup', 'top-actions'); ?>
+        <section class="hero-section">
+            <div class="hero-copy">
+                <h1>Your Trusted Partner for Tire and Auto Care</h1>
+                <p>
+                    Fast, reliable, and honest service for tire replacement, battery support,
+                    wheel alignment prep, and underchassis checks.
+                </p>
             </div>
+        </section>
 
-            <hr>
-
-            <h1 class="welcome-text">Welcome User</h1>
-
-            <div class="top-cards">
+        <section class="appointment-summary-row">
+            <div class="book-card-mini">
+                <div class="book-mini-icon"><i class="fa-regular fa-calendar-plus"></i></div>
+                <div>
+                    <h3>Need Service Today?</h3>
+                    <p>Reserve your preferred date and time in a few clicks.</p>
+                </div>
                 <button
-                    class="book-card"
-                    id="bookAppointmentBtn"
+                    class="book-mini-btn"
+                    id="bookAppointmentBtnSecondary"
                     data-has-existing-appointment="<?php echo $hasExistingAppointment ? '1' : '0'; ?>"
                 >
-                    <div class="book-icon">
-                        <i class="fa-regular fa-calendar"></i>
-                    </div>
-                    <span>Book Appointment</span>
+                    Book Now
                 </button>
+            </div>
 
-                <div class="appointment-card" id="upcomingAppointmentCard" data-link="<?php echo htmlspecialchars($upcomingLink); ?>">
-                    <div class="appointment-icon">
-                        <i class="fa-solid fa-circle-info"></i>
-                    </div>
+            <div class="appointment-card" id="upcomingAppointmentCard" data-link="<?php echo htmlspecialchars($upcomingLink); ?>">
+                <div class="appointment-icon">
+                    <i class="fa-solid fa-circle-info"></i>
+                </div>
+                <div class="appointment-details">
+                    <h3>Upcoming Appointment</h3>
+                    <p><?php echo htmlspecialchars($upcomingText); ?></p>
+                </div>
+                <span class="appointment-open">View</span>
+            </div>
+        </section>
 
-                    <div class="appointment-details">
-                        <h3>UPCOMING APPOINTMENT</h3>
-                        <p><?php echo htmlspecialchars($upcomingText); ?></p>
+        <section class="services-area">
+            <div class="services-heading">
+                <h2>Our Automotive Services</h2>
+                <p>Choose from our most requested services designed for safe, smooth, and reliable driving.</p>
+            </div>
+
+            <div class="services-grid-home">
+                <article class="service-tile">
+                    <div class="service-icon"><i class="fa-solid fa-car-battery"></i></div>
+                    <h3>Battery Change</h3>
+                    <p>Quick replacement and terminal check to keep your vehicle starting strong.</p>
+                </article>
+
+                <article class="service-tile">
+                    <div class="service-icon"><i class="fa-solid fa-compact-disc"></i></div>
+                    <h3>Tire & Wheel Change</h3>
+                    <p>Safe tire and wheel fitting with proper size and compatibility guidance.</p>
+                </article>
+
+                <article class="service-tile">
+                    <div class="service-icon"><i class="fa-solid fa-circle-dot"></i></div>
+                    <h3>Magwheel Change</h3>
+                    <p>Upgrade or replace magwheels with secure installation and balancing support.</p>
+                </article>
+
+                <article class="service-tile">
+                    <div class="service-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                    <h3>Underchassis</h3>
+                    <p>Inspection for steering and suspension issues affecting comfort and stability.</p>
+                </article>
+
+                <article class="service-tile">
+                    <div class="service-icon"><i class="fa-solid fa-life-ring"></i></div>
+                    <h3>Vulcanize</h3>
+                    <p>Puncture repair service to restore tire usability and reduce roadside risk.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="location-section">
+            <div class="location-card">
+                <div class="location-image">
+                    <img src="../pictures/Location.png" alt="D.H Azada Tire Supply Location">
+                </div>
+                <div class="location-content">
+                    <h2>Visit Our Location</h2>
+                    <p>Drop by our shop for tire, battery, wheel, and underchassis services.</p>
+                    <div class="location-address">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <span>Kaypian Road Barangay Kaypian San Jose Del Monte City, Bulacan, Philippines</span>
                     </div>
                 </div>
             </div>
-
-            <hr class="section-line">
-
-            <h2 class="services-title">Services</h2>
-
-            <div class="services-slider">
-                <div class="slide active" data-index="0">
-                    <div class="slide-overlay">
-                        <h3>Wheel Change</h3>
-                        <p>
-                            We change wheels for different vehicle types, from sedans to SUVs,
-                            vans, and truck-type vehicles, with proper fitting and safe installation.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="slide" data-index="1">
-                    <div class="slide-overlay">
-                        <h3>Battery Change</h3>
-                        <p>
-                            We provide battery replacement service with proper installation,
-                            terminal checking, and dependable power support for your vehicle.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="slide" data-index="2">
-                    <div class="slide-overlay">
-                        <h3>Under Chassis</h3>
-                        <p>
-                            We inspect and service under chassis parts to help maintain vehicle
-                            stability, steering performance, and smoother driving condition.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="slider-dots">
-                    <span class="dot active" data-slide="0"></span>
-                    <span class="dot" data-slide="1"></span>
-                    <span class="dot" data-slide="2"></span>
-                </div>
-            </div>
-        </main>
+        </section>
     </div>
 
     <script src="../js/customer_ui_shared.js"></script>

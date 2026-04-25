@@ -64,7 +64,10 @@ Separated Terms and Privacy into separate popups.
 Added new Policies item in profile dropdown.
 
 
-
+25/04/2026
+Redo UI in homepage
+added location in homepage
+added notification function
 
 
 
@@ -82,3 +85,8 @@ ADD COLUMN IF NOT EXISTS email_verification_token VARCHAR(64) DEFAULT NULL,
 ADD COLUMN IF NOT EXISTS email_verified_at DATETIME DEFAULT NULL,
 ADD COLUMN IF NOT EXISTS password_reset_token VARCHAR(64) DEFAULT NULL,
 ADD COLUMN IF NOT EXISTS password_reset_expires_at DATETIME DEFAULT NULL;
+
+new SQL codes: 25/04/2026
+ALTER TABLE appointments_tbl
+ADD COLUMN decline_reason VARCHAR(255) NULL AFTER appt_status;
+
