@@ -3,7 +3,10 @@ to enter website use this link
 http://localhost/D.H-Azada%20-customer/php/customer_login.php
 
 to do:
-UI design
+UI design ( login, sign up, appointment, product, service, history, profile, policies)
+appointment map progress
+product ( more filter, pictures of product)
+scroll function ( experemental)
 
 
 
